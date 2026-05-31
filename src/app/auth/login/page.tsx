@@ -21,6 +21,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Support ?next= redirect for fans coming from storefronts
+  const next = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") || "/dashboard" : "/dashboard";
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -31,14 +34,15 @@ export default function LoginPage() {
       setLoading(false);
       return;
     }
-    router.push("/dashboard");
+    router.push(next);
   }
 
   async function handleGoogle() {
     const supabase = createClient();
+    const nextParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") || "" : "";
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback${nextParam ? `?next=${encodeURIComponent(nextParam)}` : ""}` },
     });
   }
 

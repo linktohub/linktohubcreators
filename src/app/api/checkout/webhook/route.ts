@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-  // Handle Stripe Connect account updates
+  // Stripe Connect account enabled
   if (event.type === "account.updated") {
     const account = event.data.object as Stripe.Account;
     if (account.charges_enabled) {
@@ -26,8 +26,73 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
+  // Stripe Checkout completed — handle subscriptions, events, tips
+  if (event.type === "checkout.session.completed") {
+    const sess = event.data.object as Stripe.Checkout.Session;
+    const meta = sess.metadata || {};
+
+    if (meta.type === "subscription" && meta.tier_id && meta.creator_id) {
+      const subId = sess.subscription as string | null;
+      let periodStart: string | null = null;
+      let periodEnd: string | null = null;
+      let stripePriceId: string | null = null;
+
+      if (subId) {
+        try {
+          const sub = await stripe.subscriptions.retrieve(subId);
+          const item = sub.items.data[0];
+          stripePriceId = item?.price.id || null;
+          const start = (sub as unknown as { current_period_start: number }).current_period_start;
+          const end = (sub as unknown as { current_period_end: number }).current_period_end;
+          if (typeof start === "number") periodStart = new Date(start * 1000).toISOString();
+          if (typeof end === "number") periodEnd = new Date(end * 1000).toISOString();
+        } catch { /* non-critical */ }
+      }
+
+      await admin.from("fan_subscriptions").insert({
+        creator_id: meta.creator_id,
+        fan_id: meta.fan_id || null,
+        tier_name: meta.tier_id,
+        price_monthly: sess.amount_total ? sess.amount_total / 100 : 0,
+        stripe_subscription_id: subId || null,
+        stripe_price_id: stripePriceId,
+        status: "active",
+        current_period_start: periodStart,
+        current_period_end: periodEnd,
+      });
+    }
+
+    if (meta.type === "event" && meta.event_id && meta.fan_id) {
+      await admin.from("event_registrations").insert({
+        event_id: meta.event_id,
+        fan_id: meta.fan_id,
+        stripe_payment_intent_id: (sess.payment_intent as string) || null,
+        status: "registered",
+      });
+    }
+
+    if (meta.type === "tip" && meta.creator_id) {
+      await admin.from("tips").insert({
+        creator_id: meta.creator_id,
+        amount: sess.amount_total || 0,
+        message: meta.message || null,
+        stripe_payment_intent_id: (sess.payment_intent as string) || null,
+      });
+    }
+
+    return NextResponse.json({ received: true });
+  }
+
+  // Subscription cancelled
+  if (event.type === "customer.subscription.deleted") {
+    const sub = event.data.object as Stripe.Subscription;
+    await admin.from("fan_subscriptions").update({ status: "cancelled" }).eq("stripe_subscription_id", sub.id);
+    return NextResponse.json({ received: true });
+  }
+
   if (event.type !== "payment_intent.succeeded") return NextResponse.json({ received: true });
 
+  // Product purchase (merch + digital)
   const pi = event.data.object as Stripe.PaymentIntent;
   const creatorId = pi.metadata.creator_id;
   const itemsMeta: { id: string; quantity: number }[] = JSON.parse(pi.metadata.items || "[]");
@@ -56,18 +121,16 @@ export async function POST(req: NextRequest) {
   const productIds = itemsMeta.map((i) => i.id);
   const { data: products } = await admin
     .from("products")
-    .select("id, type, file_type, title, file_url, pod_provider, pod_product_id, pod_variant_id")
+    .select("id, type, title, file_url, pod_provider, pod_product_id, pod_variant_id")
     .in("id", productIds);
 
   const downloadUrls: { product_id: string; title: string; url: string }[] = [];
-  let gelatoCalled = false;
 
   for (const item of itemsMeta) {
     const product = products?.find((p) => p.id === item.id);
     if (!product) continue;
 
-    // Real Gelato order for merch with POD configured
-    if (product.type === "merch" && shippingAddress && !gelatoCalled && product.pod_product_id && product.pod_variant_id) {
+    if (product.type === "merch" && shippingAddress && product.pod_product_id && product.pod_variant_id) {
       try {
         const gelatoOrder = await createGelatoOrder({
           orderReferenceId: order.id,
@@ -91,13 +154,11 @@ export async function POST(req: NextRequest) {
           },
         });
         await admin.from("orders").update({ pod_order_id: gelatoOrder.id, status: "fulfilled" }).eq("id", order.id);
-        gelatoCalled = true;
       } catch (err) {
         console.error("Gelato order failed:", err);
       }
     }
 
-    // Secure download link for digital products
     if (product.type === "digital" && customerEmail) {
       const { data: token } = await admin.from("purchase_tokens").insert({
         order_id: order.id,

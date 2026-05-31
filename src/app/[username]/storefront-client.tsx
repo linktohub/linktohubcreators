@@ -108,6 +108,8 @@ export default function StorefrontClient({
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [hasActiveSub, setHasActiveSub] = useState<boolean | null>(null);
+  const [fanUser, setFanUser] = useState<{ id: string; email: string } | null | undefined>(undefined);
+  const [processingId, setProcessingId] = useState<string | null>(null);
   // Shipping fields for card checkout path
   const [shippingName, setShippingName] = useState("");
   const [shippingLine1, setShippingLine1] = useState("");
@@ -132,6 +134,15 @@ export default function StorefrontClient({
   useEffect(() => {
     track(creator.id, "page_view", { username: creator.username });
   }, [creator.id, creator.username]);
+
+  // Check fan auth status
+  useEffect(() => {
+    (async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setFanUser(user ? { id: user.id, email: user.email || "" } : null);
+    })();
+  }, []);
 
   // Check if current user has an active subscription to this creator
   useEffect(() => {
@@ -395,6 +406,70 @@ export default function StorefrontClient({
     setChatLoading(false);
   }
 
+  function requireFanAuth(returnAction?: string) {
+    const returnUrl = `${window.location.href}${returnAction ? `?action=${returnAction}` : ""}`;
+    window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname + (returnAction ? `?action=${returnAction}` : ""))}`;
+  }
+
+  async function handleSubscribe(tierId: string) {
+    if (!fanUser) { requireFanAuth(`subscribe_${tierId}`); return; }
+    setProcessingId(tierId);
+    try {
+      const res = await fetch("/api/checkout/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tierId,
+          creatorId: creator.id,
+          successUrl: window.location.href,
+          cancelUrl: window.location.href,
+        }),
+      });
+      const data = await res.json();
+      if (data.auth) { requireFanAuth(`subscribe_${tierId}`); return; }
+      if (data.url) window.location.href = data.url;
+      else toast.error("Checkout unavailable right now");
+    } catch { toast.error("Something went wrong"); }
+    setProcessingId(null);
+  }
+
+  async function handleEventRegister(eventId: string) {
+    if (!fanUser) { requireFanAuth(`event_${eventId}`); return; }
+    setProcessingId(eventId);
+    try {
+      const res = await fetch("/api/checkout/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId, successUrl: window.location.href, cancelUrl: window.location.href }),
+      });
+      const data = await res.json();
+      if (data.auth) { requireFanAuth(`event_${eventId}`); return; }
+      if (data.url) window.location.href = data.url;
+      else toast.success("Registered!");
+    } catch { toast.error("Something went wrong"); }
+    setProcessingId(null);
+  }
+
+  async function handleTip() {
+    if (!tipAmount || parseFloat(tipAmount) < 1) { toast.error("Minimum tip is $1"); return; }
+    setProcessingId("tip");
+    try {
+      const res = await fetch("/api/checkout/tip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          creatorId: creator.id,
+          amount: tipAmount,
+          successUrl: window.location.href,
+          cancelUrl: window.location.href,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch { toast.error("Something went wrong"); }
+    setProcessingId(null);
+  }
+
   const tabs: { id: Tab; label: string; emoji: string }[] = [
     ...(creator.merch_enabled || merch.length > 0 ? [{ id: "store" as Tab, label: "Merch", emoji: "👕" }] : []),
     ...(creator.digital_enabled || digital.length > 0 ? [{ id: "digital" as Tab, label: "Digital", emoji: "📚" }] : []),
@@ -499,7 +574,7 @@ export default function StorefrontClient({
         <div className="flex gap-2 mb-7 flex-wrap">
           {creator.calendar_enabled && (
             <button className="flex-1 min-w-[90px] h-12 rounded-xl font-bold text-sm text-white border border-white/20 hover:bg-white/[0.06] transition-colors"
-              onClick={() => toast.info("Bookings coming soon")}>
+              onClick={() => toast.info("Bookings opening soon — stay tuned!")}>
               📅 Book
             </button>
           )}
@@ -515,9 +590,10 @@ export default function StorefrontClient({
               <span className="text-white/40 text-sm">$</span>
               <input type="number" value={tipAmount} onChange={(e) => setTipAmount(e.target.value)}
                 placeholder="Tip" className="w-14 bg-transparent text-white text-sm outline-none placeholder:text-white/25" />
-              <button className="text-white font-bold text-sm px-2 py-1 rounded-lg" style={{ backgroundColor: brandColor }}
-                onClick={() => toast.info("Tip checkout coming soon")}>
-                💸
+              <button className="text-white font-bold text-sm px-2 py-1 rounded-lg disabled:opacity-50" style={{ backgroundColor: brandColor }}
+                disabled={processingId === "tip"}
+                onClick={handleTip}>
+                {processingId === "tip" ? "..." : "💸"}
               </button>
             </div>
           )}
@@ -620,10 +696,11 @@ export default function StorefrontClient({
                       ))}
                     </ul>
                   )}
-                  <button className="w-full h-12 rounded-xl font-bold text-white text-sm"
+                  <button className="w-full h-12 rounded-xl font-bold text-white text-sm disabled:opacity-60"
                     style={{ backgroundColor: brandColor }}
-                    onClick={() => toast.info("Subscription checkout coming soon")}>
-                    Subscribe — ${price}/mo
+                    disabled={processingId === tier.id}
+                    onClick={() => handleSubscribe(tier.id)}>
+                    {processingId === tier.id ? "Loading..." : fanUser === null ? `Sign in to subscribe — $${price}/mo` : `Subscribe — $${price}/mo`}
                   </button>
                 </div>
               );
@@ -646,10 +723,11 @@ export default function StorefrontClient({
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="font-black">{event.price === 0 ? "Free" : `$${event.price}`}</p>
-                  <button className="mt-1 text-white text-xs font-bold px-3 py-1.5 rounded-lg"
+                  <button className="mt-1 text-white text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-60"
                     style={{ backgroundColor: brandColor }}
-                    onClick={() => toast.info("Event registration coming soon")}>
-                    Register
+                    disabled={processingId === event.id}
+                    onClick={() => handleEventRegister(event.id)}>
+                    {processingId === event.id ? "..." : event.price === 0 ? "Register free" : "Register"}
                   </button>
                 </div>
               </div>
@@ -889,10 +967,11 @@ export default function StorefrontClient({
                     </div>
                   </div>
                   {"price_monthly" in selectedProduct ? (
-                    <button className="w-full h-14 rounded-2xl font-black text-white text-base"
+                    <button className="w-full h-14 rounded-2xl font-black text-white text-base disabled:opacity-60"
                       style={{ backgroundColor: brandColor }}
-                      onClick={() => { setSelectedProduct(null); toast.info("Subscription checkout coming soon"); }}>
-                      Subscribe — ${selectedProduct.price_monthly}/mo
+                      disabled={processingId === selectedProduct.id}
+                      onClick={() => { setSelectedProduct(null); handleSubscribe(selectedProduct.id); }}>
+                      {processingId === selectedProduct.id ? "Loading..." : fanUser === null ? "Sign in to subscribe" : `Subscribe — $${selectedProduct.price_monthly}/mo`}
                     </button>
                   ) : (
                     <button className="w-full h-14 rounded-2xl font-black text-white text-base"
