@@ -1,27 +1,60 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ShoppingBag, FileText, Bot, Calendar, Ticket,
   Users, Heart, BarChart3, Lock, Mail, Link2, Zap,
 } from "lucide-react";
 
+export const metadata: Metadata = {
+  title: "Linktohub — Sell Merch, Courses & More From One Link",
+  description: "The creator storefront that actually makes money. Sell merch, digital products, courses, bookings, and subscriptions — all from one link. Free forever.",
+  openGraph: {
+    title: "Linktohub — Sell Merch, Courses & More From One Link",
+    description: "The creator storefront that actually makes money. Sell merch, digital products, courses, bookings, and memberships — all in one place.",
+    url: "https://linktohub.vercel.app",
+    siteName: "Linktohub",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Linktohub — Sell Merch, Courses & More From One Link",
+    description: "The creator storefront that actually makes money. Free forever.",
+  },
+  alternates: {
+    canonical: "https://linktohub.vercel.app",
+  },
+};
+
 const FEATURES = [
-  { icon: ShoppingBag, label: "Custom Merch", desc: "Print-on-demand globally" },
-  { icon: FileText, label: "Digital Products", desc: "PDFs, presets, courses" },
-  { icon: Bot, label: "AI Chat", desc: "Trained on your voice" },
-  { icon: Calendar, label: "Bookings", desc: "1-on-1 sessions" },
-  { icon: Ticket, label: "Events", desc: "Webinars & seminars" },
-  { icon: Users, label: "Subscriptions", desc: "Fan membership tiers" },
-  { icon: Heart, label: "Tips", desc: "Support button" },
-  { icon: BarChart3, label: "Analytics", desc: "Deep audience insights" },
-  { icon: Lock, label: "Exclusive Content", desc: "Paywalled for fans" },
-  { icon: Mail, label: "Email List", desc: "Own your audience" },
-  { icon: Link2, label: "Affiliate Program", desc: "Let fans sell for you" },
-  { icon: Zap, label: "Instant Payouts", desc: "Stripe Connect" },
+  { icon: ShoppingBag, label: "Custom Merch", desc: "Ship branded merch without touching inventory" },
+  { icon: FileText, label: "Digital Products", desc: "Sell PDFs, presets & courses instantly" },
+  { icon: Bot, label: "AI Chat", desc: "24/7 AI that sounds like you, sells for you" },
+  { icon: Calendar, label: "Bookings", desc: "Let fans book sessions with one click" },
+  { icon: Ticket, label: "Events", desc: "Sell tickets to your webinars & workshops" },
+  { icon: Users, label: "Subscriptions", desc: "Build recurring revenue from your top fans" },
+  { icon: Heart, label: "Tips", desc: "Let fans support you with a single tap" },
+  { icon: BarChart3, label: "Analytics", desc: "See who buys, when, and why" },
+  { icon: Lock, label: "Exclusive Content", desc: "Gate your best content behind a paywall" },
+  { icon: Mail, label: "Email List", desc: "Own your audience, not just your follower count" },
+  { icon: Link2, label: "Affiliate Program", desc: "Turn your fans into your sales team" },
+  { icon: Zap, label: "Instant Payouts", desc: "Money in your bank account same day" },
 ];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Linktohub",
+  url: "https://linktohub.vercel.app",
+  description: "Creator monetization platform. Sell merch, courses, bookings, and subscriptions from one link.",
+};
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Ambient background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[700px] rounded-full bg-violet-700/[0.07] blur-[120px]" />
@@ -50,10 +83,10 @@ export default function HomePage() {
 
       {/* Hero */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-12 pb-24">
-        {/* Badge */}
+        {/* Social proof badge */}
         <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-medium px-4 py-2 rounded-full mb-10">
           <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-          The creator storefront built for scale
+          Join 500+ creators already earning
         </div>
 
         {/* Headline */}
@@ -68,7 +101,7 @@ export default function HomePage() {
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-24">
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <Link href="/auth/signup">
             <button className="btn-gradient h-14 px-9 rounded-xl text-white font-bold text-base shadow-lg shadow-violet-500/20">
               Start for free →
@@ -80,6 +113,7 @@ export default function HomePage() {
             </button>
           </Link>
         </div>
+        <p className="text-white/25 text-xs mb-20">No credit card required · Free forever</p>
 
         {/* Feature grid */}
         <div className="w-full max-w-5xl mx-auto">

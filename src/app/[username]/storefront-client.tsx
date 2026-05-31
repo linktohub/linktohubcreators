@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
-import { ShoppingCart, X, Plus, Minus, Loader2, ArrowLeft } from "lucide-react";
+import { ShoppingCart, X, Plus, Minus, Loader2, ArrowLeft, Share2 } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import type { Stripe, StripeCardElement } from "@stripe/stripe-js";
 
@@ -277,6 +277,21 @@ export default function StorefrontClient({
     setCart((prev) => prev.map((i) => i.id === id ? { ...i, quantity: Math.max(0, i.quantity + delta) } : i).filter((i) => i.quantity > 0));
   }
 
+  async function handleShare() {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const shareData = {
+      title: `${creator.display_name} on Linktohub`,
+      text: creator.bio ? creator.bio.slice(0, 100) : `Check out ${creator.display_name}'s store`,
+      url,
+    };
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try { await navigator.share(shareData); } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard!");
+    }
+  }
+
   async function handleEmailCapture(e: React.FormEvent) {
     e.preventDefault();
     const supabase = createClient();
@@ -354,6 +369,12 @@ export default function StorefrontClient({
               : creator.display_name?.[0]?.toUpperCase()
             }
           </div>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1.5 bg-white/[0.06] border border-white/[0.08] rounded-xl px-3 py-2 text-white/60 hover:text-white hover:bg-white/[0.1] transition-colors text-xs font-medium"
+          >
+            <Share2 className="w-3.5 h-3.5" /> Share
+          </button>
         </div>
 
         {/* Name — full width, no overlap */}
@@ -614,7 +635,10 @@ export default function StorefrontClient({
 
       {/* Powered by */}
       <div className="text-center py-6 text-white/15 text-xs">
-        Powered by <span className="font-semibold text-white/25">Linktohub</span>
+        Powered by{" "}
+        <a href="https://linktohub.vercel.app" target="_blank" rel="noopener noreferrer" className="font-semibold text-white/25 hover:text-white/50 transition-colors">
+          Linktohub
+        </a>
       </div>
 
       {/* Product Detail Modal */}

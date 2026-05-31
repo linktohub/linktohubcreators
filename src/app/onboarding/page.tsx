@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 import {
   ShoppingBag, FileText, Bot, Calendar, Ticket, Users, Heart,
   Upload, X, Image, Film, Music, File, CheckCircle2, RefreshCw,
-  Pencil, Check, SkipForward, Sparkles, Rocket, Camera, Mic, MicOff,
+  Pencil, Check, SkipForward, Sparkles, Rocket, Camera, Mic, MicOff, Share2,
 } from "lucide-react";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
-type Mode = "form" | "generating" | "review";
+type Mode = "form" | "generating" | "review" | "success";
 
 interface GeneratedBrand {
   bio: string;
@@ -367,11 +367,64 @@ export default function OnboardingPage() {
       fetch("/api/voice/clone", { method: "POST", body: voiceForm }).catch(() => {});
     }
 
-    router.push("/dashboard");
+    setMode("success");
   }
 
   const approvedCount = Object.values(approved).filter(Boolean).length;
   const totalCount = Object.keys(approved).length;
+
+  // ─── SUCCESS SCREEN ──────────────────────────────────────────────────────
+  if (mode === "success") {
+    const storefrontUrl = `https://linktohub.vercel.app/${form.username}`;
+
+    async function handleShareStorefront() {
+      const shareData = {
+        title: `${form.display_name} on Linktohub`,
+        text: "Check out my storefront",
+        url: storefrontUrl,
+      };
+      if (typeof navigator !== "undefined" && navigator.share) {
+        try { await navigator.share(shareData); } catch { /* cancelled */ }
+      } else {
+        await navigator.clipboard.writeText(storefrontUrl);
+        toast.success("Link copied!");
+      }
+    }
+
+    return (
+      <div className="min-h-screen bg-[#050508] text-white flex flex-col items-center justify-center px-6">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-violet-700/[0.08] blur-[100px]" />
+        </div>
+        <div className="relative z-10 w-full max-w-sm text-center">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/30">
+            <Rocket className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-4xl font-black mb-2">You&apos;re live! 🎉</h2>
+          <p className="text-white/40 mb-8 text-sm">Your storefront is ready for your audience</p>
+
+          <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4 mb-5 text-left">
+            <p className="text-white/30 text-xs font-medium uppercase tracking-wider mb-1.5">Your storefront URL</p>
+            <p className="text-white font-bold text-sm break-all">{storefrontUrl}</p>
+          </div>
+
+          <button
+            onClick={handleShareStorefront}
+            className="w-full h-14 btn-gradient rounded-2xl text-white font-black text-base flex items-center justify-center gap-2 shadow-lg shadow-violet-500/20 mb-3"
+          >
+            <Share2 className="w-5 h-5" /> Share my storefront
+          </button>
+
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="w-full h-12 rounded-2xl border border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.04] text-sm font-medium transition-colors"
+          >
+            Go to dashboard →
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // ─── GENERATING SCREEN ───────────────────────────────────────────────────
   if (mode === "generating") {
@@ -827,6 +880,21 @@ export default function OnboardingPage() {
                     className="h-12 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus:border-violet-500/40 rounded-xl"
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-white/40 text-xs font-medium uppercase tracking-wider">Your niche <span className="text-white/20 normal-case">(powers AI)</span></label>
+                  <div className="flex flex-wrap gap-2">
+                    {NICHES.map((n) => (
+                      <button key={n} type="button" onClick={() => setField("niche", n)} className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                        form.niche === n
+                          ? "bg-violet-600/20 border-violet-500/50 text-violet-200"
+                          : "bg-white/[0.03] border-white/[0.08] text-white/50 hover:bg-white/[0.06] hover:text-white"
+                      )}>
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -871,14 +939,6 @@ export default function OnboardingPage() {
                 <p className="text-white/40">Tell us about your content</p>
               </div>
               <div className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-white/40 text-xs font-medium uppercase tracking-wider">Your niche</label>
-                  <div className="flex flex-wrap gap-2">
-                    {NICHES.map((n) => (
-                      <button key={n} type="button" onClick={() => setField("niche", n)} className={cn("px-4 py-1.5 rounded-full text-sm font-medium border transition-all", form.niche === n ? "bg-violet-600/20 border-violet-500/50 text-violet-200" : "bg-white/[0.03] border-white/[0.08] text-white/50 hover:bg-white/[0.06] hover:text-white")}>{n}</button>
-                    ))}
-                  </div>
-                </div>
                 <div className="space-y-2">
                   <label className="text-white/40 text-xs font-medium uppercase tracking-wider">Audience size</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
