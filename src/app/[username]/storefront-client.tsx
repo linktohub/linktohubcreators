@@ -383,7 +383,12 @@ export default function StorefrontClient({
         body: JSON.stringify({ creatorId: creator.id, message: userMsg, history: chatMessages }),
       });
       const data = await res.json();
-      setChatMessages((m) => [...m, { role: "ai", text: data.reply }]);
+      if (data.gate) {
+        setChatMessages((m) => [...m, { role: "ai", text: `💬 AI Chat is a members-only perk. Subscribe to chat with ${creator.display_name}'s AI directly! Check the Members tab below.` }]);
+        setTimeout(() => setActiveTab("subscribe"), 2000);
+      } else {
+        setChatMessages((m) => [...m, { role: "ai", text: data.reply }]);
+      }
     } catch {
       setChatMessages((m) => [...m, { role: "ai", text: "Sorry, couldn't respond right now." }]);
     }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Pencil } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -288,6 +288,14 @@ export default function ProductsClient({
 
               {/* Price — fixed width */}
               <p className="font-bold text-white text-sm shrink-0 w-14 text-right">{item.price}</p>
+
+              {/* Edit — only for products table items */}
+              {item.source === "products" && (
+                <Link href={`/dashboard/products/${item.id}`}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-violet-400 hover:bg-violet-500/10 transition-colors shrink-0">
+                  <Pencil className="w-3.5 h-3.5" />
+                </Link>
+              )}
 
               {/* Toggle */}
               <button

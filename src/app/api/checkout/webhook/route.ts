@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { stripe } from "@/lib/stripe";
+import { createClient as createAdmin } from "@supabase/supabase-js";
 import { createGelatoOrder } from "@/lib/gelato";
-import { sendOrderConfirmation } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   const body = await req.text();
   const sig = req.headers.get("stripe-signature")!;
 
@@ -16,168 +15,110 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  if (event.type === "payment_intent.succeeded") {
-    const pi = event.data.object as Stripe.PaymentIntent;
-    const creatorId = pi.metadata.creator_id;
-    const rawItems: { id: string; quantity: number }[] = JSON.parse(
-      pi.metadata.items || "[]"
-    );
+  const admin = createAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-    if (!creatorId || !rawItems.length) {
-      return NextResponse.json({ received: true });
+  // Handle Stripe Connect account updates
+  if (event.type === "account.updated") {
+    const account = event.data.object as Stripe.Account;
+    if (account.charges_enabled) {
+      await admin.from("creators").update({ stripe_account_enabled: true }).eq("stripe_account_id", account.id);
     }
+    return NextResponse.json({ received: true });
+  }
 
-    const supabase = createAdminClient();
+  if (event.type !== "payment_intent.succeeded") return NextResponse.json({ received: true });
 
-    const productIds = rawItems.map((i) => i.id);
-    const { data: products } = await supabase
-      .from("products")
-      .select("id, title, price, type, pod_product_id, pod_variant_id, images")
-      .in("id", productIds);
+  const pi = event.data.object as Stripe.PaymentIntent;
+  const creatorId = pi.metadata.creator_id;
+  const itemsMeta: { id: string; quantity: number }[] = JSON.parse(pi.metadata.items || "[]");
+  const customerEmail = pi.metadata.customer_email || pi.receipt_email || "";
+  const shippingName = pi.metadata.shipping_name || "";
+  const shippingAddress = pi.metadata.shipping_address ? JSON.parse(pi.metadata.shipping_address) : null;
 
-    const productMap = new Map((products || []).map((p) => [p.id, p]));
+  const totalCents = pi.amount;
+  const platformFee = Math.round(totalCents * 0.10);
+  const creatorPayout = totalCents - platformFee;
 
-    const totalCents = rawItems.reduce((sum, item) => {
-      const p = productMap.get(item.id);
-      return sum + (p ? Math.round(p.price * 100) * item.quantity : 0);
-    }, 0);
+  const { data: order } = await admin.from("orders").insert({
+    creator_id: creatorId,
+    stripe_payment_intent_id: pi.id,
+    subtotal: totalCents,
+    platform_fee: platformFee,
+    creator_payout: creatorPayout,
+    total: totalCents,
+    status: "paid",
+    shipping_name: shippingName || null,
+    shipping_address: shippingAddress || null,
+  }).select("id").single();
 
-    const platformFeeCents = Math.round(totalCents * 0.1);
-    const creatorPayoutCents = totalCents - platformFeeCents;
-    const piShipping = pi.shipping;
+  if (!order) return NextResponse.json({ received: true });
 
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert({
-        creator_id: creatorId,
-        stripe_payment_intent_id: pi.id,
-        subtotal: totalCents,
-        platform_fee: platformFeeCents,
-        creator_payout: creatorPayoutCents,
-        total: totalCents,
-        status: "paid",
-        shipping_name: piShipping?.name || null,
-        shipping_address: piShipping?.address || null,
-      })
-      .select("id")
-      .single();
+  const productIds = itemsMeta.map((i) => i.id);
+  const { data: products } = await admin
+    .from("products")
+    .select("id, type, file_type, title, file_url, pod_provider, pod_product_id, pod_variant_id")
+    .in("id", productIds);
 
-    if (orderError || !order) {
-      console.error("[checkout-webhook] Order insert failed:", orderError?.message);
-      return NextResponse.json({ received: true });
-    }
+  const downloadUrls: { product_id: string; title: string; url: string }[] = [];
+  let gelatoCalled = false;
 
-    const orderItems = rawItems
-      .filter((item) => productMap.has(item.id))
-      .map((item) => ({
-        order_id: order.id,
-        product_id: item.id,
-        quantity: item.quantity,
-        unit_price: Math.round((productMap.get(item.id)?.price ?? 0) * 100),
-      }));
+  for (const item of itemsMeta) {
+    const product = products?.find((p) => p.id === item.id);
+    if (!product) continue;
 
-    if (orderItems.length) {
-      await supabase.from("order_items").insert(orderItems);
-    }
-
-    supabase
-      .rpc("increment_creator_revenue", {
-        p_creator_id: creatorId,
-        p_amount: totalCents / 100,
-      })
-      .then(({ error }) => {
-        if (error) console.error("[checkout-webhook] Revenue RPC failed:", error.message);
-      });
-
-    const physicalItems = rawItems.filter((item) => {
-      const p = productMap.get(item.id);
-      return p && (p.type === "merch" || p.type === "physical") && p.pod_product_id;
-    });
-
-    if (physicalItems.length > 0 && piShipping?.address) {
-      const addr = piShipping.address;
-      const nameParts = (piShipping.name || "").split(" ");
-      const firstName = nameParts[0] || "Customer";
-      const lastName = nameParts.slice(1).join(" ") || ".";
-
-      const gelatoItems = physicalItems.map((item) => {
-        const p = productMap.get(item.id)!;
-        return {
-          itemReferenceId: item.id,
-          productUid: p.pod_product_id!,
-          variantUid: p.pod_variant_id || p.pod_product_id!,
-          quantity: item.quantity,
-          files: p.images?.[0]
-            ? [{ type: "default", url: p.images[0] }]
-            : [],
-        };
-      });
-
+    // Real Gelato order for merch with POD configured
+    if (product.type === "merch" && shippingAddress && !gelatoCalled && product.pod_product_id && product.pod_variant_id) {
       try {
         const gelatoOrder = await createGelatoOrder({
           orderReferenceId: order.id,
-          customerReferenceId: pi.receipt_email || order.id,
+          customerReferenceId: customerEmail,
           currency: "USD",
-          items: gelatoItems,
+          items: [{
+            itemReferenceId: item.id,
+            productUid: product.pod_product_id,
+            variantUid: product.pod_variant_id,
+            quantity: item.quantity,
+            files: [],
+          }],
           shippingAddress: {
-            firstName,
-            lastName,
-            addressLine1: addr.line1 || "",
-            city: addr.city || "",
-            postCode: addr.postal_code || "",
-            country: addr.country || "US",
-            email: pi.receipt_email || "",
+            firstName: shippingAddress.firstName || shippingName.split(" ")[0] || "",
+            lastName: shippingAddress.lastName || shippingName.split(" ").slice(1).join(" ") || "",
+            addressLine1: shippingAddress.addressLine1,
+            city: shippingAddress.city,
+            postCode: shippingAddress.postCode,
+            country: shippingAddress.country,
+            email: customerEmail,
           },
         });
-
-        await supabase
-          .from("orders")
-          .update({
-            pod_order_id: gelatoOrder.id,
-            status: "fulfilled",
-            tracking_number: gelatoOrder.shipments?.[0]?.trackingCode || null,
-            tracking_url: gelatoOrder.shipments?.[0]?.trackingUrl || null,
-          })
-          .eq("id", order.id);
+        await admin.from("orders").update({ pod_order_id: gelatoOrder.id, status: "fulfilled" }).eq("id", order.id);
+        gelatoCalled = true;
       } catch (err) {
-        // Non-fatal: log and continue — order is still recorded
-        console.error("[checkout-webhook] Gelato order failed:", err);
+        console.error("Gelato order failed:", err);
       }
     }
 
-    // Send order confirmation email
-    if (pi.receipt_email) {
-      const { data: creator } = await supabase
-        .from("creators")
-        .select("display_name")
-        .eq("id", creatorId)
-        .single();
+    // Secure download link for digital products
+    if (product.type === "digital" && customerEmail) {
+      const { data: token } = await admin.from("purchase_tokens").insert({
+        order_id: order.id,
+        product_id: product.id,
+        buyer_email: customerEmail,
+      }).select("token").single();
 
-      const emailItems = rawItems
-        .filter((item) => productMap.has(item.id))
-        .map((item) => {
-          const p = productMap.get(item.id)!;
-          return {
-            name: p.title,
-            quantity: item.quantity,
-            unitPrice: Math.round(p.price * 100),
-          };
-        });
-
-      try {
-        await sendOrderConfirmation({
-          to: pi.receipt_email,
-          buyerName: piShipping?.name || "there",
-          creatorName: creator?.display_name || "the creator",
-          items: emailItems,
-          totalCents,
-          orderId: order.id,
-        });
-      } catch (err) {
-        console.error("[checkout-webhook] Resend email failed:", err);
+      if (token) {
+        const origin = process.env.NEXT_PUBLIC_APP_URL || "https://linktohub.vercel.app";
+        downloadUrls.push({ product_id: product.id, title: product.title, url: `${origin}/api/download?token=${token.token}` });
       }
     }
   }
+
+  if (downloadUrls.length > 0) {
+    await admin.from("orders").update({ download_urls: downloadUrls }).eq("id", order.id);
+  }
+
+  try {
+    await admin.rpc("increment_creator_revenue", { p_creator_id: creatorId, p_amount: totalCents / 100 });
+  } catch { /* non-critical */ }
 
   return NextResponse.json({ received: true });
 }
