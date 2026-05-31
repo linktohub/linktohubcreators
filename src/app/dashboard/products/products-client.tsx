@@ -236,7 +236,7 @@ export default function ProductsClient({
               className={cn(
                 "flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all shrink-0",
                 activeTab === tab.id
-                  ? "bg-white text-black"
+                  ? "btn-gradient text-white"
                   : "bg-white/[0.04] border border-white/[0.06] text-white/50 hover:text-white hover:bg-white/[0.08]"
               )}
             >
@@ -245,7 +245,7 @@ export default function ProductsClient({
               {count > 0 && (
                 <span className={cn(
                   "text-xs px-1.5 py-0.5 rounded-md font-bold",
-                  activeTab === tab.id ? "bg-black/10 text-black" : "bg-white/[0.08] text-white/50"
+                  activeTab === tab.id ? "bg-black/20 text-white/80" : "bg-white/[0.08] text-white/50"
                 )}>
                   {count}
                 </span>
@@ -308,7 +308,7 @@ export default function ProductsClient({
               <button
                 onClick={() => deleteItem(item)}
                 disabled={deletingId === item.id}
-                className="text-white/20 hover:text-red-400 transition-colors disabled:opacity-40 w-5 text-center shrink-0 text-sm"
+                className="text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 w-8 h-8 flex items-center justify-center rounded-lg shrink-0"
               >
                 {deletingId === item.id ? "·" : "✕"}
               </button>
