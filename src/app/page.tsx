@@ -68,15 +68,13 @@ export default function HomePage() {
           <span className="gradient-text">link</span>tohub
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/auth/login">
-            <button className="text-white/50 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/5 transition-colors">
-              Log in
-            </button>
+          <Link href="/auth/login"
+            className="text-white/50 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/5 transition-colors">
+            Log in
           </Link>
-          <Link href="/auth/signup">
-            <button className="text-sm font-bold px-5 py-2.5 rounded-xl bg-white text-black hover:bg-white/90 transition-colors">
-              Get started
-            </button>
+          <Link href="/auth/signup"
+            className="text-sm font-bold px-5 py-2.5 rounded-xl bg-white text-black hover:bg-white/90 transition-colors">
+            Get started
           </Link>
         </div>
       </nav>
@@ -102,15 +100,13 @@ export default function HomePage() {
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <Link href="/auth/signup">
-            <button className="btn-gradient h-14 px-9 rounded-xl text-white font-bold text-base shadow-lg shadow-violet-500/20">
-              Start for free →
-            </button>
+          <Link href="/auth/signup"
+            className="btn-gradient h-14 px-9 rounded-xl text-white font-bold text-base shadow-lg shadow-violet-500/20 inline-flex items-center justify-center">
+            Start for free →
           </Link>
-          <Link href="/auth/login">
-            <button className="h-14 px-9 rounded-xl border border-white/10 text-white/60 hover:text-white hover:bg-white/[0.04] text-base font-medium transition-colors">
-              Sign in
-            </button>
+          <Link href="/auth/login"
+            className="h-14 px-9 rounded-xl border border-white/10 text-white/60 hover:text-white hover:bg-white/[0.04] text-base font-medium transition-colors inline-flex items-center justify-center">
+            Sign in
           </Link>
         </div>
         <p className="text-white/25 text-xs mb-20">No credit card required · Free forever</p>
@@ -142,10 +138,9 @@ export default function HomePage() {
               <span className="gradient-text">your audience?</span>
             </h2>
             <p className="text-white/40 mb-8">Set up your storefront in minutes. Free forever.</p>
-            <Link href="/auth/signup">
-              <button className="btn-gradient h-14 px-10 rounded-xl text-white font-bold text-base shadow-lg shadow-violet-500/25">
-                Create your storefront →
-              </button>
+            <Link href="/auth/signup"
+              className="btn-gradient h-14 px-10 rounded-xl text-white font-bold text-base shadow-lg shadow-violet-500/25 inline-flex items-center justify-center">
+              Create your storefront →
             </Link>
           </div>
         </div>

@@ -329,7 +329,7 @@ export default function StorefrontClient({
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#050508] text-white">
 
       {/* Banner */}
       <div className="relative h-52 overflow-hidden">
@@ -451,7 +451,7 @@ export default function StorefrontClient({
         {/* Email capture */}
         {!emailSubmitted ? (
           <form onSubmit={handleEmailCapture} className="flex gap-2 mb-7">
-            <input type="email" placeholder="Your email for exclusive updates" value={email}
+            <input type="email" placeholder="your@email.com" value={email}
               onChange={(e) => setEmail(e.target.value)} required
               className="flex-1 h-11 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
             <button type="submit" className="h-11 px-5 rounded-xl font-bold text-sm text-white shrink-0"
@@ -623,7 +623,7 @@ export default function StorefrontClient({
                   placeholder="Ask something..."
                   className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-white/20" />
                 <button onClick={sendChat} disabled={chatLoading}
-                  className="px-4 text-white font-bold rounded-xl text-sm disabled:opacity-50"
+                  className="h-11 min-w-[44px] px-4 text-white font-bold rounded-xl text-sm disabled:opacity-50 flex items-center justify-center shrink-0"
                   style={{ backgroundColor: brandColor }}>
                   →
                 </button>

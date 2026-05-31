@@ -14,12 +14,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  const supabase = await createClient();
+
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object as Stripe.PaymentIntent;
     const creatorId = pi.metadata.creator_id;
     const items = JSON.parse(pi.metadata.items || "[]");
 
-    const supabase = await createClient();
     await supabase.from("orders").insert({
       creator_id: creatorId,
       stripe_payment_intent_id: pi.id,
@@ -35,6 +36,16 @@ export async function POST(req: NextRequest) {
         p_amount: pi.amount / 100,
       });
     } catch { /* non-critical */ }
+  }
+
+  if (event.type === "account.updated") {
+    const account = event.data.object as Stripe.Account;
+    if (account.charges_enabled) {
+      await supabase
+        .from("creators")
+        .update({ stripe_account_enabled: true })
+        .eq("stripe_account_id", account.id);
+    }
   }
 
   return NextResponse.json({ received: true });

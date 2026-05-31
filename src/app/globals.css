@@ -173,3 +173,7 @@
 .glow-violet {
   box-shadow: 0 0 40px rgba(124,58,237,0.18), 0 0 80px rgba(124,58,237,0.08);
 }
+
+.safe-area-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+}
