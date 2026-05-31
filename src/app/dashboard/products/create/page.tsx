@@ -68,6 +68,14 @@ export default function CreateProductPage() {
   const [refining, setRefining] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
+  // Event: creator must be able to set these before publishing
+  const [eventDate, setEventDate] = useState("");
+  const [eventTime, setEventTime] = useState("18:00");
+  const [eventDuration, setEventDuration] = useState(90);
+  const [eventMaxAttendees, setEventMaxAttendees] = useState(100);
+  const [eventType, setEventType] = useState("webinar");
+  const [eventPrice, setEventPrice] = useState(0);
+
   const generate = useCallback(async (type: ProductTypeId, feedbackText?: string, prev?: AIData) => {
     setStep("generating");
     setFeedback("");
@@ -80,6 +88,17 @@ export default function CreateProductPage() {
       const { data } = await res.json();
       if (!data) throw new Error("No data");
       setAiData(data);
+      // Sync event defaults from AI
+      if (type === "event") {
+        if (data.type) setEventType(data.type);
+        if (data.duration_minutes) setEventDuration(data.duration_minutes);
+        if (data.max_attendees) setEventMaxAttendees(data.max_attendees);
+        if (data.price !== undefined) setEventPrice(data.price);
+        // Default date = 3 weeks from now
+        const d = new Date();
+        d.setDate(d.getDate() + (data.days_from_now || 21));
+        setEventDate(d.toISOString().split("T")[0]);
+      }
       setStep("preview");
     } catch {
       toast.error("AI generation failed — try again");
@@ -123,16 +142,18 @@ export default function CreateProductPage() {
       });
       error = result.error;
     } else if (productType === "event") {
-      const startsAt = new Date();
-      startsAt.setDate(startsAt.getDate() + (aiData.days_from_now || 21));
+      // Use the creator-chosen date/time, not the AI default
+      const dateStr = eventDate || (() => { const d = new Date(); d.setDate(d.getDate() + 21); return d.toISOString().split("T")[0]; })();
+      const startsAt = new Date(`${dateStr}T${eventTime}:00`);
       const result = await supabase.from("events").insert({
         creator_id: creator.id,
         title: aiData.title || "Live Event",
         description: aiData.description || null,
-        type: aiData.type || "webinar",
+        type: eventType || aiData.type || "webinar",
         starts_at: startsAt.toISOString(),
-        price: aiData.price || 0,
-        max_attendees: aiData.max_attendees || null,
+        price: eventPrice ?? aiData.price ?? 0,
+        ends_at: new Date(startsAt.getTime() + ((eventDuration || aiData.duration_minutes || 90) * 60000)).toISOString(),
+        max_attendees: eventMaxAttendees || aiData.max_attendees || null,
         published: true,
       });
       error = result.error;
@@ -288,6 +309,51 @@ export default function CreateProductPage() {
 
               {/* Type-specific content */}
               <PreviewContent aiData={aiData} type={productType!} />
+
+              {/* Event: editable fields — creator sets these before publishing */}
+              {productType === "event" && (
+                <div className="space-y-3 mt-4 pt-4 border-t border-white/[0.07]">
+                  <p className="text-white/40 text-xs font-bold uppercase tracking-wider">Set your event details</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Date</label>
+                      <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)}
+                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 [color-scheme:dark]" />
+                    </div>
+                    <div>
+                      <label className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Time</label>
+                      <input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)}
+                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 [color-scheme:dark]" />
+                    </div>
+                    <div>
+                      <label className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Duration (min)</label>
+                      <input type="number" value={eventDuration} onChange={(e) => setEventDuration(Number(e.target.value))} min="15"
+                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50" />
+                    </div>
+                    <div>
+                      <label className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Max spots</label>
+                      <input type="number" value={eventMaxAttendees} onChange={(e) => setEventMaxAttendees(Number(e.target.value))} min="1"
+                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50" />
+                    </div>
+                    <div>
+                      <label className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Price ($)</label>
+                      <input type="number" value={eventPrice} onChange={(e) => setEventPrice(Number(e.target.value))} min="0" step="0.01"
+                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50" />
+                    </div>
+                    <div>
+                      <label className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Type</label>
+                      <select value={eventType} onChange={(e) => setEventType(e.target.value)}
+                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50">
+                        <option value="webinar">Webinar</option>
+                        <option value="zoom">Zoom Call</option>
+                        <option value="seminar">Seminar</option>
+                        <option value="livestream">Livestream</option>
+                        <option value="in_person">In Person</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Price / meta row */}
               <div className="flex items-center gap-4 mt-5 pt-5 border-t border-white/[0.06]">

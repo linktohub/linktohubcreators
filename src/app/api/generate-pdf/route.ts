@@ -6,6 +6,8 @@ import { createClient as createAdmin } from "@supabase/supabase-js";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
@@ -16,221 +18,193 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-  const { data: product } = await admin
+  const { data: product, error: productError } = await admin
     .from("products")
-    .select("*, creators(display_name, niche, brand_color)")
+    .select("id, title, description, file_type, metadata, creators(display_name, niche, brand_color)")
     .eq("id", productId)
     .single();
 
-  if (!product) return NextResponse.json({ error: "Product not found" }, { status: 404 });
-
-  const creator = product.creators as { display_name?: string; niche?: string; brand_color?: string } | null;
-  const metadata = product.metadata as {
-    sections?: string[];
-    pages?: number;
-    modules?: { title: string; lessons: string[] }[];
-  } | null;
-
-  // Generate full content for each section/module using Claude
-  const isGuide = product.file_type === "pdf";
-  const isCourse = product.file_type === "course";
-
-  let contentPrompt = "";
-  if (isGuide && metadata?.sections) {
-    contentPrompt = `Write a complete PDF guide titled "${product.title}" by ${creator?.display_name || "the creator"} (${creator?.niche || "creator"} niche).
-
-For each section, write 3-4 paragraphs of real, valuable, actionable content. This should be a complete, professional guide that delivers real value.
-
-Sections:
-${metadata.sections.map((s, i) => `${i + 1}. ${s}`).join("\n")}
-
-Description: ${product.description || ""}
-
-Return ONLY a JSON object:
-{
-  "sections": [
-    {
-      "title": "Section title",
-      "content": "Full 3-4 paragraph content for this section. Make it practical and specific."
-    }
-  ]
-}`;
-  } else if (isCourse && metadata?.modules) {
-    contentPrompt = `Write complete lesson content for a course titled "${product.title}" by ${creator?.display_name || "the creator"} (${creator?.niche || "creator"} niche).
-
-For each lesson, write 2-3 paragraphs of concrete, actionable content. This is a real course that students will learn from.
-
-Modules and lessons:
-${metadata.modules.map((m, i) => `Module ${i + 1}: ${m.title}\n${m.lessons.map((l, j) => `  Lesson ${j + 1}: ${l}`).join("\n")}`).join("\n\n")}
-
-Description: ${product.description || ""}
-
-Return ONLY a JSON object:
-{
-  "modules": [
-    {
-      "title": "Module title",
-      "lessons": [
-        {
-          "title": "Lesson title",
-          "content": "Complete 2-3 paragraph lesson content. Be specific and actionable."
-        }
-      ]
-    }
-  ]
-}`;
+  if (productError || !product) {
+    return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
-  let generatedContent: { sections?: { title: string; content: string }[]; modules?: { title: string; lessons: { title: string; content: string }[] }[] } = {};
+  const creator = product.creators as { display_name?: string; niche?: string; brand_color?: string } | null;
+  const meta = product.metadata as { sections?: string[]; pages?: number; modules?: { title: string; lessons: string[] }[] } | null;
+  const isCourse = product.file_type === "course";
 
-  if (contentPrompt) {
-    try {
-      const msg = await anthropic.messages.create({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 4000,
-        messages: [{ role: "user", content: contentPrompt }],
-      });
-      const text = msg.content[0].type === "text" ? msg.content[0].text : "";
-      const match = text.match(/\{[\s\S]*\}/);
-      if (match) generatedContent = JSON.parse(match[0]);
-    } catch (err) {
-      console.error("Content generation error:", err);
+  // Generate content with Claude — compact prompt for speed
+  let sectionContents: { heading: string; body: string }[] = [];
+
+  try {
+    const items = isCourse
+      ? (meta?.modules || []).flatMap((m) => m.lessons.map((l) => `${m.title}: ${l}`)).slice(0, 12)
+      : (meta?.sections || []).slice(0, 8);
+
+    if (items.length === 0) {
+      items.push(...["Introduction", "Key Concepts", "How to Apply This", "Next Steps"]);
     }
+
+    const prompt = `Write a complete ${isCourse ? "course" : "PDF guide"} titled "${product.title}" by ${creator?.display_name || "the creator"}.
+
+For each section below, write 2 paragraphs of specific, actionable, valuable content:
+${items.map((s, i) => `${i + 1}. ${s}`).join("\n")}
+
+Creator niche: ${creator?.niche || "general"}
+Description: ${product.description || ""}
+
+Return ONLY valid JSON:
+{"sections":[{"heading":"Section title","body":"Two paragraphs of real, specific content here."}]}`;
+
+    const msg = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 2500,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const text = msg.content[0].type === "text" ? msg.content[0].text : "";
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      sectionContents = parsed.sections || [];
+    }
+  } catch (err) {
+    console.error("Content gen error:", err);
+    // Fall back to section titles only
+    const fallbackSections = meta?.sections || meta?.modules?.map((m) => m.title) || ["Content"];
+    sectionContents = fallbackSections.map((s) => ({
+      heading: s,
+      body: `This section covers ${s} in detail. ${product.description || ""}`,
+    }));
   }
 
   // Build PDF
-  const pdfDoc = await PDFDocument.create();
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  try {
+    const pdfDoc = await PDFDocument.create();
+    const W = 612;
+    const H = 792;
+    const M = 72;
 
-  const pageWidth = 595;
-  const pageHeight = 842;
-  const margin = 60;
-  const contentWidth = pageWidth - margin * 2;
+    const fontReg = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-  // Parse brand color
-  const hex = (creator?.brand_color || "#7c3aed").replace("#", "");
-  const r = parseInt(hex.slice(0, 2), 16) / 255;
-  const g = parseInt(hex.slice(2, 4), 16) / 255;
-  const b = parseInt(hex.slice(4, 6), 16) / 255;
-  const brandRgb = rgb(r, g, b);
+    // Brand color
+    const hex = (creator?.brand_color || "#7c3aed").replace("#", "");
+    const br = parseInt(hex.slice(0, 2), 16) / 255;
+    const bg = parseInt(hex.slice(2, 4), 16) / 255;
+    const bb = parseInt(hex.slice(4, 6), 16) / 255;
+    const brand = rgb(br, bg, bb);
+    const dark = rgb(0.08, 0.08, 0.1);
 
-  function addPage() {
-    const page = pdfDoc.addPage([pageWidth, pageHeight]);
-    return page;
-  }
+    // Wrap text helper
+    function wrap(text: string, width: number, size: number, f: typeof fontReg): string[] {
+      const words = text.split(" ");
+      const lines: string[] = [];
+      let cur = "";
+      for (const w of words) {
+        const test = cur ? `${cur} ${w}` : w;
+        if (f.widthOfTextAtSize(test, size) > width && cur) {
+          lines.push(cur);
+          cur = w;
+        } else {
+          cur = test;
+        }
+      }
+      if (cur) lines.push(cur);
+      return lines;
+    }
 
-  function wrapText(text: string, maxWidth: number, fontSize: number, fontObj: typeof font): string[] {
-    const words = text.split(" ");
-    const lines: string[] = [];
-    let currentLine = "";
-    for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const width = fontObj.widthOfTextAtSize(testLine, fontSize);
-      if (width > maxWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
+    // Cover page
+    const cover = pdfDoc.addPage([W, H]);
+    cover.drawRectangle({ x: 0, y: 0, width: W, height: H, color: dark });
+    cover.drawRectangle({ x: 0, y: H * 0.45, width: W, height: H * 0.55, color: brand });
+    cover.drawRectangle({ x: 0, y: H * 0.44, width: W, height: H * 0.02, color: rgb(1, 1, 1), opacity: 0.1 });
+    cover.drawRectangle({ x: M - 16, y: 0, width: 5, height: H * 0.44, color: brand });
+
+    // Title on cover
+    const titleWords = (product.title || "Untitled").split(" ");
+    let titleLine = "";
+    const titleLines: string[] = [];
+    for (const w of titleWords) {
+      const test = titleLine ? `${titleLine} ${w}` : w;
+      if (fontBold.widthOfTextAtSize(test, 28) > W - M * 2 && titleLine) {
+        titleLines.push(titleLine);
+        titleLine = w;
       } else {
-        currentLine = testLine;
+        titleLine = test;
       }
     }
-    if (currentLine) lines.push(currentLine);
-    return lines;
-  }
+    if (titleLine) titleLines.push(titleLine);
 
-  // Cover page
-  const cover = addPage();
-  cover.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: rgb(0.02, 0.02, 0.05) });
-  cover.drawRectangle({ x: 0, y: pageHeight * 0.6, width: pageWidth, height: pageHeight * 0.4, color: brandRgb, opacity: 0.15 });
-  cover.drawRectangle({ x: margin - 10, y: pageHeight * 0.35, width: 6, height: pageHeight * 0.28, color: brandRgb });
-
-  const titleLines = wrapText(product.title, contentWidth - 20, 32, boldFont);
-  let titleY = pageHeight * 0.7;
-  for (const line of titleLines.slice(0, 3)) {
-    cover.drawText(line, { x: margin, y: titleY, size: 32, font: boldFont, color: rgb(1, 1, 1) });
-    titleY -= 40;
-  }
-
-  if (product.description) {
-    const descLines = wrapText(product.description, contentWidth, 13, font);
-    let descY = pageHeight * 0.5;
-    for (const line of descLines.slice(0, 5)) {
-      cover.drawText(line, { x: margin, y: descY, size: 13, font, color: rgb(0.7, 0.7, 0.7) });
-      descY -= 18;
-    }
-  }
-
-  cover.drawText(creator?.display_name || "Linktohub", { x: margin, y: 80, size: 12, font: boldFont, color: brandRgb });
-  cover.drawText(`linktohub.vercel.app`, { x: margin, y: 60, size: 10, font, color: rgb(0.4, 0.4, 0.4) });
-
-  // Content pages
-  function writeSection(title: string, content: string) {
-    const page = addPage();
-    page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: rgb(0.97, 0.97, 0.99) });
-    page.drawRectangle({ x: 0, y: pageHeight - 8, width: pageWidth, height: 8, color: brandRgb });
-
-    // Section title
-    const titleLines = wrapText(title, contentWidth, 20, boldFont);
-    let y = pageHeight - 60;
-    for (const line of titleLines) {
-      page.drawText(line, { x: margin, y, size: 20, font: boldFont, color: rgb(0.1, 0.1, 0.15) });
-      y -= 28;
-    }
-    y -= 10;
-    page.drawRectangle({ x: margin, y: y + 6, width: contentWidth, height: 2, color: brandRgb, opacity: 0.4 });
-    y -= 20;
-
-    // Content paragraphs
-    const paragraphs = content.split("\n\n").filter(Boolean);
-    for (const para of paragraphs) {
-      const lines = wrapText(para.trim(), contentWidth, 11, font);
-      for (const line of lines) {
-        if (y < 80) break;
-        page.drawText(line, { x: margin, y, size: 11, font, color: rgb(0.2, 0.2, 0.25) });
-        y -= 16;
-      }
-      y -= 12;
-      if (y < 80) break;
+    let ty = H * 0.78;
+    for (const line of titleLines.slice(0, 4)) {
+      cover.drawText(line, { x: M, y: ty, size: 28, font: fontBold, color: rgb(1, 1, 1) });
+      ty -= 36;
     }
 
-    // Page footer
-    page.drawText(`${product.title}`, { x: margin, y: 30, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
-  }
-
-  if (isGuide && generatedContent.sections) {
-    for (const section of generatedContent.sections) {
-      writeSection(section.title, section.content);
-    }
-  } else if (isCourse && generatedContent.modules) {
-    for (const module of generatedContent.modules) {
-      for (const lesson of module.lessons) {
-        writeSection(`${module.title}: ${lesson.title}`, lesson.content);
+    if (product.description) {
+      const descLines = wrap(product.description, W - M * 2, 12, fontReg).slice(0, 4);
+      let dy = H * 0.62;
+      for (const l of descLines) {
+        cover.drawText(l, { x: M, y: dy, size: 12, font: fontReg, color: rgb(1, 1, 1), opacity: 0.75 });
+        dy -= 17;
       }
     }
-  } else if (metadata?.sections) {
-    for (const section of metadata.sections) {
-      writeSection(section, `This section covers ${section}. Content is being developed by ${creator?.display_name || "the creator"}.`);
+
+    cover.drawText(creator?.display_name?.toUpperCase() || "LINKTOHUB", { x: M, y: 100, size: 11, font: fontBold, color: brand });
+    cover.drawText(`${sectionContents.length} sections  •  ${product.file_type === "course" ? "Video Course" : "PDF Guide"}`, { x: M, y: 78, size: 10, font: fontReg, color: rgb(0.5, 0.5, 0.5) });
+    cover.drawText("linktohub.vercel.app", { x: W - M - 120, y: 30, size: 9, font: fontItalic, color: rgb(0.35, 0.35, 0.35) });
+
+    // Content pages
+    for (const section of sectionContents) {
+      const page = pdfDoc.addPage([W, H]);
+      page.drawRectangle({ x: 0, y: 0, width: W, height: H, color: rgb(0.99, 0.99, 0.99) });
+      page.drawRectangle({ x: 0, y: H - 6, width: W, height: 6, color: brand });
+      page.drawRectangle({ x: M - 16, y: 0, width: 3, height: H - 6, color: brand, opacity: 0.15 });
+
+      // Heading
+      const hLines = wrap(section.heading, W - M * 2, 18, fontBold).slice(0, 3);
+      let hy = H - 56;
+      for (const l of hLines) {
+        page.drawText(l, { x: M, y: hy, size: 18, font: fontBold, color: rgb(0.08, 0.08, 0.12) });
+        hy -= 24;
+      }
+      page.drawRectangle({ x: M, y: hy - 4, width: 60, height: 3, color: brand });
+
+      // Body text
+      const bodyLines = wrap(section.body, W - M * 2, 11.5, fontReg);
+      let by = hy - 28;
+      for (const l of bodyLines) {
+        if (by < 60) break;
+        page.drawText(l, { x: M, y: by, size: 11.5, font: fontReg, color: rgb(0.22, 0.22, 0.28) });
+        by -= 17;
+      }
+
+      // Footer
+      page.drawText(product.title || "", { x: M, y: 28, size: 8.5, font: fontReg, color: rgb(0.6, 0.6, 0.6) });
     }
+
+    const pdfBytes = await pdfDoc.save();
+
+    // Upload
+    const { data: uploaded, error: upErr } = await admin.storage
+      .from("products")
+      .upload(`digital/${productId}/content.pdf`, Buffer.from(pdfBytes), {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+
+    if (upErr) {
+      console.error("Upload error:", upErr);
+      return NextResponse.json({ error: `Upload failed: ${upErr.message}` }, { status: 500 });
+    }
+
+    const { data: { publicUrl } } = admin.storage.from("products").getPublicUrl(uploaded.path);
+    await admin.from("products").update({ file_url: publicUrl }).eq("id", productId);
+
+    return NextResponse.json({ url: publicUrl, ok: true });
+  } catch (err) {
+    console.error("PDF build error:", err);
+    return NextResponse.json({ error: `PDF generation failed: ${String(err)}` }, { status: 500 });
   }
-
-  const pdfBytes = await pdfDoc.save();
-  const pdfBuffer = Buffer.from(pdfBytes);
-
-  // Upload to Supabase storage
-  const path = `digital/${productId}/content.pdf`;
-  const { data: uploaded, error: uploadError } = await admin.storage
-    .from("products")
-    .upload(path, pdfBuffer, { contentType: "application/pdf", upsert: true });
-
-  if (uploadError) {
-    console.error("Upload error:", uploadError);
-    return NextResponse.json({ error: "Failed to upload PDF" }, { status: 500 });
-  }
-
-  const { data: { publicUrl } } = admin.storage.from("products").getPublicUrl(uploaded.path);
-
-  // Save URL back to product
-  await admin.from("products").update({ file_url: publicUrl }).eq("id", productId);
-
-  return NextResponse.json({ url: publicUrl, ok: true });
 }
