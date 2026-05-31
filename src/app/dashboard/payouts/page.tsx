@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { DollarSign, ExternalLink, ArrowLeft } from "lucide-react";
+import { DollarSign, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { ConnectStripeButton } from "./connect-button";
 
 export default async function PayoutsPage() {
   const supabase = await createClient();
@@ -50,15 +50,7 @@ export default async function PayoutsPage() {
                 : "Connect Stripe to receive direct payouts from every sale."}
             </p>
           </div>
-          {!creator.stripe_account_enabled && (
-            <Button
-              className="bg-white text-black hover:bg-white/90 font-bold gap-2"
-              onClick={() => {}}
-            >
-              <ExternalLink className="w-4 h-4" />
-              Connect Stripe
-            </Button>
-          )}
+          {!creator.stripe_account_enabled && <ConnectStripeButton />}
         </div>
       </div>
 

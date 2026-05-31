@@ -107,6 +107,13 @@ export default function StorefrontClient({
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [hasActiveSub, setHasActiveSub] = useState<boolean | null>(null);
+  // Shipping fields for card checkout path
+  const [shippingName, setShippingName] = useState("");
+  const [shippingLine1, setShippingLine1] = useState("");
+  const [shippingCity, setShippingCity] = useState("");
+  const [shippingPostal, setShippingPostal] = useState("");
+  const [shippingCountry, setShippingCountry] = useState("US");
 
   const paymentRequestRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -125,6 +132,30 @@ export default function StorefrontClient({
   useEffect(() => {
     track(creator.id, "page_view", { username: creator.username });
   }, [creator.id, creator.username]);
+
+  // Check if current user has an active subscription to this creator
+  useEffect(() => {
+    if (!creator.ai_chat_enabled) return;
+    (async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setHasActiveSub(false); return; }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+      if (!profile) { setHasActiveSub(false); return; }
+      const { data: sub } = await supabase
+        .from("fan_subscriptions")
+        .select("id")
+        .eq("creator_id", creator.id)
+        .eq("fan_id", profile.id)
+        .eq("status", "active")
+        .maybeSingle();
+      setHasActiveSub(!!sub);
+    })();
+  }, [creator.id, creator.ai_chat_enabled]);
 
   useEffect(() => {
     if (!cartOpen || cartTotal === 0 || !stripePromise) return;
@@ -163,6 +194,17 @@ export default function StorefrontClient({
         pr.on("paymentmethod", async (e) => {
           setCheckingOut(true);
           try {
+            const sa = e.shippingAddress;
+            const shipping = sa
+              ? {
+                  name: e.payerName || "",
+                  line1: sa.addressLine?.[0] || "",
+                  city: sa.city || "",
+                  postal_code: sa.postalCode || "",
+                  country: sa.country || "US",
+                  state: sa.region || undefined,
+                }
+              : undefined;
             const res = await fetch("/api/checkout/intent", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -170,6 +212,7 @@ export default function StorefrontClient({
                 creatorId: creator.id,
                 customerEmail: e.payerEmail,
                 items: cart.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+                shipping,
               }),
             });
             const { clientSecret } = await res.json();
@@ -234,6 +277,16 @@ export default function StorefrontClient({
     if (!stripeRef.current || !cardElementRef.current) return;
     setCheckingOut(true);
     try {
+      const shipping =
+        hasPhysical && shippingLine1
+          ? {
+              name: shippingName,
+              line1: shippingLine1,
+              city: shippingCity,
+              postal_code: shippingPostal,
+              country: shippingCountry,
+            }
+          : undefined;
       const res = await fetch("/api/checkout/intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -241,6 +294,7 @@ export default function StorefrontClient({
           creatorId: creator.id,
           customerEmail: checkoutEmail,
           items: cart.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+          shipping,
         }),
       });
       const { clientSecret } = await res.json();
@@ -280,9 +334,25 @@ export default function StorefrontClient({
   async function handleEmailCapture(e: React.FormEvent) {
     e.preventDefault();
     const supabase = createClient();
-    await supabase.from("email_subscribers").upsert({ creator_id: creator.id, email, source: "storefront" }, { onConflict: "creator_id,email" });
+    const { data: existing } = await supabase
+      .from("email_subscribers")
+      .select("id")
+      .eq("creator_id", creator.id)
+      .eq("email", email)
+      .maybeSingle();
+    await supabase
+      .from("email_subscribers")
+      .upsert({ creator_id: creator.id, email, source: "storefront" }, { onConflict: "creator_id,email" });
     setEmailSubmitted(true);
     toast.success("You're in!");
+    // Notify creator of new subscriber (only on first sign-up, best-effort)
+    if (!existing) {
+      fetch("/api/notify/new-subscriber", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ creatorId: creator.id, subscriberEmail: email }),
+      }).catch(() => {});
+    }
   }
 
   async function sendChat() {
@@ -573,40 +643,72 @@ export default function StorefrontClient({
                   <p className="text-white/35 text-xs">Trained on their content & voice</p>
                 </div>
               </div>
-              <div className="h-80 p-4 space-y-3 overflow-y-auto">
-                {chatMessages.length === 0 && (
-                  <p className="text-white/25 text-sm text-center mt-10">
-                    Ask me anything about {creator.display_name}
-                  </p>
-                )}
-                {chatMessages.map((msg, i) => (
-                  <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-xs rounded-2xl px-4 py-2.5 text-sm ${
-                      msg.role === "user" ? "bg-white text-black" : "bg-white/[0.08] text-white"
-                    }`}>
-                      {msg.text}
-                    </div>
+
+              {/* Paywall: show spinner while checking, locked state if no sub */}
+              {hasActiveSub === null && (
+                <div className="h-80 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-white/30" />
+                </div>
+              )}
+
+              {hasActiveSub === false && (
+                <div className="h-80 flex flex-col items-center justify-center px-8 text-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
+                    style={{ backgroundColor: brandColor + "22" }}>🔒</div>
+                  <div>
+                    <p className="font-bold text-white">Members only</p>
+                    <p className="text-white/45 text-sm mt-1">Subscribe to chat with {creator.display_name}&apos;s AI</p>
                   </div>
-                ))}
-                {chatLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white/[0.06] rounded-2xl px-4 py-2.5 text-sm text-white/40">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    </div>
+                  {tiers.length > 0 && (
+                    <button
+                      className="h-11 px-6 rounded-xl font-bold text-sm text-white"
+                      style={{ backgroundColor: brandColor }}
+                      onClick={() => setActiveTab("subscribe")}
+                    >
+                      View membership plans
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {hasActiveSub === true && (
+                <>
+                  <div className="h-80 p-4 space-y-3 overflow-y-auto">
+                    {chatMessages.length === 0 && (
+                      <p className="text-white/25 text-sm text-center mt-10">
+                        Ask me anything about {creator.display_name}
+                      </p>
+                    )}
+                    {chatMessages.map((msg, i) => (
+                      <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-xs rounded-2xl px-4 py-2.5 text-sm ${
+                          msg.role === "user" ? "bg-white text-black" : "bg-white/[0.08] text-white"
+                        }`}>
+                          {msg.text}
+                        </div>
+                      </div>
+                    ))}
+                    {chatLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-white/[0.06] rounded-2xl px-4 py-2.5 text-sm text-white/40">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div className="p-3 border-t border-white/[0.08] flex gap-2">
-                <input value={chatInput} onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendChat()}
-                  placeholder="Ask something..."
-                  className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-white/20" />
-                <button onClick={sendChat} disabled={chatLoading}
-                  className="px-4 text-white font-bold rounded-xl text-sm disabled:opacity-50"
-                  style={{ backgroundColor: brandColor }}>
-                  →
-                </button>
-              </div>
+                  <div className="p-3 border-t border-white/[0.08] flex gap-2">
+                    <input value={chatInput} onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && sendChat()}
+                      placeholder="Ask something..."
+                      className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-white/20" />
+                    <button onClick={sendChat} disabled={chatLoading}
+                      className="px-4 text-white font-bold rounded-xl text-sm disabled:opacity-50"
+                      style={{ backgroundColor: brandColor }}>
+                      →
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -871,10 +973,27 @@ export default function StorefrontClient({
                     onChange={(e) => setCheckoutEmail(e.target.value)}
                     className="w-full h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20"
                   />
+                  {hasPhysical && (
+                    <div className="space-y-2">
+                      <p className="text-white/40 text-xs font-semibold uppercase tracking-wider">Shipping address</p>
+                      <input placeholder="Full name" value={shippingName} onChange={(e) => setShippingName(e.target.value)}
+                        className="w-full h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                      <input placeholder="Address line 1" value={shippingLine1} onChange={(e) => setShippingLine1(e.target.value)}
+                        className="w-full h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                      <div className="flex gap-2">
+                        <input placeholder="City" value={shippingCity} onChange={(e) => setShippingCity(e.target.value)}
+                          className="flex-1 h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                        <input placeholder="ZIP" value={shippingPostal} onChange={(e) => setShippingPostal(e.target.value)}
+                          className="w-24 h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                      </div>
+                      <input placeholder="Country (e.g. US)" value={shippingCountry} onChange={(e) => setShippingCountry(e.target.value)}
+                        className="w-full h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                    </div>
+                  )}
                   <div ref={cardRef} className="w-full bg-white/[0.06] border border-white/[0.1] rounded-xl p-4 min-h-[52px]" />
                   <button
                     onClick={handleCardPay}
-                    disabled={checkingOut || !checkoutEmail}
+                    disabled={checkingOut || !checkoutEmail || (hasPhysical && (!shippingLine1 || !shippingCity || !shippingPostal))}
                     className="w-full h-14 rounded-2xl font-black text-white text-base flex items-center justify-center gap-2 disabled:opacity-50"
                     style={{ backgroundColor: brandColor }}
                   >
