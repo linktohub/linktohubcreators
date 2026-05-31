@@ -4,145 +4,97 @@ import { createClient } from "@/lib/supabase/server";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// ─── SVG Clothing Illustrations ───────────────────────────────────────────────
+// ─── Merch Product Images ─────────────────────────────────────────────────────
+// Premium brand-card design — looks like a real streetwear/creator product drop
+
+const ITEM_ICONS: Record<string, string> = {
+  hoodie: "H",
+  sweatshirt: "S",
+  tshirt: "T",
+  shirt: "T",
+  cap: "C",
+  hat: "C",
+  snapback: "C",
+  jacket: "J",
+  bag: "B",
+  tote: "B",
+  mug: "M",
+  poster: "P",
+  default: "★",
+};
+
+const ITEM_LABELS: Record<string, string> = {
+  hoodie: "HOODIE",
+  sweatshirt: "CREWNECK",
+  tshirt: "TEE",
+  shirt: "TEE",
+  cap: "CAP",
+  hat: "HAT",
+  snapback: "SNAPBACK",
+  jacket: "JACKET",
+  bag: "TOTE BAG",
+  tote: "TOTE BAG",
+  mug: "MUG",
+  poster: "POSTER",
+  default: "MERCH",
+};
 
 function svgMerchImage(color: string, itemType: string, label: string): string {
-  const type = (itemType || "tshirt").toLowerCase().replace(/[\s-_]/g, "");
+  const typeKey = (itemType || "tshirt").toLowerCase().replace(/[\s\-_]/g, "");
   const c = color || "#7c3aed";
-  const dark = c + "cc";
-  const mid = c + "88";
-  const light = c + "44";
+  const itemLabel = ITEM_LABELS[typeKey] || ITEM_LABELS[Object.keys(ITEM_LABELS).find(k => typeKey.includes(k)) || "default"] || "MERCH";
+  const letter = itemLabel.charAt(0);
+  const brandName = (label || "").substring(0, 14).toUpperCase();
 
-  let shape = "";
+  // Parse hex color to components for background
+  const hex = c.replace("#", "");
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const darkBg = `rgb(${Math.round(r * 0.06)},${Math.round(g * 0.06)},${Math.round(b * 0.08)})`;
 
-  if (type.includes("hoodie") || type.includes("sweatshirt")) {
-    shape = `
-      <!-- Hoodie body -->
-      <path d="M155,148 L118,82 L38,110 L60,178 L102,163 L102,328 L298,328 L298,163 L340,178 L362,110 L282,82 L245,148 Q225,128 200,125 Q175,128 155,148 Z" fill="${dark}"/>
-      <!-- Hood shape -->
-      <path d="M118,82 L108,64 Q135,28 200,26 Q265,28 292,64 L282,82 L245,148 Q225,128 200,125 Q175,128 155,148 Z" fill="${mid}"/>
-      <!-- Hood lining -->
-      <path d="M135,100 Q160,60 200,56 Q240,60 265,100 Q240,118 200,121 Q160,118 135,100 Z" fill="${light}"/>
-      <!-- Kangaroo pocket -->
-      <rect x="152" y="232" width="96" height="64" rx="10" fill="${mid}"/>
-      <line x1="200" y1="232" x2="200" y2="296" stroke="${dark}" stroke-width="2"/>
-      <!-- Cuffs -->
-      <rect x="38" y="163" width="64" height="12" rx="6" fill="${mid}"/>
-      <rect x="298" y="163" width="64" height="12" rx="6" fill="${mid}"/>
-      <!-- Waistband -->
-      <rect x="102" y="318" width="196" height="14" rx="7" fill="${mid}"/>`;
-  } else if (type.includes("cap") || type.includes("hat") || type.includes("snapback")) {
-    shape = `
-      <!-- Crown -->
-      <path d="M68,248 Q75,162 200,154 Q325,162 332,248 Z" fill="${dark}"/>
-      <!-- Brim -->
-      <ellipse cx="200" cy="250" rx="138" ry="26" fill="${mid}"/>
-      <!-- Brim highlight -->
-      <ellipse cx="200" cy="248" rx="138" ry="12" fill="${dark}"/>
-      <!-- Front panel seam -->
-      <path d="M200,164 Q200,165 200,248" stroke="${light}" stroke-width="2" fill="none"/>
-      <!-- Eyelet left -->
-      <circle cx="148" cy="192" r="5" fill="${light}"/>
-      <!-- Eyelet right -->
-      <circle cx="252" cy="192" r="5" fill="${light}"/>
-      <!-- Button on top -->
-      <circle cx="200" cy="156" r="10" fill="${mid}"/>
-      <circle cx="200" cy="156" r="6" fill="${light}"/>
-      <!-- Sweatband hint -->
-      <path d="M68,248 Q75,256 200,260 Q325,256 332,248" stroke="${light}" stroke-width="2" fill="none"/>
-      <!-- Bill underside -->
-      <ellipse cx="160" cy="274" rx="68" ry="12" fill="${light}"/>`;
-  } else if (type.includes("jacket") || type.includes("coat")) {
-    shape = `
-      <!-- Jacket body -->
-      <path d="M155,128 L118,78 L38,106 L60,178 L102,163 L102,328 L298,328 L298,163 L340,178 L362,106 L282,78 L245,128 Q225,108 200,105 Q175,108 155,128 Z" fill="${dark}"/>
-      <!-- Left lapel -->
-      <path d="M155,128 Q175,108 200,105 L195,200 L152,240 Z" fill="${mid}"/>
-      <!-- Right lapel -->
-      <path d="M245,128 Q225,108 200,105 L205,200 L248,240 Z" fill="${mid}"/>
-      <!-- Center zip/button line -->
-      <line x1="200" y1="200" x2="200" y2="328" stroke="${light}" stroke-width="3"/>
-      <!-- Chest pocket left -->
-      <rect x="125" y="170" width="48" height="32" rx="5" fill="${mid}"/>
-      <!-- Side pockets -->
-      <rect x="118" y="248" width="56" height="40" rx="6" fill="${mid}"/>
-      <rect x="226" y="248" width="56" height="40" rx="6" fill="${mid}"/>
-      <!-- Collar -->
-      <path d="M155,128 Q175,108 200,105 Q225,108 245,128 L238,148 Q225,138 200,136 Q175,138 162,148 Z" fill="${mid}"/>`;
-  } else if (type.includes("bag") || type.includes("tote")) {
-    shape = `
-      <!-- Bag body -->
-      <rect x="80" y="160" width="240" height="200" rx="12" fill="${dark}"/>
-      <!-- Bag top flap -->
-      <rect x="80" y="145" width="240" height="20" rx="6" fill="${mid}"/>
-      <!-- Left handle -->
-      <path d="M125,145 Q115,95 130,80 Q145,65 160,80 Q175,95 165,145" stroke="${mid}" stroke-width="12" fill="none" stroke-linecap="round"/>
-      <!-- Right handle -->
-      <path d="M235,145 Q225,95 240,80 Q255,65 270,80 Q285,95 275,145" stroke="${mid}" stroke-width="12" fill="none" stroke-linecap="round"/>
-      <!-- Center pocket -->
-      <rect x="140" y="210" width="120" height="90" rx="8" fill="${mid}"/>
-      <!-- Pocket zipper line -->
-      <line x1="152" y1="210" x2="248" y2="210" stroke="${light}" stroke-width="3"/>
-      <!-- Brand patch area -->
-      <rect x="168" y="228" width="64" height="38" rx="6" fill="${light}"/>`;
-  } else if (type.includes("mug") || type.includes("cup")) {
-    shape = `
-      <!-- Mug body -->
-      <rect x="110" y="130" width="180" height="210" rx="16" fill="${dark}"/>
-      <!-- Mug rim -->
-      <ellipse cx="200" cy="130" rx="90" ry="16" fill="${mid}"/>
-      <!-- Mug base -->
-      <ellipse cx="200" cy="338" rx="90" ry="16" fill="${mid}"/>
-      <!-- Handle -->
-      <path d="M290,175 Q340,175 340,230 Q340,285 290,285" stroke="${mid}" stroke-width="22" fill="none" stroke-linecap="round"/>
-      <!-- Design area -->
-      <rect x="135" y="185" width="130" height="100" rx="10" fill="${mid}"/>
-      <!-- Steam lines -->
-      <path d="M170,110 Q178,90 170,70" stroke="${light}" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <path d="M200,105 Q208,85 200,65" stroke="${light}" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <path d="M230,110 Q238,90 230,70" stroke="${light}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-  } else {
-    // Default: T-shirt
-    shape = `
-      <!-- T-shirt body -->
-      <path d="M152,128 L120,78 L40,106 L62,176 L104,161 L104,326 L296,326 L296,161 L338,176 L360,106 L280,78 L248,128 Q226,108 200,105 Q174,108 152,128 Z" fill="${dark}"/>
-      <!-- Collar -->
-      <path d="M152,128 Q174,108 200,105 Q226,108 248,128 Q228,142 200,145 Q172,142 152,128 Z" fill="${mid}"/>
-      <!-- Sleeve seams -->
-      <line x1="104" y1="128" x2="104" y2="161" stroke="${light}" stroke-width="2"/>
-      <line x1="296" y1="128" x2="296" y2="161" stroke="${light}" stroke-width="2"/>
-      <!-- Cuffs -->
-      <rect x="40" y="161" width="64" height="12" rx="6" fill="${mid}"/>
-      <rect x="296" y="161" width="64" height="12" rx="6" fill="${mid}"/>
-      <!-- Hem -->
-      <rect x="104" y="316" width="192" height="12" rx="6" fill="${mid}"/>`;
-  }
-
-  const labelText = label ? label.substring(0, 18) : "";
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
     <defs>
       <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#141420"/>
-        <stop offset="100%" stop-color="#0d0d18"/>
+        <stop offset="0%" stop-color="${darkBg}"/>
+        <stop offset="100%" stop-color="#08080f"/>
       </linearGradient>
-      <filter id="glow">
-        <feGaussianBlur stdDeviation="12" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
+      <linearGradient id="block" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${c}"/>
+        <stop offset="100%" stop-color="${c}" stop-opacity="0.85"/>
+      </linearGradient>
     </defs>
+    <!-- Background -->
     <rect width="400" height="400" fill="url(#bg)"/>
-    <!-- Glow blob behind item -->
-    <ellipse cx="200" cy="210" rx="140" ry="110" fill="${c}" opacity="0.12" filter="url(#glow)"/>
-    <!-- Clothing illustration -->
-    <g transform="translate(0, -10)" opacity="0.95">
-      ${shape}
-    </g>
-    <!-- Creator label -->
-    ${labelText ? `<text x="200" y="388" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="${c}" opacity="0.7" letter-spacing="2">${labelText.toUpperCase()}</text>` : ""}
+    <!-- Color block - top 55% -->
+    <rect x="0" y="0" width="400" height="220" fill="url(#block)"/>
+    <!-- Diagonal slice -->
+    <polygon points="0,200 400,220 400,240 0,240" fill="${darkBg}" opacity="0.3"/>
+    <!-- Corner accent -->
+    <rect x="0" y="0" width="8" height="220" fill="white" opacity="0.15"/>
+    <rect x="0" y="0" width="400" height="6" fill="white" opacity="0.15"/>
+    <!-- Product category label - top left -->
+    <text x="28" y="38" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="800" fill="white" opacity="0.6" letter-spacing="4">${itemLabel}</text>
+    <!-- Large focal letter -->
+    <text x="200" y="175" font-family="Georgia,serif" font-size="168" font-weight="900" text-anchor="middle" fill="white" opacity="0.12">${letter}</text>
+    <text x="200" y="175" font-family="Georgia,serif" font-size="168" font-weight="900" text-anchor="middle" fill="white" opacity="0.88">${letter}</text>
+    <!-- Horizontal rule -->
+    <rect x="28" y="238" width="344" height="1" fill="${c}" opacity="0.4"/>
+    <!-- Brand name -->
+    <text x="28" y="272" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="900" fill="white" letter-spacing="1">${brandName || "LIMITED DROP"}</text>
+    <!-- Sub text -->
+    <text x="28" y="298" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="white" opacity="0.4" letter-spacing="2">EXCLUSIVE MERCH</text>
+    <!-- Dot decoration -->
+    <circle cx="372" cy="360" r="32" fill="${c}" opacity="0.15"/>
+    <circle cx="372" cy="360" r="20" fill="${c}" opacity="0.2"/>
+    <!-- linktohub label -->
+    <text x="28" y="380" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="white" opacity="0.2" letter-spacing="1">linktohub</text>
+    <text x="372" y="366" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="800" text-anchor="middle" fill="${c}" opacity="0.9">NEW</text>
   </svg>`;
 
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
+
 
 function brandedImage(color: string, emoji: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${color}" stop-opacity="1"/><stop offset="100%" stop-color="${color}" stop-opacity="0.55"/></linearGradient></defs><rect width="400" height="400" fill="url(#g)"/><text x="200" y="230" font-family="system-ui,sans-serif" font-size="160" text-anchor="middle" dominant-baseline="middle">${emoji}</text></svg>`;

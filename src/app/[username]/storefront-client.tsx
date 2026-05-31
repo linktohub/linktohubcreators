@@ -110,6 +110,12 @@ export default function StorefrontClient({
   const [hasActiveSub, setHasActiveSub] = useState<boolean | null>(null);
   const [fanUser, setFanUser] = useState<{ id: string; email: string } | null | undefined>(undefined);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
   // Shipping fields for card checkout path
   const [shippingName, setShippingName] = useState("");
   const [shippingLine1, setShippingLine1] = useState("");
@@ -406,9 +412,43 @@ export default function StorefrontClient({
     setChatLoading(false);
   }
 
-  function requireFanAuth(returnAction?: string) {
-    const returnUrl = `${window.location.href}${returnAction ? `?action=${returnAction}` : ""}`;
-    window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname + (returnAction ? `?action=${returnAction}` : ""))}`;
+  function requireFanAuth(action?: string) {
+    setPendingAction(action || null);
+    setShowAuthModal(true);
+  }
+
+  async function handleFanAuth(e: React.FormEvent) {
+    e.preventDefault();
+    setAuthLoading(true);
+    const supabase = createClient();
+    let result;
+    if (authMode === "signin") {
+      result = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
+    } else {
+      result = await supabase.auth.signUp({ email: authEmail, password: authPassword });
+    }
+    if (result.error) {
+      toast.error(result.error.message);
+      setAuthLoading(false);
+      return;
+    }
+    const user = result.data.user;
+    if (user) {
+      setFanUser({ id: user.id, email: user.email || "" });
+      setShowAuthModal(false);
+      setAuthEmail("");
+      setAuthPassword("");
+      toast.success(authMode === "signin" ? "Signed in!" : "Account created!");
+      // Execute pending action
+      if (pendingAction?.startsWith("subscribe_")) {
+        const tierId = pendingAction.replace("subscribe_", "");
+        setTimeout(() => handleSubscribe(tierId), 500);
+      } else if (pendingAction?.startsWith("event_")) {
+        const eventId = pendingAction.replace("event_", "");
+        setTimeout(() => handleEventRegister(eventId), 500);
+      }
+    }
+    setAuthLoading(false);
   }
 
   async function handleSubscribe(tierId: string) {
@@ -817,6 +857,38 @@ export default function StorefrontClient({
           </div>
         )}
       </div>
+
+      {/* Fan Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowAuthModal(false)} />
+          <div className="relative w-full max-w-md bg-[#111] rounded-t-3xl border-t border-white/[0.08] p-6 pb-10">
+            <div className="flex justify-center mb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
+            <div className="flex gap-1 bg-white/[0.05] rounded-xl p-1 mb-6 mt-4">
+              {(["signin", "signup"] as const).map((m) => (
+                <button key={m} onClick={() => setAuthMode(m)}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${authMode === m ? "bg-white text-black" : "text-white/40 hover:text-white"}`}>
+                  {m === "signin" ? "Sign in" : "Create account"}
+                </button>
+              ))}
+            </div>
+            <p className="text-white/50 text-sm text-center mb-5">
+              {authMode === "signin" ? `Sign in to subscribe and support ${creator.display_name}` : `Create a free account to subscribe`}
+            </p>
+            <form onSubmit={handleFanAuth} className="space-y-3">
+              <input type="email" placeholder="Your email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required
+                className="w-full h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/30" />
+              <input type="password" placeholder="Password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required
+                className="w-full h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/30" />
+              <button type="submit" disabled={authLoading}
+                className="w-full h-12 rounded-xl font-bold text-white text-sm disabled:opacity-50"
+                style={{ backgroundColor: brandColor }}>
+                {authLoading ? "..." : authMode === "signin" ? "Sign in" : "Create account"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Powered by */}
       <div className="text-center py-6 text-white/15 text-xs">
