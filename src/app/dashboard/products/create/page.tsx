@@ -154,12 +154,21 @@ export default function CreateProductPage() {
         description: aiData.description || null,
         price: aiData.price || 0,
         file_type: isDigital ? productType : null,
-        pod_provider: productType === "merch" ? (aiData.pod_provider || "gelato") : null,
+        pod_provider: productType === "merch" ? "gelato" : null,
         active: true,
         images: aiData.image ? [aiData.image] : [],
         ...(metadata ? { metadata } : {}),
-      });
+      }).select("id").single();
       error = result.error;
+
+      // Auto-assign Gelato product IDs for merch silently in background
+      if (!error && result.data?.id && productType === "merch" && aiData.item_type) {
+        fetch("/api/gelato/auto-assign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId: result.data.id, itemType: aiData.item_type }),
+        }).catch(() => {}); // non-blocking, non-fatal
+      }
     }
 
     if (error) {

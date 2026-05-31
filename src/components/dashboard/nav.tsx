@@ -21,7 +21,7 @@ const NAV_GROUPS = [
       { href: "/dashboard/products", label: "Products", icon: ShoppingBag },
       { href: "/dashboard/digital", label: "Digital", icon: FileText },
       { href: "/dashboard/subscriptions", label: "Subscriptions", icon: Star },
-      { href: "/dashboard/payouts", label: "Payouts", icon: DollarSign },
+      { href: "/dashboard/payouts", label: "Earnings", icon: DollarSign },
     ],
   },
   {
