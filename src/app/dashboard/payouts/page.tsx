@@ -1,11 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { DollarSign, ExternalLink, ArrowLeft } from "lucide-react";
+import { DollarSign, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { stripe } from "@/lib/stripe";
+import ConnectStripeButton from "./connect-button";
 
-export default async function PayoutsPage() {
+export default async function PayoutsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ connected?: string }>;
+}) {
+  const { connected } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
@@ -17,6 +23,20 @@ export default async function PayoutsPage() {
     .single();
   if (!creator) redirect("/onboarding");
 
+  // When Stripe redirects back, verify account charges_enabled and update DB
+  if (connected === "1" && creator.stripe_account_id && !creator.stripe_account_enabled) {
+    try {
+      const account = await stripe.accounts.retrieve(creator.stripe_account_id as string);
+      if (account.charges_enabled) {
+        await supabase
+          .from("creators")
+          .update({ stripe_account_enabled: true })
+          .eq("id", creator.id);
+        creator.stripe_account_enabled = true;
+      }
+    } catch { /* non-critical */ }
+  }
+
   const { data: recentOrders } = await supabase
     .from("orders")
     .select("id, total, creator_payout, status, created_at, shipping_name")
@@ -26,6 +46,7 @@ export default async function PayoutsPage() {
     .limit(20);
 
   const pendingPayout = (recentOrders || []).reduce((sum, o) => sum + (o.creator_payout || 0), 0);
+  const justConnected = connected === "1" && creator.stripe_account_enabled;
 
   return (
     <div className="p-6 pb-24 md:pb-6 max-w-4xl mx-auto">
@@ -39,6 +60,14 @@ export default async function PayoutsPage() {
         </div>
       </div>
 
+      {/* Just-connected success banner */}
+      {justConnected && (
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 mb-6 flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <p className="text-emerald-300 font-semibold text-sm">Stripe connected! Payouts are now enabled on your account.</p>
+        </div>
+      )}
+
       {/* Stripe Connect status */}
       <div className={`border rounded-2xl p-6 mb-6 ${creator.stripe_account_enabled ? "bg-green-500/10 border-green-500/30" : "bg-white/5 border-white/10"}`}>
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -50,15 +79,7 @@ export default async function PayoutsPage() {
                 : "Connect Stripe to receive direct payouts from every sale."}
             </p>
           </div>
-          {!creator.stripe_account_enabled && (
-            <Button
-              className="bg-white text-black hover:bg-white/90 font-bold gap-2"
-              onClick={() => {}}
-            >
-              <ExternalLink className="w-4 h-4" />
-              Connect Stripe
-            </Button>
-          )}
+          {!creator.stripe_account_enabled && <ConnectStripeButton />}
         </div>
       </div>
 

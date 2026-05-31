@@ -6,19 +6,17 @@ Wire up the full transaction path so money actually moves: creator gets paid, bu
 
 ---
 
-## Task 1 — Stripe Connect Onboarding CRITICAL
+## Task 1 — Stripe Connect Onboarding CRITICAL ✅ DONE
 
 **Why:** The "Connect Stripe" button in `/dashboard/payouts` has `onClick={() => {}}` — it does nothing. `paymentIntents.create` in `/api/checkout/intent` doesn't use `transfer_data` or `application_fee_amount`, so even when a customer pays, 100% of the money sits in the platform Stripe account and the creator never sees a dollar. This is the single biggest blocker.
 
-**What to build:**
-- `src/app/api/stripe/connect/route.ts` — POST handler: creates a Stripe Express account for the creator (if none exists), saves `stripe_account_id` to `creators` table, generates an `AccountLink` for onboarding, returns the URL
-- `src/app/api/stripe/connect/return/route.ts` — GET handler Stripe redirects to after onboarding; calls `stripe.accounts.retrieve()`, sets `stripe_account_enabled = true` in `creators` if `charges_enabled`
-- `src/app/dashboard/payouts/page.tsx` — replace `onClick={() => {}}` with a `<form action="/api/stripe/connect">` POST that redirects the browser to the Stripe onboarding URL; add a "Refresh status" button that re-checks `stripe_account_enabled` after return
-- `src/app/api/checkout/intent/route.ts` — fetch `stripe_account_id` for the `creatorId`; if present, add `transfer_data: { destination: stripe_account_id }` and `application_fee_amount: Math.round(totalCents * 0.10)` to the PaymentIntent
-
-**Done when:**
-- A creator clicks "Connect Stripe", completes Stripe Express onboarding, and the dashboard shows "Payouts enabled"
-- A test purchase routes 90% to the creator's connected account automatically (verifiable in Stripe dashboard)
+**What was built:**
+- `src/app/api/stripe/connect/route.ts` — POST handler: creates Stripe Express account, saves `stripe_account_id`, returns AccountLink URL
+- `src/app/api/stripe/connect-refresh/route.ts` — GET handler for expired links, generates fresh AccountLink
+- `src/app/dashboard/payouts/connect-button.tsx` — client component with loading state; POSTs then redirects to Stripe
+- `src/app/dashboard/payouts/page.tsx` — verifies `charges_enabled` on `?connected=1` return, writes `stripe_account_enabled=true`, shows success banner
+- `src/app/api/checkout/webhook/route.ts` — added `account.updated` handler for async Stripe confirmation
+- `src/app/api/checkout/intent/route.ts` — added `transfer_data` + `application_fee_amount` (10%) when creator has connected account
 
 ---
 
