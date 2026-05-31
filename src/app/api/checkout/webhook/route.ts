@@ -29,7 +29,6 @@ export async function POST(req: NextRequest) {
 
     const supabase = createAdminClient();
 
-    // Fetch full product details for all items
     const productIds = rawItems.map((i) => i.id);
     const { data: products } = await supabase
       .from("products")
@@ -45,11 +44,8 @@ export async function POST(req: NextRequest) {
 
     const platformFeeCents = Math.round(totalCents * 0.1);
     const creatorPayoutCents = totalCents - platformFeeCents;
-
-    // Shipping from Stripe PI
     const piShipping = pi.shipping;
 
-    // Create order record
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -71,7 +67,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Insert order items
     const orderItems = rawItems
       .filter((item) => productMap.has(item.id))
       .map((item) => ({
@@ -85,7 +80,6 @@ export async function POST(req: NextRequest) {
       await supabase.from("order_items").insert(orderItems);
     }
 
-    // Update creator revenue stat (best-effort)
     supabase
       .rpc("increment_creator_revenue", {
         p_creator_id: creatorId,
@@ -95,7 +89,6 @@ export async function POST(req: NextRequest) {
         if (error) console.error("[checkout-webhook] Revenue RPC failed:", error.message);
       });
 
-    // Submit Gelato order for physical/merch items
     const physicalItems = rawItems.filter((item) => {
       const p = productMap.get(item.id);
       return p && (p.type === "merch" || p.type === "physical") && p.pod_product_id;
