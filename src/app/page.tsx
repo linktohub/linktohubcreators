@@ -1,125 +1,122 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   ShoppingBag, FileText, Bot, Calendar, Ticket,
-  Users, Heart, BarChart3, Lock, Mail, Link2, Zap,
+  Users, Heart, BarChart3, Lock, Mail, Link2, Zap, ArrowRight, Star, TrendingUp,
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Linktohub — Sell Merch, Courses & More From One Link",
-  description: "The creator storefront that actually makes money. Sell merch, digital products, courses, bookings, and subscriptions — all from one link. Free forever.",
-  openGraph: {
-    title: "Linktohub — Sell Merch, Courses & More From One Link",
-    description: "The creator storefront that actually makes money. Sell merch, digital products, courses, bookings, and memberships — all in one place.",
-    url: "https://linktohub.vercel.app",
-    siteName: "Linktohub",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Linktohub — Sell Merch, Courses & More From One Link",
-    description: "The creator storefront that actually makes money. Free forever.",
-  },
-  alternates: {
-    canonical: "https://linktohub.vercel.app",
-  },
+  title: "Linktohub — The AI That Runs Your Creator Business",
+  description: "207 million creators. Only 4% earn $50K+. Linktohub is the AI that builds every product, ships your merch, and grows your revenue — while you create.",
+  openGraph: { title: "Linktohub — Your creator business, running itself", description: "AI builds everything. One link. Every revenue stream.", url: "https://linktohub.vercel.app", siteName: "Linktohub", type: "website" },
 };
 
 const FEATURES = [
-  { icon: ShoppingBag, label: "Custom Merch", desc: "Ship branded merch without touching inventory" },
-  { icon: FileText, label: "Digital Products", desc: "Sell PDFs, presets & courses instantly" },
-  { icon: Bot, label: "AI Chat", desc: "24/7 AI that sounds like you, sells for you" },
-  { icon: Calendar, label: "Bookings", desc: "Let fans book sessions with one click" },
-  { icon: Ticket, label: "Events", desc: "Sell tickets to your webinars & workshops" },
-  { icon: Users, label: "Subscriptions", desc: "Build recurring revenue from your top fans" },
-  { icon: Heart, label: "Tips", desc: "Let fans support you with a single tap" },
-  { icon: BarChart3, label: "Analytics", desc: "See who buys, when, and why" },
-  { icon: Lock, label: "Exclusive Content", desc: "Gate your best content behind a paywall" },
-  { icon: Mail, label: "Email List", desc: "Own your audience, not just your follower count" },
-  { icon: Link2, label: "Affiliate Program", desc: "Turn your fans into your sales team" },
-  { icon: Zap, label: "Instant Payouts", desc: "Money in your bank account same day" },
+  { icon: ShoppingBag, label: "Merch", desc: "Ships globally. No inventory ever." },
+  { icon: FileText, label: "Courses & PDFs", desc: "AI writes the content. You collect." },
+  { icon: Bot, label: "Your AI Clone", desc: "Answers fans 24/7 in your voice." },
+  { icon: Calendar, label: "Bookings", desc: "1-on-1 sessions at your price." },
+  { icon: Ticket, label: "Events", desc: "Webinars, livestreams, seminars." },
+  { icon: Users, label: "Memberships", desc: "Monthly fan tiers. Recurring MRR." },
+  { icon: Heart, label: "Tips", desc: "One tap for fans to support you." },
+  { icon: BarChart3, label: "Analytics", desc: "Know your audience deeply." },
+  { icon: Lock, label: "Exclusive Content", desc: "Paywalled for subscribers." },
+  { icon: Mail, label: "Email List", desc: "You own it. Not the algorithm." },
+  { icon: Link2, label: "Affiliate Program", desc: "Earn 25% from creator referrals." },
+  { icon: Zap, label: "Instant Payouts", desc: "Your money hits your bank auto." },
 ];
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Linktohub",
-  url: "https://linktohub.vercel.app",
-  description: "Creator monetization platform. Sell merch, courses, bookings, and subscriptions from one link.",
-};
+const COMPARED = [
+  { name: "Stan.store", price: "$99/mo for email", limit: "No AI creation. No merch.", highlight: false },
+  { name: "Gumroad", price: "10% fee every sale", limit: "No subscriptions. No events.", highlight: false },
+  { name: "Linktree", price: "12% fee", limit: "Just links. No revenue tools.", highlight: false },
+  { name: "Linktohub", price: "From $29/mo · 5% fee", limit: "AI builds everything. You approve.", highlight: true },
+];
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col overflow-x-hidden">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      {/* Ambient background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[700px] rounded-full bg-violet-700/[0.07] blur-[120px]" />
         <div className="absolute top-1/2 -left-60 w-[600px] h-[600px] rounded-full bg-fuchsia-700/[0.04] blur-[100px]" />
-        <div className="absolute top-1/3 -right-40 w-[400px] h-[400px] rounded-full bg-indigo-700/[0.04] blur-[100px]" />
       </div>
 
-      {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 max-w-7xl mx-auto w-full">
-        <div className="text-xl font-black tracking-tight">
-          <span className="gradient-text">link</span>tohub
-        </div>
+        <div className="text-xl font-black tracking-tight"><span className="gradient-text">link</span>tohub</div>
         <div className="flex items-center gap-2">
-          <Link href="/auth/login"
-            className="text-white/50 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/5 transition-colors">
-            Log in
-          </Link>
-          <Link href="/auth/signup"
-            className="text-sm font-bold px-5 py-2.5 rounded-xl bg-white text-black hover:bg-white/90 transition-colors">
-            Get started
-          </Link>
+          <Link href="/pricing" className="text-white/50 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/5 transition-colors hidden sm:block">Pricing</Link>
+          <Link href="/auth/login" className="text-white/50 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/5 transition-colors">Sign in</Link>
+          <Link href="/auth/signup" className="text-sm font-bold px-5 py-2.5 rounded-xl bg-white text-black hover:bg-white/90 transition-colors">Start free</Link>
         </div>
       </nav>
 
-      {/* Hero */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-12 pb-24">
-        {/* Social proof badge */}
-        <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-medium px-4 py-2 rounded-full mb-10">
-          <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-          Join 500+ creators already earning
-        </div>
+      <main className="relative z-10 flex-1 flex flex-col items-center px-6">
 
-        {/* Headline */}
-        <h1 className="text-6xl sm:text-7xl lg:text-[90px] font-black tracking-tight leading-[0.88] mb-7 max-w-4xl">
-          One link.<br />
-          <span className="gradient-text">Everything you sell.</span>
-        </h1>
+        {/* Hero */}
+        <section className="w-full max-w-5xl mx-auto pt-16 pb-20 text-center">
+          <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-medium px-4 py-2 rounded-full mb-10">
+            <TrendingUp className="w-3.5 h-3.5" />
+            207M creators. Only 4% earn $50K+. We fix that.
+          </div>
+          <h1 className="text-5xl sm:text-6xl lg:text-[76px] font-black tracking-tight leading-[0.9] mb-7">
+            Your entire creator<br /><span className="gradient-text">business, running itself.</span>
+          </h1>
+          <p className="text-lg sm:text-xl text-white/45 max-w-2xl mx-auto leading-relaxed mb-10">
+            AI builds your products. Merch ships globally. Your AI talks to fans 24/7 in your voice. You just approve and collect.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+            <Link href="/auth/signup" className="btn-gradient h-14 px-9 rounded-2xl text-white font-bold text-base shadow-lg shadow-violet-500/20 flex items-center justify-center gap-2">
+              Create free storefront <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link href="/pricing" className="h-14 px-9 rounded-2xl border border-white/10 text-white/60 hover:text-white hover:bg-white/[0.04] text-base font-medium transition-colors flex items-center justify-center">
+              View pricing
+            </Link>
+          </div>
+          <p className="text-white/25 text-sm">14-day free trial · No credit card · Your storefront live in 10 minutes</p>
+        </section>
 
-        {/* Sub */}
-        <p className="text-lg sm:text-xl text-white/45 max-w-lg leading-relaxed mb-10">
-          Merch, digital products, AI chat, bookings, subscriptions — all in one storefront your audience loves.
-        </p>
+        {/* How it works */}
+        <section className="w-full max-w-4xl mx-auto mb-20">
+          <div className="bg-gradient-to-r from-violet-600/10 to-fuchsia-600/5 border border-violet-500/20 rounded-3xl p-10 text-center">
+            <div className="grid grid-cols-3 gap-8">
+              {[
+                { n: "01", t: "Tell us who you are", d: "Connect your socials. AI reads your brand, voice, and audience." },
+                { n: "02", t: "AI builds everything", d: "Courses, merch, events, memberships — created automatically. You approve or refine." },
+                { n: "03", t: "Share one link", d: "Fans buy everything from your storefront. Money hits your bank." },
+              ].map((s) => (
+                <div key={s.n}>
+                  <p className="text-5xl font-black text-violet-400/25 mb-3">{s.n}</p>
+                  <p className="font-black text-white text-base mb-2">{s.t}</p>
+                  <p className="text-white/40 text-sm leading-relaxed">{s.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <Link href="/auth/signup"
-            className="btn-gradient h-14 px-9 rounded-xl text-white font-bold text-base shadow-lg shadow-violet-500/20 inline-flex items-center justify-center">
-            Start for free →
-          </Link>
-          <Link href="/auth/login"
-            className="h-14 px-9 rounded-xl border border-white/10 text-white/60 hover:text-white hover:bg-white/[0.04] text-base font-medium transition-colors inline-flex items-center justify-center">
-            Sign in
-          </Link>
-        </div>
-        <p className="text-white/25 text-xs mb-20">No credit card required · Free forever</p>
+        {/* vs competitors */}
+        <section className="w-full max-w-4xl mx-auto mb-20">
+          <h2 className="text-3xl font-black text-center mb-10">Why creators switch</h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {COMPARED.map((c) => (
+              <div key={c.name} className={`rounded-2xl p-6 border ${c.highlight ? "bg-violet-500/10 border-violet-500/40" : "bg-white/[0.02] border-white/[0.06]"}`}>
+                <div className="flex items-start justify-between mb-2">
+                  <p className={`font-bold ${c.highlight ? "text-white text-xl" : "text-white/50"}`}>{c.name}</p>
+                  <p className={`text-sm font-bold ${c.highlight ? "text-violet-400" : "text-white/30"}`}>{c.price}</p>
+                </div>
+                <p className={`text-sm ${c.highlight ? "text-white/70" : "text-white/30"}`}>{c.limit}</p>
+                {c.highlight && <div className="flex items-center gap-1.5 mt-3"><Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" /><p className="text-yellow-400 text-xs font-semibold">Best value for creators</p></div>}
+              </div>
+            ))}
+          </div>
+        </section>
 
-        {/* Feature grid */}
-        <div className="w-full max-w-5xl mx-auto">
-          <p className="text-white/25 text-sm font-medium uppercase tracking-widest mb-8">Everything creators need</p>
+        {/* Features */}
+        <section className="w-full max-w-5xl mx-auto mb-20">
+          <p className="text-white/25 text-sm font-medium uppercase tracking-widest mb-8 text-center">Every revenue stream in one place</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {FEATURES.map(({ icon: Icon, label, desc }) => (
-              <div
-                key={label}
-                className="card-glass rounded-2xl p-5 text-left transition-all"
-              >
+              <div key={label} className="card-glass rounded-2xl p-5">
                 <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center mb-4">
                   <Icon className="w-4 h-4 text-violet-400" />
                 </div>
@@ -128,27 +125,48 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Bottom CTA */}
-        <div className="mt-24 w-full max-w-2xl mx-auto">
-          <div className="card-glass rounded-3xl p-10 text-center glow-violet">
-            <h2 className="text-3xl sm:text-4xl font-black mb-3">
-              Ready to monetize<br />
-              <span className="gradient-text">your audience?</span>
-            </h2>
-            <p className="text-white/40 mb-8">Set up your storefront in minutes. Free forever.</p>
-            <Link href="/auth/signup"
-              className="btn-gradient h-14 px-10 rounded-xl text-white font-bold text-base shadow-lg shadow-violet-500/25 inline-flex items-center justify-center">
-              Create your storefront →
-            </Link>
+        {/* Pricing preview */}
+        <section className="w-full max-w-3xl mx-auto mb-20 text-center">
+          <h2 className="text-4xl font-black mb-3">Simple pricing</h2>
+          <p className="text-white/40 mb-10">We only make money when you make money.</p>
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            {[
+              { n: "Starter", p: "$29/mo", f: "5% fee", h: false },
+              { n: "Pro", p: "$49/mo", f: "3% fee", h: true },
+              { n: "Business", p: "$99/mo", f: "0% fee", h: false },
+            ].map((pl) => (
+              <div key={pl.n} className={`rounded-2xl p-5 border ${pl.h ? "bg-violet-500/10 border-violet-500/40" : "bg-white/[0.02] border-white/[0.06]"}`}>
+                <p className="font-bold text-white">{pl.n}</p>
+                <p className="text-2xl font-black text-white mt-1">{pl.p}</p>
+                <p className={`text-xs mt-1 ${pl.h ? "text-violet-400" : "text-white/30"}`}>{pl.f}</p>
+              </div>
+            ))}
           </div>
-        </div>
+          <Link href="/pricing" className="text-violet-400 hover:text-violet-300 text-sm font-semibold transition-colors">Compare all features →</Link>
+        </section>
+
+        {/* Final CTA */}
+        <section className="w-full max-w-2xl mx-auto pb-24">
+          <div className="card-glass rounded-3xl p-10 text-center glow-violet">
+            <h2 className="text-4xl font-black mb-3">Your storefront.<br /><span className="gradient-text">Live in 10 minutes.</span></h2>
+            <p className="text-white/40 mb-8">AI builds everything. You approve. Start earning today.</p>
+            <Link href="/auth/signup" className="btn-gradient h-14 px-10 rounded-2xl text-white font-bold text-base shadow-lg shadow-violet-500/25 inline-flex items-center gap-2">
+              Create free storefront <ArrowRight className="w-4 h-4" />
+            </Link>
+            <p className="text-white/20 text-xs mt-4">14-day free trial · No credit card required</p>
+          </div>
+        </section>
       </main>
 
-      {/* Footer */}
       <footer className="relative z-10 text-center py-8 border-t border-white/[0.06]">
-        <p className="text-white/20 text-sm">© 2026 Linktohub</p>
+        <div className="flex items-center justify-center gap-6 text-white/20 text-sm">
+          <Link href="/pricing" className="hover:text-white/40 transition-colors">Pricing</Link>
+          <Link href="/auth/signup" className="hover:text-white/40 transition-colors">Sign up</Link>
+          <Link href="/auth/login" className="hover:text-white/40 transition-colors">Sign in</Link>
+        </div>
+        <p className="text-white/15 text-xs mt-4">© 2026 Linktohub · The creator monetization OS</p>
       </footer>
     </div>
   );

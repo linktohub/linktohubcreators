@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, ShoppingBag, FileText, Bot, Calendar,
-  Ticket, Star, BarChart3, Settings, ExternalLink, DollarSign, MessageSquarePlus,
+  Ticket, Star, BarChart3, Settings, ExternalLink, DollarSign,
+  MessageSquarePlus, Users, CreditCard,
 } from "lucide-react";
 
 const NAV_GROUPS = [
@@ -36,8 +37,16 @@ const NAV_GROUPS = [
     label: "Grow",
     items: [
       { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+      { href: "/dashboard/affiliate", label: "Affiliate", icon: Users },
       { href: "/dashboard/settings", label: "Settings", icon: Settings },
       { href: "/dashboard/feedback", label: "Feedback", icon: MessageSquarePlus },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { href: "/dashboard/billing", label: "Plan & Billing", icon: CreditCard },
+      { href: "/dashboard/payouts", label: "Earnings", icon: DollarSign },
     ],
   },
 ];
