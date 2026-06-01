@@ -30,7 +30,7 @@ const COMPARED = [
   { name: "Stan.store", price: "$99/mo for email", limit: "No AI creation. No merch.", highlight: false },
   { name: "Gumroad", price: "10% fee every sale", limit: "No subscriptions. No events.", highlight: false },
   { name: "Linktree", price: "12% fee", limit: "Just links. No revenue tools.", highlight: false },
-  { name: "Linktohub", price: "From $29/mo · 5% fee", limit: "AI builds everything. You approve.", highlight: true },
+  { name: "Linktohub", price: "From $29/mo · 6% fee", limit: "AI builds everything. You approve.", highlight: true },
 ];
 
 export default function HomePage() {
@@ -133,9 +133,9 @@ export default function HomePage() {
           <p className="text-white/40 mb-10">We only make money when you make money.</p>
           <div className="grid grid-cols-3 gap-4 mb-6">
             {[
-              { n: "Starter", p: "$29/mo", f: "5% fee", h: false },
-              { n: "Pro", p: "$49/mo", f: "3% fee", h: true },
-              { n: "Business", p: "$99/mo", f: "0% fee", h: false },
+              { n: "Starter", p: "$29/mo", f: "6% fee", h: false },
+              { n: "Pro", p: "$49/mo", f: "4.5% fee", h: true },
+              { n: "Business", p: "$99/mo", f: "3% fee", h: false },
             ].map((pl) => (
               <div key={pl.n} className={`rounded-2xl p-5 border ${pl.h ? "bg-violet-500/10 border-violet-500/40" : "bg-white/[0.02] border-white/[0.06]"}`}>
                 <p className="font-bold text-white">{pl.n}</p>

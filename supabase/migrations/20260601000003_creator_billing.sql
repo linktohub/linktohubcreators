@@ -33,9 +33,9 @@ CREATE POLICY "creator_subs_owner" ON public.creator_subscriptions FOR ALL USING
 CREATE OR REPLACE FUNCTION update_creator_fee()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.plan_tier = 'starter' THEN NEW.transaction_fee_pct = 0.05;
-  ELSIF NEW.plan_tier = 'pro' THEN NEW.transaction_fee_pct = 0.03;
-  ELSIF NEW.plan_tier = 'business' THEN NEW.transaction_fee_pct = 0.00;
+  IF NEW.plan_tier = 'starter' THEN NEW.transaction_fee_pct = 0.06;
+  ELSIF NEW.plan_tier = 'pro' THEN NEW.transaction_fee_pct = 0.045;
+  ELSIF NEW.plan_tier = 'business' THEN NEW.transaction_fee_pct = 0.03;
   ELSE NEW.transaction_fee_pct = 0.10;
   END IF;
   RETURN NEW;

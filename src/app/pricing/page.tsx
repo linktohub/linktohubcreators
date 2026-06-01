@@ -11,7 +11,7 @@ const PLANS = [
   {
     name: "Starter",
     price: 29,
-    fee: "5%",
+    fee: "6%",
     badge: null,
     tagline: "Launch your store",
     color: "from-white/10 to-white/5",
@@ -26,20 +26,20 @@ const PLANS = [
       "AI chat (members only)",
       "Analytics dashboard",
       "Email list capture",
-      "5% transaction fee",
+      "6% transaction fee",
     ],
   },
   {
     name: "Pro",
     price: 49,
-    fee: "3%",
+    fee: "4.5%",
     badge: "Most Popular",
     tagline: "Scale your revenue",
     color: "from-violet-600/20 to-fuchsia-600/10",
     border: "border-violet-500/40",
     features: [
       "Everything in Starter",
-      "3% transaction fee (save 2%)",
+      "4.5% transaction fee",
       "Priority AI generation",
       "Custom domain",
       "Advanced analytics",
@@ -53,14 +53,14 @@ const PLANS = [
   {
     name: "Business",
     price: 99,
-    fee: "0%",
+    fee: "3%",
     badge: "For power creators",
     tagline: "Keep everything you earn",
     color: "from-fuchsia-600/15 to-violet-600/5",
     border: "border-fuchsia-500/30",
     features: [
       "Everything in Pro",
-      "ZERO transaction fee",
+      "3% transaction fee",
       "White-label storefront",
       "Agency mode (manage 5 accounts)",
       "API access",
@@ -75,7 +75,7 @@ const PLANS = [
 
 const FAQ = [
   { q: "Is there a free trial?", a: "Yes. 14 days free on any plan. No credit card required to start." },
-  { q: "What is a transaction fee?", a: "When a fan buys something from your store, we take a small percentage. Starter: 5%, Pro: 3%, Business: 0%. We only make money when you make money." },
+  { q: "What is a transaction fee?", a: "When a fan buys something from your store, we take a small percentage. Starter: 6%, Pro: 4.5%, Business: 3%. We only make money when you make money." },
   { q: "Can I cancel anytime?", a: "Yes. No contracts, no cancellation fees. Cancel from your dashboard in one click." },
   { q: "What does the AI actually do?", a: "It reads your social media, understands your brand and audience, then creates your products, writes all the copy, sets prices, and publishes to your storefront. You just approve or give feedback." },
   { q: "Do I need a Gelato or Stripe account?", a: "No. We handle all of that for you. You just add your bank account to receive your payments." },
@@ -178,7 +178,7 @@ export default function PricingPage() {
         <div className="bg-gradient-to-r from-violet-500/10 to-fuchsia-500/5 border border-violet-500/20 rounded-3xl p-10 mb-20 text-center">
           <h2 className="text-3xl font-black mb-4">The math is simple</h2>
           <p className="text-white/60 text-lg mb-8 max-w-2xl mx-auto">
-            A creator earning $2,000/month on Pro pays $49 + $60 (3% fee) = $109/mo.
+            A creator earning $2,000/month on Pro pays $49 + $90 (4.5% fee) = $139/mo.
             They're keeping $1,891. On Gumroad, they'd pay $200+ in fees.
           </p>
           <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">

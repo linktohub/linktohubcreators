@@ -4,16 +4,16 @@ import { ArrowLeft, Check, Zap, Crown } from "lucide-react";
 import Link from "next/link";
 
 const PLANS = [
-  { tier: "starter" as const, name: "Starter", price: 29, fee: "5%", color: "border-white/10" },
-  { tier: "pro" as const, name: "Pro", price: 49, fee: "3%", color: "border-violet-500/40", popular: true },
-  { tier: "business" as const, name: "Business", price: 99, fee: "0%", color: "border-fuchsia-500/30" },
+  { tier: "starter" as const, name: "Starter", price: 29, fee: "6%", color: "border-white/10" },
+  { tier: "pro" as const, name: "Pro", price: 49, fee: "4.5%", color: "border-violet-500/40", popular: true },
+  { tier: "business" as const, name: "Business", price: 99, fee: "3%", color: "border-fuchsia-500/30" },
 ];
 
 const TIER_FEATURES: Record<string, string[]> = {
   trial: ["14-day free access", "10% transaction fee", "All core features"],
-  starter: ["Everything + 5% fee", "Email marketing included", "Custom domain"],
-  pro: ["Everything + 3% fee", "Priority AI", "Affiliate program", "Remove branding"],
-  business: ["Everything + 0% fee", "Agency mode", "Dedicated success manager", "Instant payouts"],
+  starter: ["Everything + 6% fee", "Email marketing included", "Custom domain"],
+  pro: ["Everything + 4.5% fee", "Priority AI", "Affiliate program", "Remove branding"],
+  business: ["Everything + 3% fee", "Agency mode", "Dedicated success manager", "Instant payouts"],
 };
 
 export default async function BillingPage() {
