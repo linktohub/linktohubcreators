@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { createClient as createAdmin } from "@supabase/supabase-js";
 import { createGelatoOrder } from "@/lib/gelato";
+import { sendOrderConfirmation } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -97,8 +98,20 @@ export async function POST(req: NextRequest) {
   const creatorId = pi.metadata.creator_id;
   const itemsMeta: { id: string; quantity: number }[] = JSON.parse(pi.metadata.items || "[]");
   const customerEmail = pi.metadata.customer_email || pi.receipt_email || "";
-  const shippingName = pi.metadata.shipping_name || "";
-  const shippingAddress = pi.metadata.shipping_address ? JSON.parse(pi.metadata.shipping_address) : null;
+  // Fall back to Stripe's native shipping field — metadata field may not always be set
+  const shippingName = pi.metadata.shipping_name || pi.shipping?.name || "";
+  const shippingAddress = pi.metadata.shipping_address
+    ? JSON.parse(pi.metadata.shipping_address)
+    : pi.shipping?.address
+    ? {
+        firstName:    (pi.shipping.name || "").split(" ")[0] || "",
+        lastName:     (pi.shipping.name || "").split(" ").slice(1).join(" ") || "",
+        addressLine1: pi.shipping.address.line1 || "",
+        city:         pi.shipping.address.city || "",
+        postCode:     pi.shipping.address.postal_code || "",
+        country:      pi.shipping.address.country || "US",
+      }
+    : null;
 
   const totalCents = pi.amount;
   const platformFee = Math.round(totalCents * 0.10);
@@ -121,7 +134,7 @@ export async function POST(req: NextRequest) {
   const productIds = itemsMeta.map((i) => i.id);
   const { data: products } = await admin
     .from("products")
-    .select("id, type, title, file_url, pod_provider, pod_product_id, pod_variant_id")
+    .select("id, type, title, file_url, pod_provider, pod_product_id, pod_variant_id, price, images")
     .in("id", productIds);
 
   const downloadUrls: { product_id: string; title: string; url: string }[] = [];
@@ -141,7 +154,9 @@ export async function POST(req: NextRequest) {
             productUid: product.pod_product_id,
             variantUid: product.pod_variant_id,
             quantity: item.quantity,
-            files: [],
+            files: product.images?.[0]
+              ? [{ type: "default", url: product.images[0] }]
+              : [],
           }],
           shippingAddress: {
             firstName: shippingAddress.firstName || shippingName.split(" ")[0] || "",
@@ -180,6 +195,26 @@ export async function POST(req: NextRequest) {
   try {
     await admin.rpc("increment_creator_revenue", { p_creator_id: creatorId, p_amount: totalCents / 100 });
   } catch { /* non-critical */ }
+
+  // Send order confirmation email to buyer
+  if (customerEmail) {
+    const { data: creator } = await admin.from("creators").select("display_name").eq("id", creatorId).single();
+    const emailItems = (products || [])
+      .filter((p) => itemsMeta.find((i) => i.id === p.id))
+      .map((p) => {
+        const item = itemsMeta.find((i) => i.id === p.id)!;
+        return { name: p.title, quantity: item.quantity, unitPrice: Math.round(p.price * 100) };
+      });
+    await sendOrderConfirmation({
+      to: customerEmail,
+      buyerName: shippingName,
+      creatorName: creator?.display_name || "the creator",
+      items: emailItems,
+      totalCents,
+      orderId: order.id,
+      downloadUrls: downloadUrls.map((d) => ({ title: d.title, url: d.url })),
+    }).catch((err) => console.error("[webhook] email failed:", err));
+  }
 
   return NextResponse.json({ received: true });
 }
