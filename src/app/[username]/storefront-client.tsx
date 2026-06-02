@@ -122,6 +122,10 @@ export default function StorefrontClient({
   const [shippingCity, setShippingCity] = useState("");
   const [shippingPostal, setShippingPostal] = useState("");
   const [shippingCountry, setShippingCountry] = useState("US");
+  const [checkoutSuccess, setCheckoutSuccess] = useState<{
+    cart: CartItem[];
+    downloads: { title: string; url: string }[];
+  } | null>(null);
 
   const paymentRequestRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -243,9 +247,15 @@ export default function StorefrontClient({
               toast.error("Payment failed");
             } else {
               e.complete("success");
+              const piId = clientSecret.split("_secret")[0];
+              const successCart = [...cart];
+              const hasDigital = successCart.some(i => i.type === "digital");
               setCart([]);
-              setCartOpen(false);
-              toast.success("Order placed! 🎉");
+              setCheckoutSuccess({ cart: successCart, downloads: [] });
+              if (hasDigital) {
+                const downloads = await pollForDownloads(piId);
+                setCheckoutSuccess({ cart: successCart, downloads });
+              }
             }
           } catch {
             e.complete("fail");
@@ -290,6 +300,20 @@ export default function StorefrontClient({
     };
   }, [cartOpen, cartTotal]);
 
+  async function pollForDownloads(piId: string): Promise<{ title: string; url: string }[]> {
+    for (let i = 0; i < 8; i++) {
+      await new Promise(r => setTimeout(r, 2000));
+      try {
+        const res = await fetch(`/api/orders/by-intent?pi=${encodeURIComponent(piId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.download_urls?.length > 0) return data.download_urls;
+        }
+      } catch { /* continue polling */ }
+    }
+    return [];
+  }
+
   async function handleCardPay() {
     if (!stripeRef.current || !cardElementRef.current) return;
     setCheckingOut(true);
@@ -324,9 +348,15 @@ export default function StorefrontClient({
       if (error) {
         toast.error(error.message || "Payment failed");
       } else {
+        const piId = clientSecret.split("_secret")[0];
+        const successCart = [...cart];
+        const hasDigital = successCart.some(i => i.type === "digital");
         setCart([]);
-        setCartOpen(false);
-        toast.success("Order placed! 🎉");
+        setCheckoutSuccess({ cart: successCart, downloads: [] });
+        if (hasDigital) {
+          const downloads = await pollForDownloads(piId);
+          setCheckoutSuccess({ cart: successCart, downloads });
+        }
       }
     } catch {
       toast.error("Payment failed");
@@ -1078,110 +1108,169 @@ export default function StorefrontClient({
       {/* Cart drawer */}
       {cartOpen && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setCartOpen(false)} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setCartOpen(false); setCheckoutSuccess(null); }} />
           <div className="relative bg-[#111] rounded-t-3xl max-h-[90vh] flex flex-col border-t border-white/[0.08]">
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-white/20" />
             </div>
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.07]">
-              <h2 className="font-black text-xl">Your Cart</h2>
-              <button onClick={() => setCartOpen(false)} className="w-8 h-8 rounded-xl bg-white/[0.06] flex items-center justify-center">
+              <h2 className="font-black text-xl">{checkoutSuccess ? "Order Confirmed" : "Your Cart"}</h2>
+              <button onClick={() => { setCartOpen(false); setCheckoutSuccess(null); }} className="w-8 h-8 rounded-xl bg-white/[0.06] flex items-center justify-center">
                 <X className="w-4 h-4 text-white/60" />
               </button>
             </div>
 
-            {/* Items */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-              {cart.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.06] rounded-2xl p-3">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 flex items-center justify-center text-2xl"
-                    style={{ backgroundColor: brandColor + "33" }}>
-                    {item.image
-                      ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                      : item.type === "digital" ? "📄" : "👕"}
+            {checkoutSuccess ? (
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5 pb-8">
+                <div className="flex flex-col items-center text-center gap-3 py-4">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center text-3xl">✓</div>
+                  <div>
+                    <p className="font-black text-xl text-white">You&apos;re all set!</p>
+                    <p className="text-white/45 text-sm mt-1">Check your email for a receipt.</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm truncate">{item.name}</p>
-                    <p className="text-white/40 text-xs mt-0.5">${item.price.toFixed(2)} each</p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button onClick={() => updateQty(item.id, -1)}
-                      className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center hover:bg-white/[0.1]">
-                      <Minus className="w-3 h-3" />
-                    </button>
-                    <span className="w-5 text-center text-sm font-bold">{item.quantity}</span>
-                    <button onClick={() => updateQty(item.id, 1)}
-                      className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center hover:bg-white/[0.1]">
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <p className="font-black text-sm w-16 text-right shrink-0">${(item.price * item.quantity).toFixed(2)}</p>
                 </div>
-              ))}
-            </div>
 
-            {/* Totals + pay */}
-            <div className="px-6 pb-8 pt-4 border-t border-white/[0.07] space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-white/50">
-                  <span>Subtotal</span><span>${cartTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm text-white/50">
-                  <span>Shipping</span>
-                  <span className="text-emerald-400 font-semibold">Free</span>
-                </div>
-                <div className="flex justify-between font-black text-lg pt-1">
-                  <span>Total</span><span>${cartTotal.toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Loading state */}
-              {prAvailable === null && (
-                <div className="w-full h-14 rounded-2xl bg-white/[0.06] animate-pulse" />
-              )}
-
-              {/* Apple Pay / Google Pay button */}
-              <div ref={paymentRequestRef} className={prAvailable === true ? "w-full" : "hidden"} />
-
-              {/* Card fallback */}
-              {prAvailable === false && (
-                <div className="space-y-3">
-                  <input
-                    type="email"
-                    placeholder="Email for receipt"
-                    value={checkoutEmail}
-                    onChange={(e) => setCheckoutEmail(e.target.value)}
-                    className="w-full h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20"
-                  />
-                  {hasPhysical && (
-                    <div className="space-y-2">
-                      <p className="text-white/40 text-xs font-semibold uppercase tracking-wider">Shipping address</p>
-                      <input placeholder="Full name" value={shippingName} onChange={(e) => setShippingName(e.target.value)}
-                        className="w-full h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
-                      <input placeholder="Address line 1" value={shippingLine1} onChange={(e) => setShippingLine1(e.target.value)}
-                        className="w-full h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
-                      <div className="flex gap-2">
-                        <input placeholder="City" value={shippingCity} onChange={(e) => setShippingCity(e.target.value)}
-                          className="flex-1 h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
-                        <input placeholder="ZIP" value={shippingPostal} onChange={(e) => setShippingPostal(e.target.value)}
-                          className="w-24 h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                <div className="space-y-2">
+                  <p className="text-white/40 text-xs font-semibold uppercase tracking-wider">Order summary</p>
+                  {checkoutSuccess.cart.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.06] rounded-xl p-3">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center text-xl"
+                        style={{ backgroundColor: brandColor + "33" }}>
+                        {item.image
+                          ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          : item.type === "digital" ? "📄" : "👕"}
                       </div>
-                      <input placeholder="Country (e.g. US)" value={shippingCountry} onChange={(e) => setShippingCountry(e.target.value)}
-                        className="w-full h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                      <p className="flex-1 font-semibold text-sm truncate">{item.name}</p>
+                      <p className="text-white/50 text-sm shrink-0">×{item.quantity}</p>
+                      <p className="font-black text-sm w-14 text-right shrink-0">${(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {checkoutSuccess.cart.some(i => i.type === "digital") && (
+                  <div className="space-y-2">
+                    <p className="text-white/40 text-xs font-semibold uppercase tracking-wider">Your downloads</p>
+                    {checkoutSuccess.downloads.length === 0 ? (
+                      <div className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.06] rounded-xl p-4">
+                        <Loader2 className="w-4 h-4 animate-spin text-white/40 shrink-0" />
+                        <p className="text-white/50 text-sm">Preparing your files…</p>
+                      </div>
+                    ) : (
+                      checkoutSuccess.downloads.map((dl, i) => (
+                        <a key={i} href={dl.url} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center justify-between gap-3 bg-violet-600/20 border border-violet-600/30 rounded-xl p-4 group">
+                          <span className="text-sm font-bold text-white truncate">{dl.title}</span>
+                          <span className="text-violet-400 font-bold text-sm shrink-0 group-hover:text-violet-300">Download →</span>
+                        </a>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                <button
+                  onClick={() => { setCartOpen(false); setCheckoutSuccess(null); }}
+                  className="w-full h-14 rounded-2xl font-black text-white text-base"
+                  style={{ backgroundColor: brandColor }}
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Items */}
+                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+                  {cart.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.06] rounded-2xl p-3">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 flex items-center justify-center text-2xl"
+                        style={{ backgroundColor: brandColor + "33" }}>
+                        {item.image
+                          ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          : item.type === "digital" ? "📄" : "👕"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm truncate">{item.name}</p>
+                        <p className="text-white/40 text-xs mt-0.5">${item.price.toFixed(2)} each</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={() => updateQty(item.id, -1)}
+                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center hover:bg-white/[0.1]">
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="w-5 text-center text-sm font-bold">{item.quantity}</span>
+                        <button onClick={() => updateQty(item.id, 1)}
+                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center hover:bg-white/[0.1]">
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <p className="font-black text-sm w-16 text-right shrink-0">${(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Totals + pay */}
+                <div className="px-6 pb-8 pt-4 border-t border-white/[0.07] space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm text-white/50">
+                      <span>Subtotal</span><span>${cartTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-white/50">
+                      <span>Shipping</span>
+                      <span className="text-emerald-400 font-semibold">Free</span>
+                    </div>
+                    <div className="flex justify-between font-black text-lg pt-1">
+                      <span>Total</span><span>${cartTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {/* Loading state */}
+                  {prAvailable === null && (
+                    <div className="w-full h-14 rounded-2xl bg-white/[0.06] animate-pulse" />
+                  )}
+
+                  {/* Apple Pay / Google Pay button */}
+                  <div ref={paymentRequestRef} className={prAvailable === true ? "w-full" : "hidden"} />
+
+                  {/* Card fallback */}
+                  {prAvailable === false && (
+                    <div className="space-y-3">
+                      <input
+                        type="email"
+                        placeholder="Email for receipt"
+                        value={checkoutEmail}
+                        onChange={(e) => setCheckoutEmail(e.target.value)}
+                        className="w-full h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20"
+                      />
+                      {hasPhysical && (
+                        <div className="space-y-2">
+                          <p className="text-white/40 text-xs font-semibold uppercase tracking-wider">Shipping address</p>
+                          <input placeholder="Full name" value={shippingName} onChange={(e) => setShippingName(e.target.value)}
+                            className="w-full h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                          <input placeholder="Address line 1" value={shippingLine1} onChange={(e) => setShippingLine1(e.target.value)}
+                            className="w-full h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                          <div className="flex gap-2">
+                            <input placeholder="City" value={shippingCity} onChange={(e) => setShippingCity(e.target.value)}
+                              className="flex-1 h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                            <input placeholder="ZIP" value={shippingPostal} onChange={(e) => setShippingPostal(e.target.value)}
+                              className="w-24 h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                          </div>
+                          <input placeholder="Country (e.g. US)" value={shippingCountry} onChange={(e) => setShippingCountry(e.target.value)}
+                            className="w-full h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                        </div>
+                      )}
+                      <div ref={cardRef} className="w-full bg-white/[0.06] border border-white/[0.1] rounded-xl p-4 min-h-[52px]" />
+                      <button
+                        onClick={handleCardPay}
+                        disabled={checkingOut || !checkoutEmail || (hasPhysical && (!shippingLine1 || !shippingCity || !shippingPostal))}
+                        className="w-full h-14 rounded-2xl font-black text-white text-base flex items-center justify-center gap-2 disabled:opacity-50"
+                        style={{ backgroundColor: brandColor }}
+                      >
+                        {checkingOut ? <Loader2 className="w-5 h-5 animate-spin" /> : `Pay $${cartTotal.toFixed(2)}`}
+                      </button>
                     </div>
                   )}
-                  <div ref={cardRef} className="w-full bg-white/[0.06] border border-white/[0.1] rounded-xl p-4 min-h-[52px]" />
-                  <button
-                    onClick={handleCardPay}
-                    disabled={checkingOut || !checkoutEmail || (hasPhysical && (!shippingLine1 || !shippingCity || !shippingPostal))}
-                    className="w-full h-14 rounded-2xl font-black text-white text-base flex items-center justify-center gap-2 disabled:opacity-50"
-                    style={{ backgroundColor: brandColor }}
-                  >
-                    {checkingOut ? <Loader2 className="w-5 h-5 animate-spin" /> : `Pay $${cartTotal.toFixed(2)}`}
-                  </button>
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -73,7 +73,7 @@ files: product.images?.[0]
 
 ---
 
-## Task 2 — Show buyer download links after payment CRITICAL
+## Task 2 — ✅ Show buyer download links after payment CRITICAL
 
 **Why:** After `confirmCardPayment` succeeds, `storefront-client.tsx` line 327 just fires `toast.success("Order placed! 🎉")` and clears the cart. Digital product buyers have **no way to access their purchase** — no download link, no redirect, no email (Resend is unset). This is a refund magnet.
 
