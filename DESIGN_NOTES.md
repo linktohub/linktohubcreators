@@ -1,8 +1,51 @@
 # Design Notes — Wednesday Audit Pass
 
-**Date:** 2026-05-31  
-**Rating before:** 4/10 → **Target:** 8/10  
-**This pass:** ~5.5/10 (foundational fixes)
+**Date:** 2026-06-03
+**Rating before:** 5/10 → **Target:** 8/10  
+**This pass:** ~5.5/10 (mobile layout fixes + visual polish)
+
+---
+
+## What Was Fixed (2026-06-03)
+
+### 1. Landing page — mobile overflow on "How it works" and Pricing grids
+`src/app/page.tsx`
+
+Both sections used `grid-cols-3` with zero mobile breakpoint. On 375px they crammed three columns into ~100px each — completely unreadable. Fixed: `grid-cols-1 md:grid-cols-3` for "How it works", `grid-cols-1 sm:grid-cols-3` for pricing.
+
+### 2. Nav — duplicate Earnings link
+`src/components/dashboard/nav.tsx`
+
+The "Account" group duplicated `/dashboard/payouts` (Earnings) which was already in the "Monetize" group. Removed duplicate.
+
+### 3. Mobile bottom nav — active state
+`src/components/dashboard/nav.tsx`
+
+Active state was only a color change (`text-violet-400`). Added `bg-violet-500/[0.12]` background pill so the active tab is visually distinct. Matches the desktop nav treatment.
+
+### 4. Storefront banner — background color seam
+`src/app/[username]/storefront-client.tsx`
+
+Banner overlay gradient stopped at `#0a0a0a` while page bg is `#050508`. Caused a visible color seam on the banner-to-content transition. Fixed both the gradient stop and the avatar border.
+
+### 5. Dashboard storefront card — URL overflow
+`src/app/dashboard/page.tsx`
+
+The `<code>` URL element had no width constraint. Long usernames overflowed the card on mobile. Now hidden on mobile (`hidden sm:block`) with `max-w-[180px] truncate` on larger screens.
+
+### 6. Products list — delete button icon
+`src/app/dashboard/products/products-client.tsx`
+
+Delete used a unicode `✕` character — inconsistent with the Lucide icon system used everywhere else. Replaced with `<Trash2 />`. Added `animate-pulse` on loading state.
+
+### 7. Create product page — padding alignment
+`src/app/dashboard/products/create/page.tsx`
+
+Used `p-6` while the design system standard is `p-5`. Aligned.
+
+---
+
+## Previous pass notes (2026-05-31)
 
 ---
 
