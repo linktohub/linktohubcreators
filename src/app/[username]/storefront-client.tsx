@@ -557,7 +557,7 @@ export default function StorefrontClient({
           ? <img src={bannerUrl} alt="banner" className="w-full h-full object-cover" />
           : <div className="w-full h-full" style={{ background: `linear-gradient(135deg, ${brandColor}66 0%, ${brandColor}22 100%)` }} />
         }
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#050508]" />
 
         {/* Back button */}
         <button
@@ -582,7 +582,7 @@ export default function StorefrontClient({
 
         {/* Avatar — overlaps banner, full width name below */}
         <div className="-mt-10 mb-3 flex items-end justify-between">
-          <div className="w-20 h-20 rounded-2xl border-4 border-[#0a0a0a] overflow-hidden flex items-center justify-center text-3xl font-black shrink-0"
+          <div className="w-20 h-20 rounded-2xl border-4 border-[#050508] overflow-hidden flex items-center justify-center text-3xl font-black shrink-0"
             style={{ backgroundColor: brandColor }}>
             {creator.avatar_url
               ? <img src={creator.avatar_url} alt={creator.display_name} className="w-full h-full object-cover" />

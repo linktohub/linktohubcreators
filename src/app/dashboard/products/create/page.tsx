@@ -205,7 +205,7 @@ export default function CreateProductPage() {
   const typeInfo = PRODUCT_TYPES.find((t) => t.id === productType);
 
   return (
-    <div className="p-6 pb-24 md:pb-6 max-w-2xl mx-auto">
+    <div className="p-5 pb-24 md:pb-5 max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         {step === "pick" ? (

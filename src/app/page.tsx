@@ -78,7 +78,7 @@ export default function HomePage() {
         {/* How it works */}
         <section className="w-full max-w-4xl mx-auto mb-20">
           <div className="bg-gradient-to-r from-violet-600/10 to-fuchsia-600/5 border border-violet-500/20 rounded-3xl p-10 text-center">
-            <div className="grid grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               {[
                 { n: "01", t: "Tell us who you are", d: "Connect your socials. AI reads your brand, voice, and audience." },
                 { n: "02", t: "AI builds everything", d: "Courses, merch, events, memberships — created automatically. You approve or refine." },
@@ -131,7 +131,7 @@ export default function HomePage() {
         <section className="w-full max-w-3xl mx-auto mb-20 text-center">
           <h2 className="text-4xl font-black mb-3">Simple pricing</h2>
           <p className="text-white/40 mb-10">We only make money when you make money.</p>
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             {[
               { n: "Starter", p: "$29/mo", f: "6% fee", h: false },
               { n: "Pro", p: "$49/mo", f: "4.5% fee", h: true },

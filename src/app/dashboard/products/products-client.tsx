@@ -5,7 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { Sparkles, Pencil } from "lucide-react";
+import { Sparkles, Pencil, Trash2 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -318,7 +318,7 @@ export default function ProductsClient({
                 disabled={deletingId === item.id}
                 className="text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 w-8 h-8 flex items-center justify-center rounded-lg shrink-0"
               >
-                {deletingId === item.id ? "·" : "✕"}
+                <Trash2 className={cn("w-3.5 h-3.5", deletingId === item.id && "animate-pulse")} />
               </button>
             </div>
           ))}

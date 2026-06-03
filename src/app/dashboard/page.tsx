@@ -85,7 +85,7 @@ export default async function DashboardPage() {
             <p className="text-white/35 text-sm mt-0.5">Share this link with your audience to start earning</p>
           </div>
           <div className="flex items-center gap-3">
-            <code className="bg-white/[0.06] border border-white/[0.08] px-4 py-2 rounded-xl text-sm text-white/70 font-mono">
+            <code className="bg-white/[0.06] border border-white/[0.08] px-4 py-2 rounded-xl text-sm text-white/70 font-mono max-w-[180px] truncate hidden sm:block">
               linktohub.com/{creator.username}
             </code>
             <Link
