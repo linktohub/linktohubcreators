@@ -127,6 +127,72 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* AI Voice section */}
+        <section className="w-full max-w-4xl mx-auto mb-20">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-300 text-xs font-semibold px-4 py-2 rounded-full mb-6">
+              <Bot className="w-3.5 h-3.5" />
+              No competitor does this
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-black mb-4">
+              Your audience, answered 24/7<br className="hidden sm:block" />
+              <span className="gradient-text"> — in your voice</span>
+            </h2>
+            <p className="text-white/40 text-lg max-w-xl mx-auto">
+              Fans ask questions. Your AI answers, using your content, your tone, your FAQs. No extra work.
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-3xl p-6 md:p-8 max-w-lg mx-auto">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/[0.06]">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center font-black text-white text-sm shrink-0">JR</div>
+              <div>
+                <p className="font-bold text-white text-sm">Jake Ross Fitness AI</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                  <span className="text-emerald-400/70 text-xs">Always online · Trained on Jake&apos;s content</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center text-[10px] font-bold text-white/50 shrink-0 mt-0.5">A</div>
+                <div className="bg-white/[0.05] rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
+                  <p className="text-white/80 text-sm">What protein powder do you use? I&apos;ve tried 3 and hate them all 😅</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5 justify-end">
+                <div className="bg-gradient-to-br from-violet-600/25 to-fuchsia-600/25 border border-violet-500/20 rounded-2xl rounded-tr-sm px-4 py-3 max-w-[80%]">
+                  <p className="text-white/90 text-sm">I&apos;ve been on Optimum Nutrition Gold Standard for years — vanilla mixes clean, no chalk. ~$50 for 5lbs on Amazon. Grab it 💪</p>
+                </div>
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center font-black text-white text-[10px] shrink-0 mt-0.5">JR</div>
+              </div>
+
+              <div className="flex gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center text-[10px] font-bold text-white/50 shrink-0 mt-0.5">M</div>
+                <div className="bg-white/[0.05] rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
+                  <p className="text-white/80 text-sm">How many days should I train as a beginner?</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5 justify-end">
+                <div className="bg-gradient-to-br from-violet-600/25 to-fuchsia-600/25 border border-violet-500/20 rounded-2xl rounded-tr-sm px-4 py-3 max-w-[80%]">
+                  <p className="text-white/90 text-sm">Start with 3 days/week — exactly what my Beginner Blueprint covers. Rest days are half the work when you&apos;re just starting 🔥</p>
+                </div>
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center font-black text-white text-[10px] shrink-0 mt-0.5">JR</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-8">
+            <Link href="/auth/signup" className="btn-gradient h-12 px-8 rounded-xl text-white font-bold text-sm inline-flex items-center gap-2 shadow-lg shadow-violet-500/15">
+              Start for free <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
+
         {/* Pricing preview */}
         <section className="w-full max-w-3xl mx-auto mb-20 text-center">
           <h2 className="text-4xl font-black mb-3">Simple pricing</h2>

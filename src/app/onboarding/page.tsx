@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   ShoppingBag, FileText, Bot, Calendar, Ticket, Users, Heart,
   Upload, X, Image, Film, Music, File, CheckCircle2, RefreshCw,
-  Pencil, Check, SkipForward, Sparkles, Rocket, Camera, Mic, MicOff, Share2,
+  Pencil, Check, SkipForward, Sparkles, Rocket, Camera, Mic, MicOff, Share2, Zap,
 } from "lucide-react";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
@@ -415,12 +415,20 @@ export default function OnboardingPage() {
             <Share2 className="w-5 h-5" /> Share my storefront
           </button>
 
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="w-full h-12 rounded-2xl border border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.04] text-sm font-medium transition-colors"
-          >
-            Go to dashboard →
-          </button>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => router.push("/dashboard/payouts")}
+              className="h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/15 text-sm font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Zap className="w-4 h-4" /> Set up payouts
+            </button>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="h-12 rounded-2xl border border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.04] text-sm font-medium transition-colors"
+            >
+              Dashboard →
+            </button>
+          </div>
         </div>
       </div>
     );

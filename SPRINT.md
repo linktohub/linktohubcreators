@@ -17,7 +17,7 @@ All five tasks from the previous sprint are **done**:
 
 ---
 
-## Task 1 — Fix Gelato shipping address + trigger order emails CRITICAL
+## Task 1 — ✅ Fix Gelato shipping address + trigger order emails CRITICAL
 
 **Why:** The checkout intent writes shipping to `pi.shipping` (Stripe's native shipping field), but the webhook at line 101 reads from `pi.metadata.shipping_address` — a field that is never set. `shippingAddress` is therefore always `null`, the `product.type === "merch" && shippingAddress && …` guard always fails, and **zero Gelato orders have ever fired**. Additionally, `sendOrderConfirmation` is never called anywhere — buyers receive no email after purchase.
 
@@ -96,7 +96,7 @@ Add state: `const [checkoutSuccess, setCheckoutSuccess] = useState<{ piId: strin
 
 ---
 
-## Task 3 — Email marketing broadcasts dashboard HIGH
+## Task 3 — ✅ Email marketing broadcasts dashboard HIGH
 
 **Why:** Per competitor research, gating email behind $99/mo is Stan's single most-complained-about limitation. Linktohub already collects fan emails in `email_subscribers` (wired to the storefront capture form). Shipping a basic broadcast feature at the base plan — "send to your entire list in one click" — is the highest-ROI growth feature this week. Direct competitive hook: "Stan charges $99/mo for this. We include it."
 
@@ -126,7 +126,7 @@ Add state: `const [checkoutSuccess, setCheckoutSuccess] = useState<{ piId: strin
 
 ---
 
-## Task 4 — AI storefront section on homepage HIGH
+## Task 4 — ✅ AI storefront section on homepage HIGH
 
 **Why:** Per competitor research, Linktohub's creator-voice AI assistant is its most defensible moat and is **invisible in marketing**. Beacons just launched "Beam." Bio.link is building AI visitor assistants. Linktohub already has the real thing — trained on creator voice, gated behind subscriptions — but the homepage doesn't mention it. A single compelling homepage section with a mock demo converts skeptical creators into signups. This is a 1-day build with outsized acquisition impact.
 
@@ -143,7 +143,7 @@ Add state: `const [checkoutSuccess, setCheckoutSuccess] = useState<{ piId: strin
 
 ---
 
-## Task 5 — Onboarding: auto-trigger Stripe Connect setup HIGH
+## Task 5 — ✅ Onboarding: auto-trigger Stripe Connect setup HIGH
 
 **Why:** Creators complete onboarding and land on the dashboard, but nothing prompts them to connect Stripe. The payouts page exists but creators must find it themselves. The first creator who tries to sell something and never gets paid will churn and post a bad review. Auto-surface the Connect flow on first login after onboarding.
 
