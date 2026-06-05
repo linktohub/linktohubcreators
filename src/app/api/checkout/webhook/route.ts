@@ -18,16 +18,8 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-  // Stripe Connect account enabled
-  if (event.type === "account.updated") {
-    const account = event.data.object as Stripe.Account;
-    if (account.charges_enabled) {
-      await admin.from("creators").update({ stripe_account_enabled: true }).eq("stripe_account_id", account.id);
-    }
-    return NextResponse.json({ received: true });
-  }
-
   // Stripe Checkout completed — handle subscriptions, events, tips
+  // Note: account.updated (Connect) is handled by /api/stripe/connect-webhook using STRIPE_CONNECT_WEBHOOK_SECRET
   if (event.type === "checkout.session.completed") {
     const sess = event.data.object as Stripe.Checkout.Session;
     const meta = sess.metadata || {};

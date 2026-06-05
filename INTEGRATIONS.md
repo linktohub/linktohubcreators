@@ -75,6 +75,67 @@
 
 ---
 
+## 5. Post-purchase download links
+
+**Status:** Implemented  
+**Files:**
+- `src/app/api/orders/by-intent/route.ts` — GET `?pi=<payment_intent_id>`: returns `{ status, download_urls }` for the order matching the PI; no auth required (PI id is proof of purchase)
+- `src/app/[username]/storefront-client.tsx` — after `confirmCardPayment` succeeds, enters `checkoutSuccess` state; polls `/api/orders/by-intent` every 2s for up to 16s to fetch download URLs; renders order summary + download buttons inside the cart drawer
+
+**Flow:** Card path → PI client secret → derive PI id → poll webhook for token generation → show download buttons. Apple/Google Pay path uses the same polling logic.
+
+---
+
+## 6. Email broadcast
+
+**Status:** Implemented  
+**Files:**
+- `src/lib/email-broadcast.ts` — `getResendClient()` helper; returns null gracefully when `RESEND_API_KEY` is unset
+- `src/app/api/email/broadcast/route.ts` — POST: auth-gated; fetches all active `email_subscribers` for the creator; sends in batches of 10 (Resend free-tier rate limit); returns `{ sent, failed, total }`
+- `src/app/dashboard/email/page.tsx` — server component: subscriber stats by source, table of recent subscribers, CSV export, compose panel
+- `src/app/dashboard/email/broadcast-client.tsx` — client component: subject + body textarea, "Send to N subscribers" button, real-time send result
+- `src/components/dashboard/nav.tsx` — "Email" link in the Grow nav group
+
+**Required env vars (Vercel):**
+| Variable | Source |
+|---|---|
+| `RESEND_API_KEY` | Resend Dashboard → API Keys |
+
+**From address:** `updates@linktohub.com` — verify this domain in Resend. Gracefully skips (no crash) when key is absent.
+
+---
+
+## 7. Stripe Connect — dashboard UX
+
+**Status:** Implemented  
+**Files:**
+- `src/app/dashboard/page.tsx` — shows amber sticky banner ("Add your bank account to receive payouts → Connect Stripe") when `creator.stripe_account_enabled` is false; disappears automatically once enabled
+- `src/app/onboarding/page.tsx` — success screen now has a "Set up payouts" secondary CTA alongside "Go to dashboard", routing directly to `/dashboard/payouts`
+
+---
+
+## 8. Gelato — shipping address fix + order emails
+
+**Status:** Implemented (sprint week 2026-06-01)  
+**Change:** Webhook previously read shipping from `pi.metadata.shipping_address` which was never set. Now falls back to Stripe's native `pi.shipping` object:
+```ts
+const shippingAddress = pi.metadata.shipping_address
+  ? JSON.parse(pi.metadata.shipping_address)
+  : pi.shipping?.address ? { …mapped fields… } : null;
+```
+**Change:** Gelato order `files` now passes `product.images[0]` as the print design file (was always empty before this fix).  
+**Change:** `sendOrderConfirmation` is now called in the webhook after download URLs are generated. The `getResend()` helper returns `null` instead of throwing when `RESEND_API_KEY` is unset, so a missing key no longer crashes the checkout webhook.  
+**Change:** Removed redundant `account.updated` handler from the checkout webhook — this event is now exclusively handled by `/api/stripe/connect-webhook` (which correctly checks both `charges_enabled && payouts_enabled`).
+
+---
+
+## 9. AI storefront section — homepage
+
+**Status:** Implemented  
+**File:** `src/app/page.tsx` — "Your audience, answered 24/7 — in your voice" section between features grid and pricing. Includes static mock chat demo (fitness creator branded), "No competitor does this" chip, and "Start for free" CTA to `/auth/signup`.
+
+---
+
 ## Supabase admin client
 
 `src/lib/supabase/admin.ts` — service role client for webhook routes that run without user auth. Used in all webhook handlers and checkout intent route.
