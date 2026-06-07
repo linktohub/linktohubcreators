@@ -912,7 +912,7 @@ export default function OnboardingPage() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-4xl font-black mb-2">About you</h2>
-                <p className="text-white/40">Helps us personalize your experience</p>
+                <p className="text-white/40">Helps AI build better products for your audience · <button type="button" onClick={() => setStep(3)} className="text-violet-400 hover:text-violet-300 underline underline-offset-2 transition-colors">Skip</button></p>
               </div>
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -1207,7 +1207,7 @@ export default function OnboardingPage() {
                 }}
                 className="flex-1 h-12 rounded-xl btn-gradient text-white font-bold text-sm"
               >
-                Continue →
+                {step === 2 ? "Save & continue →" : "Continue →"}
               </button>
             ) : (
               <button

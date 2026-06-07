@@ -671,15 +671,21 @@ export default function StorefrontClient({
 
         {/* Email capture */}
         {!emailSubmitted ? (
-          <form onSubmit={handleEmailCapture} className="flex gap-2 mb-7">
-            <input type="email" placeholder="your@email.com" value={email}
-              onChange={(e) => setEmail(e.target.value)} required
-              className="flex-1 h-11 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
-            <button type="submit" className="h-11 px-5 rounded-xl font-bold text-sm text-white shrink-0"
-              style={{ backgroundColor: brandColor }}>
-              Join
-            </button>
-          </form>
+          <div className="mb-7">
+            <p className="text-white/55 text-xs font-semibold uppercase tracking-wider mb-2">
+              Get updates from {creator.display_name}
+            </p>
+            <p className="text-white/30 text-xs mb-3">Exclusive drops, news, and content — right in your inbox</p>
+            <form onSubmit={handleEmailCapture} className="flex gap-2">
+              <input type="email" placeholder="your@email.com" value={email}
+                onChange={(e) => setEmail(e.target.value)} required
+                className="flex-1 h-11 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+              <button type="submit" className="h-11 px-5 rounded-xl font-bold text-sm text-white shrink-0"
+                style={{ backgroundColor: brandColor }}>
+                Subscribe
+              </button>
+            </form>
+          </div>
         ) : (
           <p className="text-white/40 text-sm mb-7 flex items-center gap-2">
             <span className="text-emerald-400">✓</span> You&apos;re on the list

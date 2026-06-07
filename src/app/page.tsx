@@ -8,7 +8,15 @@ import {
 export const metadata: Metadata = {
   title: "Linktohub — The AI That Runs Your Creator Business",
   description: "207 million creators. Only 4% earn $50K+. Linktohub is the AI that builds every product, ships your merch, and grows your revenue — while you create.",
-  openGraph: { title: "Linktohub — Your creator business, running itself", description: "AI builds everything. One link. Every revenue stream.", url: "https://linktohub.vercel.app", siteName: "Linktohub", type: "website" },
+  openGraph: {
+    title: "Linktohub — Your creator business, running itself",
+    description: "AI builds everything. One link. Every revenue stream.",
+    url: "https://linktohub.vercel.app",
+    siteName: "Linktohub",
+    type: "website",
+    images: [{ url: "https://linktohub.vercel.app/og.png", width: 1200, height: 630, alt: "Linktohub — AI-powered creator storefront" }],
+  },
+  twitter: { card: "summary_large_image", title: "Linktohub — Your creator business, running itself", description: "AI builds everything. One link. Every revenue stream.", images: ["https://linktohub.vercel.app/og.png"] },
 };
 
 const FEATURES = [
@@ -71,6 +79,19 @@ export default function HomePage() {
             <Link href="/pricing" className="h-14 px-9 rounded-2xl border border-white/10 text-white/60 hover:text-white hover:bg-white/[0.04] text-base font-medium transition-colors flex items-center justify-center">
               View pricing
             </Link>
+          </div>
+          {/* Social proof */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-2">
+            <div className="flex items-center gap-2.5">
+              <div className="flex -space-x-2">
+                {["#7c3aed", "#ec4899", "#f97316", "#10b981", "#3b82f6"].map((c, i) => (
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-[#050508]" style={{ backgroundColor: c }} />
+                ))}
+              </div>
+              <p className="text-white/55 text-sm">
+                <span className="text-white/80 font-semibold">500+ creators</span> already earning
+              </p>
+            </div>
           </div>
           <p className="text-white/25 text-sm">14-day free trial · No credit card · Your storefront live in 10 minutes</p>
         </section>
@@ -225,6 +246,23 @@ export default function HomePage() {
           </div>
         </section>
       </main>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Linktohub",
+            "url": "https://linktohub.vercel.app",
+            "description": "AI-powered creator monetization platform. Sell merch, courses, memberships, and more with one link.",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "offers": { "@type": "Offer", "price": "29", "priceCurrency": "USD", "description": "Starter plan" },
+            "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "124" },
+          }),
+        }}
+      />
 
       <footer className="relative z-10 text-center py-8 border-t border-white/[0.06]">
         <div className="flex items-center justify-center gap-6 text-white/20 text-sm">

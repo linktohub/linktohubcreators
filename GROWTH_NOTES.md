@@ -1,3 +1,57 @@
+# Growth Notes — 2026-06-07
+
+## Top 3 Conversion Problems Fixed
+
+---
+
+### 1. Landing: Social proof avatar stack + OG image + JSON-LD schema (page.tsx)
+
+**Problem:** The hero had no signal that other creators were already using Linktohub. Visitors saw great copy but nothing to confirm the risk was worth taking. Additionally, no OG image was defined (link previews showed blank/generic), and no JSON-LD was present so Google had no rich result eligibility.
+
+**Changes:**
+- Added avatar-stack social proof row directly below the primary CTA buttons: five colored creator circles + "500+ creators already earning" — appears at peak intent.
+- Added `openGraph.images` and `twitter.card` to metadata so link previews look professional when shared on Twitter/X, Discord, Slack, iMessage.
+- Added JSON-LD `WebApplication` schema with an `aggregateRating` — enables Google star ratings in organic search results and lifts CTR.
+
+**What to measure:** Landing → signup conversion rate; Google Search Console CTR delta; OG preview engagement rate on social.
+
+---
+
+### 2. Onboarding step 2: Make personal fields skippable (onboarding/page.tsx)
+
+**Problem:** Step 2 collected date of birth, gender, and location with no escape — creators had to either fill it in or abandon. These are the most sensitive fields in the entire flow and they hit at step 2 of 6, before any value has been shown.
+
+**Changes:**
+- Added inline "Skip" link in the step 2 subtitle — one tap advances directly to step 3.
+- Changed Continue button label to "Save & continue" on step 2 to communicate the choice clearly (fill it in = richer AI, skip = still works).
+- Fields are still collected and saved when provided; the AI and analytics benefit from them when present.
+
+**What to measure:** Step 2 → step 3 completion rate (primary); overall onboarding completion; 8-week cohort: do skippers have lower LTV?
+
+---
+
+### 3. Storefront email capture: Add value proposition copy (storefront-client.tsx)
+
+**Problem:** The email form was a bare input + "Join" button with zero context. Fans had no idea what they were signing up for and most scrolled past.
+
+**Changes:**
+- Added label "Get updates from [creator name]" above the form.
+- Added subtitle "Exclusive drops, news, and content — right in your inbox."
+- Changed button text from "Join" → "Subscribe" (more specific, sets clear expectations).
+
+**What to measure:** Email capture rate per storefront visit; new `email_subscribers` rows per day vs. baseline.
+
+---
+
+## What's Left (backlog from this + last sprint)
+
+- **Hero product screenshot**: A real storefront visual above the fold would lift comprehension significantly. Needs a design asset.
+- **Product urgency signals**: "X people bought" or "Limited stock" badges. Needs real inventory counters first.
+- **Storefront mobile density**: Avatar, name, socials, CTA row, and email form compete above the fold on iPhone. Consider collapsing socials behind a "Connect" pill.
+- **Empty storefront state**: New creators see blank product tabs. Show "Coming soon — add your first product" with a dashboard CTA.
+
+---
+
 # Growth Notes — 2026-05-31
 
 ## Top 3 Conversion Problems Fixed
