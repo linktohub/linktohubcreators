@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, ShoppingBag, FileText, Bot, Calendar,
   Ticket, Star, BarChart3, Settings, ExternalLink, DollarSign,
-  MessageSquarePlus, Users, CreditCard, Mail,
+  MessageSquarePlus, Users, CreditCard, Mail, MessageCircle,
 } from "lucide-react";
 
 const NAV_GROUPS = [
@@ -37,6 +37,7 @@ const NAV_GROUPS = [
     label: "Grow",
     items: [
       { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+      { href: "/dashboard/autodm", label: "AutoDM", icon: MessageCircle },
       { href: "/dashboard/email", label: "Email", icon: Mail },
       { href: "/dashboard/affiliate", label: "Affiliate", icon: Users },
       { href: "/dashboard/settings", label: "Settings", icon: Settings },

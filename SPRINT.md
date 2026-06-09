@@ -17,7 +17,7 @@ All five tasks from the previous sprint are **done**:
 
 ---
 
-## Task 1 — Fix platform fee to match advertised pricing CRITICAL
+## Task 1 — ✅ Fix platform fee to match advertised pricing CRITICAL
 
 **Why:** `/api/checkout/intent/route.ts` line 38 hardcodes `totalCents * 0.1` — a flat 10% fee taken from every transaction, regardless of plan. The pricing page advertises 6% (Starter), 4.5% (Pro), and 3% (Business). Every creator on the Starter plan is being silently overcharged by 67% vs. what was sold to them. Any creator who checks their Stripe payout dashboard will see the discrepancy and churn with a bad review. This is the highest-urgency bug in the codebase.
 
@@ -55,7 +55,7 @@ If `plan_tier` doesn't exist on the `creators` table yet, add it as a migration 
 
 ---
 
-## Task 2 — Wire affiliate attribution at signup HIGH
+## Task 2 — ✅ Wire affiliate attribution at signup HIGH
 
 **Why:** `/ref/[code]` correctly redirects to `/auth/signup?ref=code`. The signup page (`/auth/signup/page.tsx`) completely ignores the `?ref` query parameter — it is never read, never stored. When a creator refers a friend, the friend lands on signup via the affiliate link, signs up, and the referring creator gets zero credit. The entire affiliate growth channel produces no commissions. Fix requires two small changes.
 
@@ -127,7 +127,7 @@ If `affiliate_referrals` table doesn't exist, create it: `(referral_code, referr
 
 ---
 
-## Task 3 — Email unsubscribe compliance (CAN-SPAM / GDPR) HIGH
+## Task 3 — ✅ Email unsubscribe compliance (CAN-SPAM / GDPR) HIGH
 
 **Why:** Every email sent via the broadcast feature contains `<a href="#unsubscribe">Unsubscribe</a>` — a broken hash anchor that does nothing. CAN-SPAM (US) and GDPR (EU) both require a functioning unsubscribe mechanism in commercial email. Resend monitors complaint rates; at >0.1% complaint rate they suspend accounts. One creator with 500 subscribers who sends a poorly-timed broadcast could trigger enough spam complaints to kill Linktohub's entire sending domain. This needs to be fixed before anyone actually uses the email feature.
 
@@ -189,7 +189,7 @@ Add `UNSUBSCRIBE_SECRET` to Vercel env vars (any random string, e.g., `openssl r
 
 ---
 
-## Task 4 — Fix onboarding product field mismatch (name vs title) HIGH
+## Task 4 — ✅ Fix onboarding product field mismatch (name vs title) HIGH
 
 **Why:** When a creator completes onboarding, `handleLaunch()` inserts products with `name: p.name` (onboarding/page.tsx line 311). The `orders` webhook at line 195 reads `p.title` to populate order confirmation emails — so any product created via onboarding will show `undefined` as the product name in the buyer's email. The storefront is defensively coded (`product.name || product.title`) so display isn't broken, but order emails are. Also: if the DB schema only has `title` (no `name` column), the onboarding inserts a field that doesn't exist and products silently have no identifier.
 
@@ -217,7 +217,7 @@ Also confirm the products dashboard page (`/dashboard/products/page.tsx`) and pr
 
 ---
 
-## Task 5 — AutoDM: Instagram trigger-to-link flow HIGH
+## Task 5 — ✅ AutoDM: Instagram trigger-to-link flow HIGH
 
 **Why:** Per competitor research, AutoDM is the single most-cited missing feature vs. Stan and Beacons. Instagram's official API supports comment-to-DM automation fully. Creators using Stan/Beacons report AutoDM as their #1 revenue driver (3–5x conversion vs. link-in-bio). Every head-to-head creator comparison will ask "do you have AutoDM?" — the answer must be yes. This is a sprint-scoped integration.
 
