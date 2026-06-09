@@ -24,18 +24,27 @@ export default function SignupPage() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    const refCode = new URLSearchParams(window.location.search).get("ref");
     const supabase = createClient();
+    const refSuffix = refCode ? `&ref=${encodeURIComponent(refCode)}` : "";
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding` },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding${refSuffix}` },
     });
     if (error) {
       toast.error(error.message);
       setLoading(false);
       return;
     }
-    // If session exists (autoconfirm on) go straight to onboarding
+    // If session exists (autoconfirm on) record attribution inline then redirect
+    if (data.session && refCode) {
+      await fetch("/api/affiliate/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refCode, userId: data.user!.id }),
+      });
+    }
     if (data.session) {
       router.push("/onboarding");
       return;

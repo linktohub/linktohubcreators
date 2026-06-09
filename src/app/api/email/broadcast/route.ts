@@ -1,7 +1,14 @@
+import { createHmac } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdmin } from "@supabase/supabase-js";
 import { getResendClient } from "@/lib/email-broadcast";
+
+function unsubscribeUrl(email: string): string {
+  const secret = process.env.UNSUBSCRIBE_SECRET || "linktohub-unsub";
+  const sig = createHmac("sha256", secret).update(email).digest("hex");
+  return `https://linktohub.vercel.app/api/email/unsubscribe?email=${encodeURIComponent(email)}&sig=${sig}`;
+}
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -41,7 +48,7 @@ export async function POST(req: NextRequest) {
           html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111">
             ${body.replace(/\n/g, "<br>")}
             <hr style="margin:32px 0;border:none;border-top:1px solid #eee">
-            <p style="color:#888;font-size:12px">You're receiving this from ${creator.display_name} via Linktohub. <a href="#unsubscribe" style="color:#888">Unsubscribe</a></p>
+            <p style="color:#888;font-size:12px">You're receiving this from ${creator.display_name} via Linktohub. <a href="${unsubscribeUrl(sub.email)}" style="color:#888">Unsubscribe</a></p>
           </div>`,
         });
         sent++;

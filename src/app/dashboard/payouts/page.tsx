@@ -18,7 +18,7 @@ export default async function PayoutsPage({
 
   const { data: creator } = await supabase
     .from("creators")
-    .select("id, stripe_account_id, stripe_account_enabled, total_revenue, display_name, email")
+    .select("id, stripe_account_id, stripe_account_enabled, total_revenue, display_name, email, transaction_fee_pct, plan_tier")
     .eq("user_id", session.user.id)
     .single();
   if (!creator) redirect("/onboarding");
@@ -128,15 +128,15 @@ export default async function PayoutsPage({
             <p className="text-white/40 text-xs uppercase tracking-wider font-medium">Your share</p>
           </div>
           <p className="text-3xl font-black text-white">${(totalEarned / 100).toFixed(2)}</p>
-          <p className="text-white/25 text-xs mt-1">90% of every sale</p>
+          <p className="text-white/25 text-xs mt-1">{(100 - (creator.transaction_fee_pct || 0.06) * 100).toFixed(0)}% of every sale</p>
         </div>
         <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <Clock className="w-4 h-4 text-blue-400" />
             <p className="text-white/40 text-xs uppercase tracking-wider font-medium">Platform fee</p>
           </div>
-          <p className="text-3xl font-black text-white">10%</p>
-          <p className="text-white/25 text-xs mt-1">We keep 10¢ per $1</p>
+          <p className="text-3xl font-black text-white">{((creator.transaction_fee_pct || 0.06) * 100).toFixed(1)}%</p>
+          <p className="text-white/25 text-xs mt-1">Per transaction ({creator.plan_tier || "starter"} plan)</p>
         </div>
       </div>
 

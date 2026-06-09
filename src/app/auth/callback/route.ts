@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/dashboard";
+  const ref = searchParams.get("ref");
 
   if (code) {
     const supabase = await createClient();
@@ -21,6 +22,25 @@ export async function GET(request: NextRequest) {
           full_name: session.user.user_metadata?.full_name || null,
         });
       }
+
+      if (ref) {
+        const { data: affiliate } = await admin
+          .from("affiliates")
+          .select("referrer_creator_id, referred_count")
+          .eq("referral_code", ref)
+          .single();
+        if (affiliate) {
+          await admin.from("affiliates")
+            .update({ referred_count: (affiliate.referred_count || 0) + 1 })
+            .eq("referral_code", ref);
+          await admin.from("affiliate_referrals").insert({
+            referral_code: ref,
+            referrer_creator_id: affiliate.referrer_creator_id,
+            referred_user_id: session.user.id,
+          });
+        }
+      }
+
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

@@ -308,7 +308,7 @@ export default function OnboardingPage() {
     // Create approved draft products
     const productsToCreate = (generated.product_ideas || [])
       .filter((_, i) => approved[`product_${i}`])
-      .map((p) => ({ creator_id: creator.id, name: p.name, description: p.description, price: p.price, type: p.type, active: true, images: p.image ? [p.image] : [] }));
+      .map((p) => ({ creator_id: creator.id, title: p.name, description: p.description, price: p.price, type: p.type, active: true, images: p.image ? [p.image] : [] }));
     if (productsToCreate.length) await supabase.from("products").insert(productsToCreate);
 
     // Create approved event

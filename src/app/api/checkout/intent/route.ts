@@ -31,11 +31,12 @@ export async function POST(req: NextRequest) {
   const supabase = createAdminClient();
   const { data: creator } = await supabase
     .from("creators")
-    .select("stripe_account_id, stripe_account_enabled")
+    .select("stripe_account_id, stripe_account_enabled, transaction_fee_pct")
     .eq("id", creatorId)
     .single();
 
-  const platformFeeCents = Math.round(totalCents * 0.1);
+  const feeRate = (creator?.transaction_fee_pct as number) ?? 0.06;
+  const platformFeeCents = Math.round(totalCents * feeRate);
 
   const intentParams: Stripe.PaymentIntentCreateParams = {
     amount: totalCents,
