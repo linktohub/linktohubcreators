@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Instagram } from "lucide-react";
+import { ArrowLeft, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import AutoDMClient from "./autodm-client";
 
@@ -35,7 +35,7 @@ export default async function AutoDMPage({
 
       {connected === "1" && (
         <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 mb-6 flex items-center gap-3">
-          <Instagram className="w-5 h-5 text-emerald-400 shrink-0" />
+          <MessageCircle className="w-5 h-5 text-emerald-400 shrink-0" />
           <p className="text-emerald-300 font-semibold text-sm">Instagram connected!</p>
         </div>
       )}
