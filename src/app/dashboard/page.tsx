@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { DollarSign, ShoppingBag, Users, Package, ArrowRight, ExternalLink, Zap } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import SuggestionsFeed from "@/components/dashboard/suggestions-feed";
 
@@ -129,6 +130,3 @@ export default async function DashboardPage() {
   );
 }
 
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
-}

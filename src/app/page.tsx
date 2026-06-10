@@ -265,7 +265,7 @@ export default function HomePage() {
       />
 
       <footer className="relative z-10 text-center py-8 border-t border-white/[0.06]">
-        <div className="flex items-center justify-center gap-6 text-white/20 text-sm">
+        <div className="flex items-center justify-center gap-6 text-white/40 text-sm">
           <Link href="/pricing" className="hover:text-white/40 transition-colors">Pricing</Link>
           <Link href="/auth/signup" className="hover:text-white/40 transition-colors">Sign up</Link>
           <Link href="/auth/login" className="hover:text-white/40 transition-colors">Sign in</Link>

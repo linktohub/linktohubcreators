@@ -1,12 +1,55 @@
 # Design Notes — Wednesday Audit Pass
 
-**Date:** 2026-06-03
-**Rating before:** 5/10 → **Target:** 8/10  
-**This pass:** ~5.5/10 (mobile layout fixes + visual polish)
+---
+
+## Pass: 2026-06-10 · Score before: ~5.5/10 → after: ~6.5/10
+
+### What Was Fixed
+
+#### 1. Dark mode CSS variables applied (`layout.tsx` + `globals.css`)
+`<html>` had no `dark` class. The shadcn variable system puts light colors in `:root` and dark in `.dark` — without the class, any shadcn component (toaster, future dialogs) renders with white backgrounds on a dark page. Fixed. Also fixed `--font-sans: var(--font-sans)` (circular self-reference) → `var(--font-geist-sans)` so Geist is the actual applied UI font.
+
+#### 2. Unreadable 10px form labels (`create/page.tsx`)
+All 6 event form labels used `text-[10px]` — below the readable minimum for uppercase tracking text at low opacity. Changed to `text-xs` (12px). Added `[color-scheme:dark]` to the event type `<select>` so the native dropdown uses dark styling.
+
+#### 3. Small touch targets on products list (`products-client.tsx`)
+Edit and delete icon buttons were `w-8 h-8` (32px) — below the 44px minimum. Changed to `w-10 h-10 rounded-xl`.
+
+#### 4. Tab bar edge clip on mobile (`products-client.tsx`)
+Category filter tabs had no edge bleed — the scrollable row started 20px from screen edge (parent `p-5`). Added `-mx-5 px-5 md:mx-0 md:px-0`. Matches the storefront tab pattern.
+
+#### 5. Near-invisible footer links (`page.tsx`)
+Footer nav links were `text-white/20` — ~1.3:1 contrast ratio. Changed to `text-white/40`.
+
+#### 6. ProductCard "Add" button too small to tap (`storefront-client.tsx`)
+Button was ~24px tall (`py-1.5`). Added `h-9 flex items-center justify-center` to the button. Added `active:scale-[0.98] transition-transform` to cards and `active:scale-95` to the button for mobile tap feedback. (This was flagged in the 2026-06-03 pass as high priority and is now done.)
+
+#### 7. Duplicate `cn` utility in dashboard (`dashboard/page.tsx`)
+Local `cn` function duplicated `@/lib/utils`. Removed, imported from utils.
+
+### What Still Needs Work (Next Pass)
+
+**High priority**
+- Auth pages and onboarding form styling — not audited. May have light-mode rendering issues in shadcn form components.
+- Event register button on storefront still small (`text-xs px-3 py-1.5`) — needs `h-9` treatment.
+- Storefront CTA row (Book / AI Chat / Tip) can stack awkwardly at 375px when all three are enabled.
+- Dashboard stats cards have no `active:scale` press feedback on mobile.
+
+**Medium priority**
+- Landing hero `leading-[0.9]` on mobile: 5-line wrap at `text-5xl` is very tight. Consider `leading-[0.95] md:leading-[0.9]`.
+- "View storefront" link in sidebar nav: sub-16px touch target, needs `py-1` or button treatment.
+- Sidebar nav redundancy: "Products" and "Digital" are separate items but both go to `/dashboard/products`.
+
+**Low priority**
+- Storefront tab scroll indicator: no visual fade-right cue that tabs are horizontally scrollable.
+- Subscription tier cards lack visual differentiation between tiers.
+- ProductCard emoji placeholder (👕, 📦) when no image — should be a gradient placeholder using brand color.
 
 ---
 
-## What Was Fixed (2026-06-03)
+## Pass: 2026-06-03 · Score before: 5/10 → after: ~5.5/10
+
+### What Was Fixed
 
 ### 1. Landing page — mobile overflow on "How it works" and Pricing grids
 `src/app/page.tsx`

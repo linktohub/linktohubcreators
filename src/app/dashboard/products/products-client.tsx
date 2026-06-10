@@ -225,7 +225,7 @@ export default function ProductsClient({
   return (
     <>
       {/* Tab bar */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 mb-6 scrollbar-none">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 mb-6 scrollbar-none -mx-5 px-5 md:mx-0 md:px-0">
         {TABS.map((tab) => {
           const count = counts[tab.id];
           if (tab.id !== "all" && count === 0) return null;
@@ -292,7 +292,7 @@ export default function ProductsClient({
               {/* Edit — only for products table items */}
               {item.source === "products" && (
                 <Link href={`/dashboard/products/${item.id}`}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-violet-400 hover:bg-violet-500/10 transition-colors shrink-0">
+                  className="w-10 h-10 flex items-center justify-center rounded-xl text-white/25 hover:text-violet-400 hover:bg-violet-500/10 transition-colors shrink-0">
                   <Pencil className="w-3.5 h-3.5" />
                 </Link>
               )}
@@ -316,7 +316,7 @@ export default function ProductsClient({
               <button
                 onClick={() => deleteItem(item)}
                 disabled={deletingId === item.id}
-                className="text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 w-8 h-8 flex items-center justify-center rounded-lg shrink-0"
+                className="text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 w-10 h-10 flex items-center justify-center rounded-xl shrink-0"
               >
                 <Trash2 className={cn("w-3.5 h-3.5", deletingId === item.id && "animate-pulse")} />
               </button>

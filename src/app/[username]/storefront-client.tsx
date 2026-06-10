@@ -1287,7 +1287,7 @@ export default function StorefrontClient({
 function ProductCard({ product, brandColor, onAdd, onView }: { product: Product; brandColor: string; onAdd: () => void; onView: () => void }) {
   const name = product.name || product.title || "Product";
   return (
-    <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden group cursor-pointer" onClick={onView}>
+    <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden group cursor-pointer active:scale-[0.98] transition-transform" onClick={onView}>
       <div className="aspect-square overflow-hidden flex items-center justify-center text-4xl bg-white/[0.03]">
         {product.images?.[0]
           ? <img src={product.images[0]} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -1300,7 +1300,7 @@ function ProductCard({ product, brandColor, onAdd, onView }: { product: Product;
         <div className="flex items-center justify-between mt-2">
           <span className="font-black text-base">${product.price}</span>
           <button onClick={(e) => { e.stopPropagation(); onAdd(); }}
-            className="text-white text-xs font-bold px-3 py-1.5 rounded-xl"
+            className="text-white text-xs font-bold px-3 h-9 rounded-xl flex items-center justify-center active:scale-95 transition-transform"
             style={{ backgroundColor: brandColor }}>
             Add
           </button>
