@@ -6,7 +6,7 @@
 **Files:**
 - `src/app/api/stripe/connect-onboard/route.ts` — POST: creates/retrieves a Stripe Express account for the authenticated creator and returns a one-time onboarding URL
 - `src/app/api/stripe/connect-webhook/route.ts` — POST: receives `account.updated` events from Stripe, sets `stripe_account_enabled = true` once `charges_enabled && payouts_enabled`
-- `src/app/api/checkout/intent/route.ts` — updated: adds `transfer_data` (90% to creator) and `application_fee_amount` (10% platform fee) when creator has Connect enabled
+- `src/app/api/checkout/intent/route.ts` — updated: adds `transfer_data` and `application_fee_amount` (reads `transaction_fee_pct` from the creator record — see §10) when creator has Connect enabled
 - `src/app/dashboard/payouts/connect-button.tsx` — client component wiring the "Connect Stripe" button to the onboard API
 - `src/app/dashboard/payouts/page.tsx` — updated to use `ConnectStripeButton`
 
@@ -133,6 +133,79 @@ const shippingAddress = pi.metadata.shipping_address
 
 **Status:** Implemented  
 **File:** `src/app/page.tsx` — "Your audience, answered 24/7 — in your voice" section between features grid and pricing. Includes static mock chat demo (fitness creator branded), "No competitor does this" chip, and "Start for free" CTA to `/auth/signup`.
+
+---
+
+---
+
+## 10. Platform fee — per-plan pricing (sprint week 2026-06-08)
+
+**Status:** Implemented  
+**Problem fixed:** `intent/route.ts` previously hardcoded a flat 10% fee on every transaction, overcharging Starter creators (advertised rate: 6%).  
+**Change:** Checkout intent now reads `creators.transaction_fee_pct` (a decimal, e.g. `0.06`) and uses it for both `application_fee_amount` and the creator's payout split. Falls back to `0.06` if the field is null (new signups default to Starter).  
+**Change:** `src/app/dashboard/payouts/page.tsx` — Platform Fee card now shows `creator.transaction_fee_pct * 100` (e.g. "6.0%") and the plan tier label, instead of the hardcoded "10%".
+
+**DB column needed:** `creators.transaction_fee_pct NUMERIC DEFAULT 0.06` and `creators.plan_tier TEXT DEFAULT 'starter'`.
+
+---
+
+## 11. Affiliate attribution at signup (sprint week 2026-06-08)
+
+**Status:** Implemented  
+**Files:**
+- `src/app/auth/signup/page.tsx` — reads `?ref` from URL, appends it to `emailRedirectTo` so it survives the email confirmation flow; on auto-confirm (session immediately available) calls `/api/affiliate/record` inline
+- `src/app/auth/callback/route.ts` — reads `?ref` from the callback URL, increments `affiliates.referred_count`, inserts into `affiliate_referrals`
+- `src/app/api/affiliate/record/route.ts` — POST: service-role write of referred_count + affiliate_referrals row for the auto-confirm path
+
+**DB table needed:** `affiliate_referrals (referral_code TEXT, referrer_creator_id UUID, referred_user_id UUID, created_at TIMESTAMPTZ DEFAULT now())`
+
+---
+
+## 12. Email unsubscribe compliance — CAN-SPAM / GDPR (sprint week 2026-06-08)
+
+**Status:** Implemented  
+**Files:**
+- `src/app/api/email/unsubscribe/route.ts` — GET `?email=X&sig=Y`: validates HMAC-SHA256 signature, sets `email_subscribers.subscribed = false`, returns a styled HTML confirmation page
+- `src/app/api/email/broadcast/route.ts` — generates a per-subscriber signed unsubscribe URL (`unsubscribeUrl()`) and injects it into the email footer, replacing the former broken `#unsubscribe` anchor
+
+**Required env var (Vercel):**
+| Variable | Value |
+|---|---|
+| `UNSUBSCRIBE_SECRET` | Any random string — `openssl rand -hex 32` |
+
+---
+
+## 13. AutoDM — Instagram keyword-to-DM flow (sprint week 2026-06-08)
+
+**Status:** Implemented (Phase 1: OAuth + trigger setup + webhook handler)  
+**Files:**
+- `src/app/dashboard/autodm/page.tsx` — server component; loads creator's IG connection state and passes to client
+- `src/app/dashboard/autodm/autodm-client.tsx` — "Connect Instagram" button, keyword input, DM message template, enabled toggle, Save
+- `src/app/api/autodm/ig-callback/route.ts` — exchanges `?code=` for a long-lived IG access token, stores `ig_access_token` + `ig_user_id` on the creator record, redirects to `/dashboard/autodm?connected=1`
+- `src/app/api/autodm/webhook/route.ts` — GET: Instagram webhook verification challenge; POST: on `comments` events, if comment text contains `autodm_keyword`, sends a DM via Graph API with `autodm_message` (replaces `{{storefront_url}}` with `https://linktohub.vercel.app/{username}`)
+- `src/app/api/autodm/save/route.ts` — POST: saves keyword/message/enabled state to creators table
+- `src/components/dashboard/nav.tsx` — "AutoDM" nav link with MessageCircle icon
+
+**Required env vars (Vercel):**
+| Variable | Source |
+|---|---|
+| `INSTAGRAM_APP_ID` | Meta Developer Console → App → Basic Settings |
+| `INSTAGRAM_APP_SECRET` | Meta Developer Console → App → Basic Settings |
+| `INSTAGRAM_VERIFY_TOKEN` | Any random string — must match what you enter in Meta webhook config |
+
+**Meta webhook to configure:**
+- URL: `https://linktohub.vercel.app/api/autodm/webhook`
+- Verify token: value of `INSTAGRAM_VERIFY_TOKEN`
+- Subscriptions: `comments`
+
+**DB columns needed on `creators`:** `ig_access_token TEXT`, `ig_user_id TEXT`, `autodm_keyword TEXT`, `autodm_message TEXT`, `autodm_enabled BOOLEAN DEFAULT false`
+
+---
+
+## 14. Onboarding product title fix (sprint week 2026-06-08)
+
+**Status:** Implemented  
+**File:** `src/app/onboarding/page.tsx` — `productsToCreate` map now uses `title: p.name` (was `name: p.name`). Products created via onboarding now have a non-null `title` column in Supabase, matching the schema used everywhere else in the product/order flow.
 
 ---
 
