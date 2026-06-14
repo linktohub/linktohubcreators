@@ -911,29 +911,23 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-4xl font-black mb-2">About you</h2>
-                <p className="text-white/40">Helps AI build better products for your audience · <button type="button" onClick={() => setStep(3)} className="text-violet-400 hover:text-violet-300 underline underline-offset-2 transition-colors">Skip</button></p>
+                <h2 className="text-4xl font-black mb-2">Where are you based?</h2>
+                <p className="text-white/40">Helps AI tailor your products to your market · <button type="button" onClick={() => setStep(3)} className="text-violet-400 hover:text-violet-300 underline underline-offset-2 transition-colors">Skip</button></p>
               </div>
               <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-white/40 text-xs font-medium uppercase tracking-wider">Date of birth</label>
-                  <Input type="date" value={form.date_of_birth} onChange={(e) => setField("date_of_birth", e.target.value)} className="h-12 bg-white/[0.04] border-white/[0.08] text-white focus:border-violet-500/40 rounded-xl" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-white/40 text-xs font-medium uppercase tracking-wider">Gender</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {["Male", "Female", "Other"].map((g) => (
-                      <button key={g} type="button" onClick={() => setField("gender", g)} className={cn("h-11 rounded-xl border text-sm font-medium transition-all", form.gender === g ? "bg-violet-600/20 border-violet-500/50 text-white" : "bg-white/[0.03] border-white/[0.08] text-white/50 hover:bg-white/[0.06] hover:text-white")}>{g}</button>
-                    ))}
+                {locationGranted && (
+                  <div className="flex items-center gap-2 bg-emerald-500/[0.07] border border-emerald-500/20 rounded-xl px-4 py-3">
+                    <span className="text-emerald-400 text-sm">✓</span>
+                    <p className="text-emerald-400/80 text-sm">Location auto-detected — confirm or edit below</p>
                   </div>
-                </div>
+                )}
                 <div className="space-y-1.5">
                   <label className="text-white/40 text-xs font-medium uppercase tracking-wider">Country</label>
-                  <Input value={form.location_country} onChange={(e) => setField("location_country", e.target.value)} placeholder={locationGranted ? "Auto-detected" : "United States"} className="h-12 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus:border-violet-500/40 rounded-xl" />
+                  <Input value={form.location_country} onChange={(e) => setField("location_country", e.target.value)} placeholder="United States" className="h-12 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus:border-violet-500/40 rounded-xl" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-white/40 text-xs font-medium uppercase tracking-wider">City</label>
-                  <Input value={form.location_city} onChange={(e) => setField("location_city", e.target.value)} placeholder={locationGranted ? "Auto-detected" : "New York"} className="h-12 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus:border-violet-500/40 rounded-xl" />
+                  <Input value={form.location_city} onChange={(e) => setField("location_city", e.target.value)} placeholder="New York" className="h-12 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus:border-violet-500/40 rounded-xl" />
                 </div>
               </div>
             </div>
@@ -1203,11 +1197,12 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={() => {
                   if (step === 1 && !form.username) { toast.error("Pick a username"); return; }
+                  if (step === 1 && !form.niche) { toast.error("Select your niche — it powers AI generation"); return; }
                   setStep((s) => (s + 1) as Step);
                 }}
                 className="flex-1 h-12 rounded-xl btn-gradient text-white font-bold text-sm"
               >
-                {step === 2 ? "Save & continue →" : "Continue →"}
+                {step === 2 ? "Looks good →" : "Continue →"}
               </button>
             ) : (
               <button

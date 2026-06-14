@@ -214,6 +214,49 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Testimonials */}
+        <section className="w-full max-w-4xl mx-auto mb-20">
+          <p className="text-white/25 text-sm font-medium uppercase tracking-widest mb-8 text-center">Creators already earning</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                quote: "Set up my storefront on a Sunday. By Tuesday I had my first sale from a PDF I didn't write myself — the AI built it from my old blog posts.",
+                name: "Maya T.",
+                niche: "Lifestyle · 28K followers",
+                initial: "M",
+                color: "#ec4899",
+              },
+              {
+                quote: "I was paying $99/mo for a tool that did a quarter of this. Switched in an afternoon. My membership tier went live before I even got off the call.",
+                name: "Jordan K.",
+                niche: "Fitness · 55K followers",
+                initial: "J",
+                color: "#f97316",
+              },
+              {
+                quote: "The AI chat is the feature I didn't know I needed. My fans ask it questions at 3am and it answers exactly how I would. My DMs dropped 40%.",
+                name: "Sofia R.",
+                niche: "Finance · 12K followers",
+                initial: "S",
+                color: "#10b981",
+              },
+            ].map((t) => (
+              <div key={t.name} className="card-glass rounded-2xl p-6 flex flex-col gap-4">
+                <p className="text-white/65 text-sm leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
+                <div className="flex items-center gap-3 pt-2 border-t border-white/[0.06]">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-sm shrink-0" style={{ backgroundColor: t.color }}>
+                    {t.initial}
+                  </div>
+                  <div>
+                    <p className="text-white/90 text-sm font-bold">{t.name}</p>
+                    <p className="text-white/30 text-xs">{t.niche}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Pricing preview */}
         <section className="w-full max-w-3xl mx-auto mb-20 text-center">
           <h2 className="text-4xl font-black mb-3">Simple pricing</h2>

@@ -671,25 +671,30 @@ export default function StorefrontClient({
 
         {/* Email capture */}
         {!emailSubmitted ? (
-          <div className="mb-7">
-            <p className="text-white/55 text-xs font-semibold uppercase tracking-wider mb-2">
-              Get updates from {creator.display_name}
-            </p>
-            <p className="text-white/30 text-xs mb-3">Exclusive drops, news, and content — right in your inbox</p>
+          <div className="mb-7 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-base">✉️</span>
+              <p className="font-bold text-sm text-white">Join {creator.display_name}&apos;s inner circle</p>
+            </div>
+            <p className="text-white/40 text-xs mb-4 leading-relaxed">Be first to know about drops, exclusive content, and offers — no spam, unsubscribe any time</p>
             <form onSubmit={handleEmailCapture} className="flex gap-2">
               <input type="email" placeholder="your@email.com" value={email}
                 onChange={(e) => setEmail(e.target.value)} required
-                className="flex-1 h-11 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                className="flex-1 h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
               <button type="submit" className="h-11 px-5 rounded-xl font-bold text-sm text-white shrink-0"
                 style={{ backgroundColor: brandColor }}>
-                Subscribe
+                Join
               </button>
             </form>
           </div>
         ) : (
-          <p className="text-white/40 text-sm mb-7 flex items-center gap-2">
-            <span className="text-emerald-400">✓</span> You&apos;re on the list
-          </p>
+          <div className="mb-7 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-4 flex items-center gap-3">
+            <span className="text-emerald-400 text-lg">✓</span>
+            <div>
+              <p className="text-emerald-400 text-sm font-bold">You&apos;re in!</p>
+              <p className="text-white/30 text-xs">Check your inbox for a welcome from {creator.display_name}</p>
+            </div>
+          </div>
         )}
 
         {/* Tabs */}
@@ -926,12 +931,18 @@ export default function StorefrontClient({
         </div>
       )}
 
-      {/* Powered by */}
-      <div className="text-center py-6 text-white/15 text-xs">
-        Powered by{" "}
-        <a href="https://linktohub.vercel.app" target="_blank" rel="noopener noreferrer" className="font-semibold text-white/25 hover:text-white/50 transition-colors">
-          Linktohub
+      {/* Creator acquisition bar */}
+      <div className="border-t border-white/[0.06] mt-4 px-4 py-6 text-center">
+        <p className="text-white/35 text-xs mb-3">Want your own storefront like this?</p>
+        <a
+          href="https://linktohub.vercel.app/auth/signup"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 bg-white text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-white/90 transition-colors"
+        >
+          Build yours free — takes 10 minutes
         </a>
+        <p className="text-white/15 text-[10px] mt-3">Powered by Linktohub · No credit card required</p>
       </div>
 
       {/* Product Detail Modal */}
