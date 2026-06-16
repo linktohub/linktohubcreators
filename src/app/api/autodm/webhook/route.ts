@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       // Look up creator by ig_user_id matching the entry id
       const { data: creator } = await admin
         .from("creators")
-        .select("id, username, ig_access_token, autodm_keyword, autodm_message, autodm_enabled")
+        .select("id, username, ig_access_token, ig_user_id, autodm_keyword, autodm_message, autodm_enabled")
         .eq("ig_user_id", entry.id)
         .eq("autodm_enabled", true)
         .single();
@@ -64,12 +64,12 @@ export async function POST(req: NextRequest) {
       const dmText = (creator.autodm_message || "Hey! Here's my store: {{storefront_url}}")
         .replace("{{storefront_url}}", storefrontUrl);
 
-      // Send DM via Instagram Graph API
-      await fetch(`https://graph.facebook.com/v18.0/me/messages`, {
+      // Send DM via Instagram Direct Message API
+      await fetch(`https://graph.instagram.com/v21.0/${creator.ig_user_id}/messages`, {
         method: "POST",
         headers: {
+          "Authorization": `Bearer ${creator.ig_access_token}`,
           "Content-Type": "application/json",
-          Authorization: `Bearer ${creator.ig_access_token}`,
         },
         body: JSON.stringify({
           recipient: { id: commenterId },

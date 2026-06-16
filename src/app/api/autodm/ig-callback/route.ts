@@ -31,9 +31,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${origin}/dashboard/autodm?error=token_exchange`);
   }
 
-  const { access_token: shortToken, user_id: igUserId } = await tokenRes.json() as {
+  const { access_token: shortToken } = await tokenRes.json() as {
     access_token: string;
-    user_id: string;
   };
 
   // Exchange for long-lived token (60 days)
@@ -43,6 +42,12 @@ export async function GET(req: NextRequest) {
 
   const longData = await longRes.json() as { access_token?: string };
   const finalToken = longData.access_token || shortToken;
+
+  // Fetch IG user id from Business Login Graph API endpoint
+  const userRes = await fetch(
+    `https://graph.instagram.com/v21.0/me?fields=id,username&access_token=${finalToken}`
+  );
+  const { id: igUserId } = await userRes.json() as { id: string; username?: string };
 
   const admin = createAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   await admin.from("creators").update({

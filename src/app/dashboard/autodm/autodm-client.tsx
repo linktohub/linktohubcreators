@@ -36,7 +36,7 @@ export default function AutoDMClient({
     }
     const redirect = encodeURIComponent(`${window.location.origin}/api/autodm/ig-callback`);
     const state = encodeURIComponent(creatorId);
-    window.location.href = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirect}&scope=user_profile,user_media&response_type=code&state=${state}`;
+    window.location.href = `https://www.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirect}&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments&response_type=code&state=${state}`;
   }
 
   async function save() {
@@ -58,6 +58,12 @@ export default function AutoDMClient({
 
   return (
     <div className="space-y-5">
+      {!isConnected && (
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-yellow-300 text-sm">
+          Connect your Instagram Business account to enable AutoDM. Requires a Business or Creator account.
+        </div>
+      )}
+
       {/* Connect card */}
       <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
