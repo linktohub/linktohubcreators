@@ -14,11 +14,20 @@ type AffiliateData = {
   monthly_earnings: number;
 };
 
+type Commission = {
+  id: string;
+  commission_cents: number;
+  status: string;
+  created_at: string;
+};
+
 export default function AffiliatePage() {
   const [data, setData] = useState<AffiliateData | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [creatorId, setCreatorId] = useState("");
+  const [commissions, setCommissions] = useState<Commission[]>([]);
+  const [affiliateEarnings, setAffiliateEarnings] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -34,6 +43,22 @@ export default function AffiliatePage() {
         .eq("referrer_creator_id", creator.id).single();
 
       if (aff) setData(aff as AffiliateData);
+
+      const { data: creatorRow } = await supabase
+        .from("creators")
+        .select("affiliate_earnings")
+        .eq("id", creator.id)
+        .single();
+      setAffiliateEarnings(creatorRow?.affiliate_earnings || 0);
+
+      const { data: comms } = await supabase
+        .from("affiliate_commissions")
+        .select("id, commission_cents, status, created_at")
+        .eq("referrer_creator_id", creator.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      setCommissions((comms as Commission[]) || []);
+
       setLoading(false);
     }
     load();
@@ -103,9 +128,9 @@ export default function AffiliatePage() {
       {data && (
         <div className="grid grid-cols-2 gap-3 mb-6">
           {[
-            { icon: Users, label: "Creators referred", value: data.referred_count || 0, suffix: "" },
+            { icon: Users, label: "Creators referred", value: String(data.referred_count || 0), suffix: "" },
             { icon: DollarSign, label: "Monthly earnings", value: `$${(data.monthly_earnings || 0).toFixed(2)}`, suffix: "/mo" },
-            { icon: TrendingUp, label: "Total earned", value: `$${(data.total_earned || 0).toFixed(2)}`, suffix: "" },
+            { icon: TrendingUp, label: "Purchase commissions", value: `$${affiliateEarnings.toFixed(2)}`, suffix: "" },
             { icon: Gift, label: "Commission rate", value: `${((data.commission_pct || 0.25) * 100).toFixed(0)}%`, suffix: " recurring" },
           ].map(({ icon: Icon, label, value, suffix }) => (
             <div key={label} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
@@ -157,6 +182,37 @@ export default function AffiliatePage() {
           className="w-full h-12 btn-gradient rounded-xl text-white font-bold text-sm disabled:opacity-50 mb-6">
           {generating ? "Generating..." : "Generate my affiliate link"}
         </button>
+      )}
+
+      {/* Purchase commissions list */}
+      {commissions.length > 0 && (
+        <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6 mb-6">
+          <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-emerald-400" />
+            Purchase commissions
+          </h3>
+          <div className="space-y-2">
+            {commissions.map((c) => (
+              <div key={c.id} className="flex items-center justify-between py-2.5 border-b border-white/[0.04] last:border-0">
+                <div>
+                  <p className="text-sm text-white font-medium">
+                    ${(c.commission_cents / 100).toFixed(2)} earned
+                  </p>
+                  <p className="text-white/30 text-xs">
+                    {new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </p>
+                </div>
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                  c.status === "paid"
+                    ? "bg-emerald-500/10 text-emerald-400"
+                    : "bg-yellow-500/10 text-yellow-400"
+                }`}>
+                  {c.status === "paid" ? "Paid" : "Pending payout"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Potential earnings calculator */}

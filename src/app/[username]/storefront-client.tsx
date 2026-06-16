@@ -234,6 +234,7 @@ export default function StorefrontClient({
                 customerEmail: e.payerEmail,
                 items: cart.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
                 shipping,
+                fanId: fanUser?.id,
               }),
             });
             const { clientSecret } = await res.json();
@@ -336,6 +337,7 @@ export default function StorefrontClient({
           customerEmail: checkoutEmail,
           items: cart.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
           shipping,
+          fanId: fanUser?.id,
         }),
       });
       const { clientSecret } = await res.json();

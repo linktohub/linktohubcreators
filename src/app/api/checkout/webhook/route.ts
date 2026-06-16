@@ -123,6 +123,36 @@ export async function POST(req: NextRequest) {
 
   if (!order) return NextResponse.json({ received: true });
 
+  // Affiliate commission: check if buyer came via affiliate referral
+  const fanId = pi.metadata.fan_id || "";
+  if (fanId) {
+    const { data: referral } = await admin
+      .from("affiliate_referrals")
+      .select("referral_code, referrer_creator_id")
+      .eq("referred_user_id", fanId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (referral) {
+      const commissionRate = 0.20;
+      const commissionCents = Math.round(platformFee * commissionRate);
+      await admin.from("affiliate_commissions").insert({
+        order_id: order.id,
+        referral_code: referral.referral_code,
+        referrer_creator_id: referral.referrer_creator_id,
+        commission_cents: commissionCents,
+        status: "pending",
+      });
+      try {
+        await admin.rpc("increment_affiliate_earnings", {
+          p_creator_id: referral.referrer_creator_id,
+          p_amount: commissionCents / 100,
+        });
+      } catch { /* non-critical */ }
+    }
+  }
+
   const productIds = itemsMeta.map((i) => i.id);
   const { data: products } = await admin
     .from("products")
