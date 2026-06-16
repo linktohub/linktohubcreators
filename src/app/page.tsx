@@ -52,6 +52,7 @@ export default function HomePage() {
       <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 max-w-7xl mx-auto w-full">
         <div className="text-xl font-black tracking-tight"><span className="gradient-text">link</span>tohub</div>
         <div className="flex items-center gap-2">
+          <Link href="/compare/gumroad" className="text-white/50 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/5 transition-colors hidden sm:block">Compare</Link>
           <Link href="/pricing" className="text-white/50 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/5 transition-colors hidden sm:block">Pricing</Link>
           <Link href="/auth/login" className="text-white/50 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/5 transition-colors">Sign in</Link>
           <Link href="/auth/signup" className="text-sm font-bold px-5 py-2.5 rounded-xl bg-white text-black hover:bg-white/90 transition-colors">Start free</Link>
