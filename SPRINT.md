@@ -27,17 +27,17 @@ All five tasks from the 2026-06-08 sprint are **done**:
 | Product edit pages | ✅ Done — `dashboard/products/[id]/edit-client.tsx` fully built |
 | PDF/download delivery | ✅ Done — purchase tokens + signed URLs in webhook |
 | Email unsubscribe | ✅ Done — last sprint |
-| AutoDM code skeleton | ✅ Exists — but uses deprecated Instagram Basic Display API scopes ❌ |
+| AutoDM code skeleton | ✅ Fixed — Business Login scopes, Graph API v21.0 DM endpoint |
 | Affiliate click → signup | ✅ Done — last sprint |
-| **Affiliate commission on purchase** | ❌ Not wired — webhook never reads `affiliate_referrals` or credits commissions |
-| **Stripe Instant Payouts** | ❌ Not built — Stripe GA, straightforward API call |
-| **Gumroad calculator page** | ❌ Not built — peak acquisition window is NOW |
+| **Affiliate commission on purchase** | ✅ Done — webhook reads `affiliate_referrals`, inserts `affiliate_commissions`, credits earnings |
+| **Stripe Instant Payouts** | ✅ Done — toggle in dashboard, manual schedule on Stripe account, "Pay out now" button |
+| **Gumroad calculator page** | ✅ Done — `/compare/gumroad` live, real-time calculator, SEO meta, nav link |
 | Bookings / Cal.com | ❌ Still "coming soon" — deprioritized |
 | Email RESEND_API_KEY | ⚠️ Code has placeholder guard — must verify in Vercel env |
 
 ---
 
-## Task 1 — Fix AutoDM Instagram API scopes CRITICAL
+## Task 1 — Fix AutoDM Instagram API scopes CRITICAL ✅ DONE
 
 **Why:** AutoDM is the #1 feature creators evaluate in head-to-head vs. Stan ($29 tier) and Beacons (free tier). The code skeleton shipped last sprint but uses the deprecated Instagram Basic Display API (`user_profile,user_media` scopes, API deprecated Dec 2024). These scopes cannot authorize DMs or comment webhooks. The feature is silently broken: OAuth will succeed but token will have wrong permissions, DMs will return 403. Meta's app review for Business API access takes 2–4 weeks — the code fix must happen NOW so the moment review clears, AutoDM goes live.
 
@@ -96,7 +96,7 @@ Also update the comment webhook field from `"comments"` to `"comments"` — fiel
 
 ---
 
-## Task 2 — Gumroad fee calculator landing page CRITICAL
+## Task 2 — Gumroad fee calculator landing page CRITICAL ✅ DONE
 
 **Why:** Creator outrage at Gumroad's effective ~20% fee is peaking in June 2026 — Reddit, YouTube, and every 2026 platform roundup are actively covering it. No competitor has built a comparison calculator. This is a 1–2 day marketing build (no backend, no auth) that captures high-intent migrators via SEO and social shares during a window that closes as the news cycle moves. The math is simple and compelling: on $1,000/mo in sales, Gumroad takes ~$100–200. Linktohub at 6% takes $60.
 
@@ -144,7 +144,7 @@ Add route to sitemap if one exists. No auth wall — this page is public acquisi
 
 ---
 
-## Task 3 — Stripe Instant Payouts toggle HIGH
+## Task 3 — Stripe Instant Payouts toggle HIGH ✅ DONE
 
 **Why:** Gumroad's 7-day payout cycle is a top-cited creator complaint (multiple Reddit threads, June 2026). Stripe Instant Payouts (GA) settle in ~30 minutes, 24/7, at 0.25% fee. Adding a dashboard toggle directly attacks the #2 Gumroad complaint (after fees). The entire Connect infrastructure is already wired. This is one Stripe API call added to the existing payouts page.
 
@@ -207,7 +207,7 @@ Note: For actual instant payout disbursement, the creator hits "Pay out now" →
 
 ---
 
-## Task 4 — Wire affiliate commission on purchase HIGH
+## Task 4 — Wire affiliate commission on purchase HIGH ✅ DONE
 
 **Why:** The affiliate referral tracking (link click → signup attribution) was fixed last sprint. But when a referred user actually buys something, the referring creator still earns $0. There is no commission logic in `checkout/webhook/route.ts`. The affiliate tab in the dashboard shows referred counts but no earnings. Closing this loop makes the affiliate system a real growth lever: every creator becomes an incentivized salesperson for Linktohub.
 
@@ -268,7 +268,7 @@ Note on `fan_id` in payment intent: the checkout intent must pass `fan_id` in me
 
 ---
 
-## Task 5 — Verify transactional email delivery HIGH
+## Task 5 — Verify transactional email delivery HIGH ✅ DONE (code)
 
 **Why:** Every digital product purchase triggers `sendOrderConfirmation()` in the Stripe webhook, which emails the buyer a secure download link. If `RESEND_API_KEY` is the placeholder value `"your_resend_api_key"` in Vercel production, the function silently returns without sending — buyers of PDFs, courses, and presets have no way to download their purchase. This is a silent revenue-destroying bug. The guard in `src/lib/email.ts` line 5: `if (!key || key === "your_resend_api_key") return null` will swallow the failure.
 
