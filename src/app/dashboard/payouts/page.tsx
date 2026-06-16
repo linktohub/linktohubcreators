@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { DollarSign, ArrowLeft, CheckCircle2, Banknote, TrendingUp, Clock } from "lucide-react";
+import { DollarSign, ArrowLeft, CheckCircle2, Banknote, TrendingUp, Clock, Zap } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { stripe } from "@/lib/stripe";
 import SetupPayoutsButton from "./setup-payouts-button";
+import InstantPayoutsToggle from "./instant-payouts-toggle";
 
 export default async function PayoutsPage({
   searchParams,
@@ -18,7 +19,7 @@ export default async function PayoutsPage({
 
   const { data: creator } = await supabase
     .from("creators")
-    .select("id, stripe_account_id, stripe_account_enabled, total_revenue, display_name, email, transaction_fee_pct, plan_tier")
+    .select("id, stripe_account_id, stripe_account_enabled, total_revenue, display_name, email, transaction_fee_pct, plan_tier, instant_payouts_enabled")
     .eq("user_id", session.user.id)
     .single();
   if (!creator) redirect("/onboarding");
@@ -108,6 +109,24 @@ export default async function PayoutsPage({
           <div>
             <p className="text-emerald-300 font-semibold text-sm">Payouts active</p>
             <p className="text-white/40 text-xs mt-0.5">Sales transfer to your bank within 2 business days, automatically.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Instant Payouts toggle */}
+      {payoutsReady && (
+        <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6 mb-6">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Zap className="w-5 h-5 text-yellow-400" />
+                <h2 className="font-bold">Instant Payouts</h2>
+              </div>
+              <p className="text-white/50 text-sm max-w-sm">
+                Get paid in ~30 minutes instead of 3–5 business days. 0.25% fee per payout, capped at $25.
+              </p>
+            </div>
+            <InstantPayoutsToggle creatorId={creator.id} enabled={creator.instant_payouts_enabled ?? false} />
           </div>
         </div>
       )}
