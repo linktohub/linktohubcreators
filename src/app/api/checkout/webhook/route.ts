@@ -235,7 +235,10 @@ export async function POST(req: NextRequest) {
       totalCents,
       orderId: order.id,
       downloadUrls: downloadUrls.map((d) => ({ title: d.title, url: d.url })),
-    }).catch((err) => console.error("[webhook] email failed:", err));
+    }).catch(async (err) => {
+      console.error("[webhook] email failed:", err);
+      await admin.from("orders").update({ email_failed: true }).eq("id", order.id);
+    });
   }
 
   return NextResponse.json({ received: true });
