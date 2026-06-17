@@ -74,7 +74,7 @@ export default function HomePage() {
             AI builds your products. Merch ships globally. Your AI talks to fans 24/7 in your voice. You just approve and collect.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
-            <Link href="/auth/signup" className="btn-gradient h-14 px-9 rounded-2xl text-white font-bold text-base shadow-lg shadow-violet-500/20 flex items-center justify-center gap-2">
+            <Link href="/auth/signup" className="btn-gradient h-14 px-9 rounded-2xl text-white font-bold text-base shadow-lg shadow-violet-500/20 flex items-center justify-center gap-2 active:opacity-80 transition-opacity">
               Create free storefront <ArrowRight className="w-4 h-4" />
             </Link>
             <Link href="/pricing" className="h-14 px-9 rounded-2xl border border-white/10 text-white/60 hover:text-white hover:bg-white/[0.04] text-base font-medium transition-colors flex items-center justify-center">
@@ -99,7 +99,7 @@ export default function HomePage() {
 
         {/* How it works */}
         <section className="w-full max-w-4xl mx-auto mb-20">
-          <div className="bg-gradient-to-r from-violet-600/10 to-fuchsia-600/5 border border-violet-500/20 rounded-3xl p-10 text-center">
+          <div className="bg-gradient-to-r from-violet-600/10 to-fuchsia-600/5 border border-violet-500/20 rounded-3xl p-6 md:p-10 text-center">
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               {[
                 { n: "01", t: "Tell us who you are", d: "Connect your socials. AI reads your brand, voice, and audience." },

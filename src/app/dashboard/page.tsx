@@ -52,23 +52,20 @@ export default async function DashboardPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-white">
-          Hey, {firstName}
-        </h1>
-        <p className="text-white/35 mt-1 text-sm">Here&apos;s what&apos;s happening with your storefront.</p>
+        <h1 className="text-3xl font-black text-white">Hey, {firstName} 👋</h1>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         {stats.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="card-glass rounded-2xl p-5 group transition-all">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-white/40 text-xs font-medium uppercase tracking-wider">{label}</p>
+          <div key={label} className="card-glass rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
               <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", bg)}>
                 <Icon className={cn("w-4 h-4", color)} />
               </div>
             </div>
-            <p className="text-3xl font-black text-white">{value}</p>
+            <p className="text-2xl font-black text-white mb-0.5">{value}</p>
+            <p className="text-white/35 text-xs font-medium">{label}</p>
           </div>
         ))}
       </div>

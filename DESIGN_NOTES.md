@@ -2,6 +2,56 @@
 
 ---
 
+## Pass: 2026-06-17 · Score before: ~6.5/10 → after: ~7/10
+
+### What Was Fixed
+
+#### 1. `scrollbar-none` CSS missing — tab bars showing scrollbars (`globals.css`)
+The class was used everywhere (storefront tabs, products filter tabs) but had no CSS definition. On Firefox and desktop Chromium the scrollbar was visible. Added `scrollbar-width: none` + `::-webkit-scrollbar { display: none }`. Also added `-webkit-tap-highlight-color: transparent` to `button, a` — eliminates the blue flash on mobile taps globally.
+
+#### 2. Storefront tip widget unusable on mobile (`storefront-client.tsx`)
+The tip input was `w-14` (56px fixed) and the send button was `px-2 py-1` (too small, unclear label). Changed: input to `flex-1 min-w-0` inside a `min-w-[140px]` container, button to `h-8 px-3` with "Send" text label. Now readable and tappable at 375px.
+
+#### 3. Subscribe button text too long on narrow screens (`storefront-client.tsx`)
+"Sign in to subscribe — $X/mo" is ~30 characters and overflows the button on narrow screens. Shortened to "Sign in to subscribe" — the price already shows in the tier header directly above.
+
+#### 4. Mobile tap feedback missing on primary actions (`storefront-client.tsx`, `page.tsx`)
+Main CTA buttons (AI chat, Book, tabs, subscribe) had zero visual feedback on tap. Added `active:opacity-75 transition-opacity` to tab buttons, CTA buttons, and subscribe. Homepage hero CTA now has `active:opacity-80`.
+
+#### 5. Dashboard stats cards — dead `group` class and weak hierarchy (`dashboard/page.tsx`)
+Cards had `group transition-all` but no `group-hover:` children — dead class. Also the label was on top with the value at bottom, making the metric hard to scan. Restructured: icon at top-left, value `text-2xl font-black` prominent, label `text-xs text-white/35` beneath. Mirrors Stan/Linear card patterns. Removed generic "Here's what's happening with your storefront." subtitle from the greeting — it said nothing.
+
+#### 6. Create product event form felt like a government form (`products/create/page.tsx`)
+6 fields each with its own uppercase `tracking-wider` label above (`Date`, `Time`, `Duration (min)`, `Max spots`, `Price ($)`, `Type`) — 12 DOM elements for data entry. Replaced with placeholder-only inputs in the same grid. A single brief prompt line ("When is it happening?") replaces all 6 labels. Date/time inputs show format hints natively; number inputs use `placeholder=` text.
+
+#### 7. Products empty state too sparse (`products/products-client.tsx`)
+Was a bare `border border-white/[0.06] rounded-2xl py-20` box — no visual hierarchy, no energy. Now has: `bg-gradient-to-b from-violet-500/[0.05]` background, a framed icon container (`w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20`), stronger title (`font-black text-white` instead of `text-white/40 font-semibold`), and a properly sized CTA (`h-11 px-7` instead of `py-3 px-6`).
+
+#### 8. Homepage "How it works" padding crushed on mobile (`page.tsx`)
+Section card had `p-10` (40px all sides) — on 375px that left only 295px of content width. Changed to `p-6 md:p-10`.
+
+---
+
+### What Still Needs Work (Next Pass)
+
+**High priority**
+- **Products list row overflow on 375px**: with emoji + title + price + edit + toggle + delete, fixed elements total ~300px leaving only ~35–75px for the product title. Needs swipe-to-reveal actions or a "..." kebab menu on mobile.
+- **Storefront product modal close button**: `X` at `top-4 right-4` overlaps long product titles in the `p-6` content area. Add `pr-10` to the title container.
+- **Digital tab empty state** (storefront): bare `<p className="text-white/25 text-center py-16">No digital products yet</p>` — one line. Apply same empty state treatment as products page.
+
+**Medium priority**
+- AI chat paywall icon uses `brandColor + "22"` (8% opacity) — invisible with light brand colors. Use fixed `bg-violet-500/10` instead.
+- ProductCard "Add" button is `h-9` (36px) — below 44px tap target minimum. Needs `h-10`.
+- Homepage features grid `p-5` cards compress to ~100px wide at 375px (2-col). Consider `p-4` on mobile or a horizontal list.
+- Subscription tier cards have no visual differentiation — consider a "Most popular" badge on the middle tier.
+
+**Low priority**
+- Storefront acquisition bar at bottom could be a gradient-border card rather than bare `border-t` for more premium feel.
+- Footer on homepage has only 3 links — add Privacy / Terms before launch.
+- Sidebar nav: "Products" and "Digital" both point to `/dashboard/products` — confusing duplication.
+
+---
+
 ## Pass: 2026-06-10 · Score before: ~5.5/10 → after: ~6.5/10
 
 ### What Was Fixed

@@ -645,27 +645,27 @@ export default function StorefrontClient({
         {/* CTA row */}
         <div className="flex gap-2 mb-7 flex-wrap">
           {creator.calendar_enabled && (
-            <button className="flex-1 min-w-[90px] h-12 rounded-xl font-bold text-sm text-white border border-white/20 hover:bg-white/[0.06] transition-colors"
+            <button className="flex-1 min-w-[90px] h-12 rounded-xl font-bold text-sm text-white border border-white/20 hover:bg-white/[0.06] active:opacity-75 transition-all"
               onClick={() => toast.info("Bookings opening soon — stay tuned!")}>
               📅 Book
             </button>
           )}
           {creator.ai_chat_enabled && (
-            <button className="flex-1 min-w-[100px] h-12 rounded-xl font-bold text-sm text-white"
+            <button className="flex-1 min-w-[100px] h-12 rounded-xl font-bold text-sm text-white active:opacity-75 transition-opacity"
               style={{ backgroundColor: brandColor }}
               onClick={() => setActiveTab("ai")}>
               🤖 Chat with AI
             </button>
           )}
           {creator.tips_enabled && (
-            <div className="flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.08] rounded-xl px-3 h-12">
-              <span className="text-white/40 text-sm">$</span>
+            <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-xl px-3 h-12 min-w-[140px]">
+              <span className="text-white/40 text-sm font-medium">$</span>
               <input type="number" value={tipAmount} onChange={(e) => setTipAmount(e.target.value)}
-                placeholder="Tip" className="w-14 bg-transparent text-white text-sm outline-none placeholder:text-white/25" />
-              <button className="text-white font-bold text-sm px-2 py-1 rounded-lg disabled:opacity-50" style={{ backgroundColor: brandColor }}
+                placeholder="Tip amount" className="flex-1 min-w-0 bg-transparent text-white text-sm outline-none placeholder:text-white/25" />
+              <button className="text-white font-bold text-sm px-3 h-8 rounded-lg disabled:opacity-50 shrink-0 active:opacity-75 transition-opacity" style={{ backgroundColor: brandColor }}
                 disabled={processingId === "tip"}
                 onClick={handleTip}>
-                {processingId === "tip" ? "..." : "💸"}
+                {processingId === "tip" ? "..." : "Send"}
               </button>
             </div>
           )}
@@ -706,7 +706,7 @@ export default function StorefrontClient({
               const isActive = activeTab === tab.id;
               return (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap shrink-0 transition-all"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap shrink-0 transition-all active:opacity-75"
                   style={isActive
                     ? { backgroundColor: brandColor, color: "#fff" }
                     : { backgroundColor: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.45)" }
@@ -779,11 +779,11 @@ export default function StorefrontClient({
                       ))}
                     </ul>
                   )}
-                  <button className="w-full h-12 rounded-xl font-bold text-white text-sm disabled:opacity-60"
+                  <button className="w-full h-12 rounded-xl font-bold text-white text-sm disabled:opacity-60 active:opacity-75 transition-opacity"
                     style={{ backgroundColor: brandColor }}
                     disabled={processingId === tier.id}
                     onClick={() => handleSubscribe(tier.id)}>
-                    {processingId === tier.id ? "Loading..." : fanUser === null ? `Sign in to subscribe — $${price}/mo` : `Subscribe — $${price}/mo`}
+                    {processingId === tier.id ? "Loading..." : fanUser === null ? `Sign in to subscribe` : `Subscribe — $${price}/mo`}
                   </button>
                 </div>
               );

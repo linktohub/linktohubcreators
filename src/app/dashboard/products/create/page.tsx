@@ -312,45 +312,30 @@ export default function CreateProductPage() {
 
               {/* Event: editable fields — creator sets these before publishing */}
               {productType === "event" && (
-                <div className="space-y-3 mt-4 pt-4 border-t border-white/[0.07]">
-                  <p className="text-white/40 text-xs font-bold uppercase tracking-wider">Set your event details</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-white/40 text-xs uppercase tracking-wider block mb-1">Date</label>
-                      <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)}
-                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 [color-scheme:dark]" />
-                    </div>
-                    <div>
-                      <label className="text-white/40 text-xs uppercase tracking-wider block mb-1">Time</label>
-                      <input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)}
-                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 [color-scheme:dark]" />
-                    </div>
-                    <div>
-                      <label className="text-white/40 text-xs uppercase tracking-wider block mb-1">Duration (min)</label>
-                      <input type="number" value={eventDuration} onChange={(e) => setEventDuration(Number(e.target.value))} min="15"
-                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50" />
-                    </div>
-                    <div>
-                      <label className="text-white/40 text-xs uppercase tracking-wider block mb-1">Max spots</label>
-                      <input type="number" value={eventMaxAttendees} onChange={(e) => setEventMaxAttendees(Number(e.target.value))} min="1"
-                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50" />
-                    </div>
-                    <div>
-                      <label className="text-white/40 text-xs uppercase tracking-wider block mb-1">Price ($)</label>
-                      <input type="number" value={eventPrice} onChange={(e) => setEventPrice(Number(e.target.value))} min="0" step="0.01"
-                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50" />
-                    </div>
-                    <div>
-                      <label className="text-white/40 text-xs uppercase tracking-wider block mb-1">Type</label>
-                      <select value={eventType} onChange={(e) => setEventType(e.target.value)}
-                        className="w-full h-10 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 [color-scheme:dark]">
-                        <option value="webinar">Webinar</option>
-                        <option value="zoom">Zoom Call</option>
-                        <option value="seminar">Seminar</option>
-                        <option value="livestream">Livestream</option>
-                        <option value="in_person">In Person</option>
-                      </select>
-                    </div>
+                <div className="space-y-2 mt-4 pt-4 border-t border-white/[0.07]">
+                  <p className="text-white/40 text-xs mb-3">When is it happening?</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)}
+                      className="h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 [color-scheme:dark]" />
+                    <input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)}
+                      className="h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 [color-scheme:dark]" />
+                    <input type="number" value={eventDuration} onChange={(e) => setEventDuration(Number(e.target.value))} min="15"
+                      placeholder="Duration (min)"
+                      className="h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 placeholder:text-white/25" />
+                    <input type="number" value={eventMaxAttendees} onChange={(e) => setEventMaxAttendees(Number(e.target.value))} min="1"
+                      placeholder="Max spots"
+                      className="h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 placeholder:text-white/25" />
+                    <input type="number" value={eventPrice} onChange={(e) => setEventPrice(Number(e.target.value))} min="0" step="0.01"
+                      placeholder="Price ($)"
+                      className="h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 placeholder:text-white/25" />
+                    <select value={eventType} onChange={(e) => setEventType(e.target.value)}
+                      className="h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 text-white text-sm outline-none focus:border-violet-500/50 [color-scheme:dark]">
+                      <option value="webinar">Webinar</option>
+                      <option value="zoom">Zoom Call</option>
+                      <option value="seminar">Seminar</option>
+                      <option value="livestream">Livestream</option>
+                      <option value="in_person">In Person</option>
+                    </select>
                   </div>
                 </div>
               )}

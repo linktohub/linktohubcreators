@@ -324,19 +324,19 @@ export default function ProductsClient({
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 border border-white/[0.06] rounded-2xl">
-          <p className="text-4xl mb-4">
+        <div className="text-center py-16 rounded-2xl bg-gradient-to-b from-violet-500/[0.05] to-transparent border border-violet-500/[0.12]">
+          <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-3xl mx-auto mb-5">
             {activeTab === "all" ? "✨" : TABS.find((t) => t.id === activeTab)?.emoji}
+          </div>
+          <p className="text-white font-black text-lg mb-1">
+            {activeTab === "all" ? "Nothing here yet" : `No ${TABS.find((t) => t.id === activeTab)?.label} yet`}
           </p>
-          <p className="text-white/40 text-lg font-semibold mb-2">
-            {activeTab === "all" ? "No products yet" : `No ${TABS.find((t) => t.id === activeTab)?.label} yet`}
-          </p>
-          <p className="text-white/25 text-sm mb-6">
-            Let AI build your first one in seconds
+          <p className="text-white/30 text-sm mb-7 max-w-xs mx-auto leading-relaxed">
+            AI will build your first one in seconds — just pick a type
           </p>
           <Link
             href="/dashboard/products/create"
-            className="inline-flex items-center gap-2 btn-gradient px-6 py-3 rounded-xl text-white font-bold text-sm"
+            className="inline-flex items-center gap-2 btn-gradient h-11 px-7 rounded-xl text-white font-bold text-sm"
           >
             <Sparkles className="w-4 h-4" />
             Create with AI

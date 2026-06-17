@@ -177,3 +177,15 @@
 .safe-area-bottom {
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
 }
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
