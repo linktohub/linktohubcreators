@@ -209,6 +209,16 @@ const shippingAddress = pi.metadata.shipping_address
 
 ---
 
+## 15. Platform fee — webhook order recording fix (sprint week 2026-06-19)
+
+**Status:** Implemented  
+**Bug fixed:** `checkout/webhook/route.ts` hardcoded `0.10` (10%) when computing `platform_fee` and `creator_payout` for the orders table. The checkout intent route already read `transaction_fee_pct` from the creator record and charged Stripe the correct application fee (e.g. 6% for Starter creators) — but the webhook wrote the wrong split to the DB.  
+**Impact:** Every order for a Starter creator (6% plan) stored an overstated `platform_fee` and understated `creator_payout` in the `orders` table. Stripe itself was charging the correct amount; only the DB records were wrong.  
+**Change:** Webhook now reads `creators.transaction_fee_pct` using the `creator_id` from the PaymentIntent metadata, falls back to 6% if null. The affiliate commission calculation (which derives `commissionCents` from `platformFee`) is also corrected by this change.  
+**File:** `src/app/api/checkout/webhook/route.ts`
+
+---
+
 ## Supabase admin client
 
 `src/lib/supabase/admin.ts` — service role client for webhook routes that run without user auth. Used in all webhook handlers and checkout intent route.

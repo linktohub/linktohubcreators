@@ -106,7 +106,15 @@ export async function POST(req: NextRequest) {
     : null;
 
   const totalCents = pi.amount;
-  const platformFee = Math.round(totalCents * 0.10);
+
+  // Read creator's actual fee rate — avoids hardcoding 10% for Starter creators (real rate: 6%)
+  const { data: creatorRecord } = await admin
+    .from("creators")
+    .select("transaction_fee_pct")
+    .eq("id", creatorId)
+    .single();
+  const feeRate = (creatorRecord?.transaction_fee_pct as number) ?? 0.06;
+  const platformFee = Math.round(totalCents * feeRate);
   const creatorPayout = totalCents - platformFee;
 
   const { data: order } = await admin.from("orders").insert({
