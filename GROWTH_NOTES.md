@@ -1,3 +1,82 @@
+# Growth Notes — 2026-06-21
+
+## Top 3 Conversion Problems Fixed
+
+---
+
+### 1. Empty Storefront Tabs → "Coming Soon" States
+**File:** `src/app/[username]/storefront-client.tsx`
+
+**Problem:** When a creator enables a tab (Merch, Digital) but hasn't added products yet, fans land on a completely blank section. Zero visual feedback. No context. Fans assume the storefront is broken or abandoned and bounce. Creator loses credibility at the worst moment — right after sharing their new store.
+
+**Fix:**
+- Store tab with no merch now shows a "Store coming soon 🛍️" card with copy: "{creator.display_name} is setting things up — join their list to be first when drops go live." Naturally drives attention back to the email capture above.
+- Digital tab upgraded from bare `text-white/25` text ("No digital products yet") to a matching "📚 Digital products coming soon" card with the same subscribe nudge.
+- Both empty states sit inside a rounded card with subtle border, consistent with the rest of the dark design system.
+- Covers the edge case where `tabs.length === 0` (creator has enabled no features) — previously showed absolutely nothing below the email capture.
+
+**Why it helps:** Creator confidence and fan retention. A creator who shares their storefront and sees it look polished (even when empty) is more likely to keep adding products. A fan who sees "coming soon" instead of a blank tab has a reason to subscribe rather than leave. Email signups captured during this pre-launch window are the highest-intent list entries.
+
+**What to measure:**
+- Email capture rate on storefronts with 0 products vs storefronts with 1+ products (baseline comparison)
+- Bounce rate on storefront pages with no products (should decrease)
+- Creator activation rate: % of new creators who add a first product within 7 days (does seeing the empty state better motivate them to fill it?)
+
+---
+
+### 2. Referral Nudge on Onboarding Success Screen
+**File:** `src/app/onboarding/page.tsx`
+
+**Problem:** The success screen has a clear share button for the creator's own storefront — but nothing to capitalize on the creator's excitement about Linktohub itself. At the moment of launch, creators are at peak motivation and most likely to tell other creators. This was called out as a priority in the 2026-06-14 backlog and never landed.
+
+**Fix:** Added a "Know another creator?" card below the Set up payouts / Dashboard buttons on the success screen:
+- Framing: "Send them to Linktohub — they get a free trial, you help build the community." Benefit-forward, not spammy.
+- "Invite a creator" button uses the Web Share API (native mobile share sheet on iOS/Android) with clipboard fallback on desktop.
+- Share text: "I just launched my creator storefront on Linktohub 🚀 If you're a creator, you should try it — https://linktohub.vercel.app"
+- Styled as a low-friction secondary card (not another loud CTA) so it doesn't compete with the share-your-storefront primary action.
+
+**Why it helps:** Creator-to-creator referrals are the highest-converting acquisition channel — more trusted than ads, zero marginal cost, and highly intent-qualified (creators who know other creators know who'd actually want this). The launch moment is the natural trigger: asking "know anyone else?" when someone is excited gets a yes far more often than asking cold a week later.
+
+**What to measure:**
+- "Invite a creator" tap rate on success screen
+- Signups originating from `linktohub.vercel.app` referrer (not utm-trackable via Web Share, but trackable via referrer header)
+- Consider adding `?utm_source=creator_invite&utm_medium=success_screen` to the shared URL in a future sprint
+
+---
+
+### 3. UTM + Creator Username on Storefront Acquisition Bar
+**File:** `src/app/[username]/storefront-client.tsx`
+
+**Problem:** The "Build yours free — takes 10 minutes" button in the creator acquisition bar linked to `/auth/signup` with no tracking parameters. The team has no way to measure how many signups this bar drives, which creator niches convert best, or whether the bar is worth keeping. Flying blind on what may be the platform's best organic acquisition channel.
+
+**Fix:** Changed href to:
+```
+https://linktohub.vercel.app/auth/signup?utm_source=storefront&utm_medium=footer&utm_campaign=creator_cta&utm_content={creator.username}
+```
+- `utm_source=storefront` — separates this from landing page, paid, or email traffic
+- `utm_medium=footer` — distinguishes from any future in-content acquisition prompts
+- `utm_campaign=creator_cta` — groups all storefront-bar signups for funnel reporting
+- `utm_content={creator.username}` — tells you WHICH creator's storefront drove each signup, enabling niche analysis ("fitness creators convert 3× better than lifestyle creators")
+
+**Why it helps:** Pure measurement — zero UX change, zero risk. But without it, any conversion rate optimization for the acquisition bar is guesswork. With it, you can identify your top-performing creators (by referral), double down on niches that convert, and A/B test copy changes with real data.
+
+**What to measure:**
+- Signups per week with `utm_source=storefront` (weekly baseline to establish)
+- Top-converting creator usernames in `utm_content` — reach out to those creators, understand why their fans convert
+- `utm_campaign=creator_cta` conversion rate vs landing page conversion rate (which is higher? what does that tell you?)
+
+---
+
+## Next priorities (backlog)
+
+- **Dashboard "share your storefront" nudge at first login** — creators who share in first 24h retain better; add a prominent banner on the dashboard for creators with 0 orders
+- **`?utm_source=creator_invite` on referral share URL** — currently using Web Share API which doesn't guarantee referrer headers; add explicit UTM to the invite URL
+- **Empty storefront: creator-facing dashboard CTA** — when a creator views their own empty storefront, show a "You're the creator? Add your first product →" link to `/dashboard/products/new`. Requires detecting creator vs. fan session (not yet implemented)
+- **Product urgency signals** — "X fans bought this" or "limited stock" badges on product cards (needs backend counter; hold for now)
+- **Storefront mobile density audit** — avatar, name, socials, CTA row, and email form all compete above the fold on iPhone 14. Consider collapsing socials behind a "Connect" pill on mobile
+
+---
+
 # Growth Notes — 2026-06-14
 
 ## Top 3 Conversion Problems Fixed

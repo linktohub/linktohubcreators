@@ -429,6 +429,28 @@ export default function OnboardingPage() {
               Dashboard →
             </button>
           </div>
+
+          {/* Referral nudge — peak motivation moment */}
+          <div className="mt-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 text-left">
+            <p className="text-white/35 text-xs font-medium uppercase tracking-wider mb-2">Know another creator?</p>
+            <p className="text-white/55 text-sm mb-3 leading-relaxed">
+              Send them to Linktohub — they get a free trial, you help build the community.
+            </p>
+            <button
+              onClick={async () => {
+                const referralMsg = `I just launched my creator storefront on Linktohub 🚀 If you're a creator, you should try it — https://linktohub.vercel.app`;
+                if (typeof navigator !== "undefined" && navigator.share) {
+                  try { await navigator.share({ title: "Linktohub — Creator storefronts", text: referralMsg, url: "https://linktohub.vercel.app" }); } catch { /* cancelled */ }
+                } else {
+                  await navigator.clipboard.writeText(referralMsg);
+                  toast.success("Copied!");
+                }
+              }}
+              className="w-full h-10 rounded-xl border border-white/[0.08] text-white/50 hover:text-white hover:bg-white/[0.04] text-sm font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <Share2 className="w-3.5 h-3.5" /> Invite a creator
+            </button>
+          </div>
         </div>
       </div>
     );

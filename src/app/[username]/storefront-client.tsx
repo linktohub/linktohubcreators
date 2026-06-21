@@ -727,6 +727,17 @@ export default function StorefrontClient({
             ))}
           </div>
         )}
+        {(activeTab === "store" || tabs.length === 0) && merch.length === 0 && (
+          <div className="flex flex-col items-center text-center py-14 px-4 gap-4 mb-16">
+            <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-3xl">🛍️</div>
+            <div>
+              <p className="font-bold text-white/60 text-base">Store coming soon</p>
+              <p className="text-white/30 text-sm mt-1.5 max-w-[220px] leading-relaxed mx-auto">
+                {creator.display_name} is setting things up — join their list to be first when drops go live.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Digital tab */}
         {activeTab === "digital" && (
@@ -753,7 +764,17 @@ export default function StorefrontClient({
                 </button>
               );
             })}
-            {digital.length === 0 && <p className="text-white/25 text-center py-16">No digital products yet</p>}
+            {digital.length === 0 && (
+              <div className="flex flex-col items-center text-center py-14 px-4 gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-3xl">📚</div>
+                <div>
+                  <p className="font-bold text-white/60 text-base">Digital products coming soon</p>
+                  <p className="text-white/30 text-sm mt-1.5 max-w-[220px] leading-relaxed mx-auto">
+                    {creator.display_name} is working on it — subscribe above to be first in line.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -937,7 +958,7 @@ export default function StorefrontClient({
       <div className="border-t border-white/[0.06] mt-4 px-4 py-6 text-center">
         <p className="text-white/35 text-xs mb-3">Want your own storefront like this?</p>
         <a
-          href="https://linktohub.vercel.app/auth/signup"
+          href={`https://linktohub.vercel.app/auth/signup?utm_source=storefront&utm_medium=footer&utm_campaign=creator_cta&utm_content=${creator.username}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-white text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-white/90 transition-colors"
