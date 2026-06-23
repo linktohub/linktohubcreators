@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe";
 import { createClient as createAdmin } from "@supabase/supabase-js";
 import { createGelatoOrder } from "@/lib/gelato";
 import { sendOrderConfirmation } from "@/lib/email";
+import { generateAndStorePdf } from "@/lib/pdf-generator";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -161,10 +162,21 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Auto-subscribe buyer to creator's email list
+  if (customerEmail) {
+    await admin.from("email_subscribers").upsert({
+      creator_id: creatorId,
+      email: customerEmail,
+      full_name: shippingName || null,
+      source: "purchase",
+      subscribed: true,
+    }, { onConflict: "creator_id,email", ignoreDuplicates: true });
+  }
+
   const productIds = itemsMeta.map((i) => i.id);
   const { data: products } = await admin
     .from("products")
-    .select("id, type, title, file_url, pod_provider, pod_product_id, pod_variant_id, price, images")
+    .select("id, type, title, file_type, file_url, pod_provider, pod_product_id, pod_variant_id, price, images")
     .in("id", productIds);
 
   const downloadUrls: { product_id: string; title: string; url: string }[] = [];
@@ -205,10 +217,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (product.type === "digital" && customerEmail) {
+      let fileUrl = product.file_url;
+      if (!fileUrl && (product.file_type === "pdf" || product.file_type === "course")) {
+        try {
+          fileUrl = await generateAndStorePdf(product.id, admin);
+        } catch (err) {
+          console.error("[webhook] auto-generate PDF failed:", err);
+        }
+      }
+
       const { data: token } = await admin.from("purchase_tokens").insert({
         order_id: order.id,
         product_id: product.id,
         buyer_email: customerEmail,
+        delivery_pending: !fileUrl,
       }).select("token").single();
 
       if (token) {

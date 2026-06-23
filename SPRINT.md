@@ -45,7 +45,7 @@ All five 2026-06-15 sprint tasks are **done**:
 
 ---
 
-## Task 1 — Auto-generate PDF at purchase when file_url is missing CRITICAL
+## Task 1 — Auto-generate PDF at purchase when file_url is missing ✅ DONE
 
 **Why:** A buyer pays for a digital product → webhook creates a `purchase_token` → confirmation email arrives with download link → `/api/download?token=X` looks up `products.file_url` → if null, returns `"File not found"` (HTTP 404). This happens whenever a creator creates a digital product without clicking "Generate PDF" in their dashboard first. Money in, broken delivery out. Silent failure, no buyer recourse.
 
@@ -88,7 +88,7 @@ Add `delivery_pending boolean default false` column to `purchase_tokens` table v
 
 ---
 
-## Task 2 — Fix welcome email (storefront promise broken on every signup) CRITICAL
+## Task 2 — Fix welcome email (storefront promise broken on every signup) ✅ DONE
 
 **Why:** `handleEmailCapture()` in `src/app/[username]/storefront-client.tsx` shows this success state after a fan subscribes:
 > "You're in! ✓ · Check your inbox for a welcome from [creator]"
@@ -140,7 +140,7 @@ Update `src/app/api/notify/new-subscriber/route.ts` to:
 
 ---
 
-## Task 3 — Auto-add buyers to email list HIGH
+## Task 3 — Auto-add buyers to email list ✅ DONE
 
 **Why:** Every successful purchase is the highest-intent interaction a fan can have with a creator. Currently, buyers are not added to `email_subscribers`. The creator's email list stays empty from sales; broadcast campaigns can't retarget buyers. RESEARCH.md ranks email marketing as the #1 acquisition lever against Stan — this is what makes "email included in base plan" actually worth something.
 
@@ -167,7 +167,7 @@ Update `src/app/dashboard/email/page.tsx` — the source breakdown cards already
 
 ---
 
-## Task 4 — Email delivery health check in dashboard HIGH
+## Task 4 — Email delivery health check in dashboard ✅ DONE
 
 **Why:** `src/lib/email.ts` silently returns `null` if `RESEND_API_KEY` is missing or is the placeholder value. Order confirmation emails, welcome emails, and broadcasts all fail without any visible error to the creator. There is currently no dashboard signal that email is broken. A creator could have $0 in revenue from email because it's unconfigured and have no idea.
 
@@ -212,7 +212,7 @@ If `failedEmailCount > 0`, show a warning in the stats section: "X orders had de
 
 ---
 
-## Task 5 — Mobile storefront UX: 3 conversion-blocking bugs HIGH
+## Task 5 — Mobile storefront UX: 3 conversion-blocking bugs ✅ DONE
 
 **Why:** Mobile visitors are 141% more engaged and log in 63% more often (RESEARCH). DESIGN_NOTES lists three remaining mobile bugs that directly block purchase actions on 375px screens. These are the last polish items that can break a sale.
 

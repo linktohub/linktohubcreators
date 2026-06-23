@@ -77,3 +77,34 @@ export async function sendNewSubscriberNotification({
     </div>`,
   });
 }
+
+export async function sendSubscriberWelcome({
+  to, subscriberName, creatorName, creatorUsername, topProducts,
+}: {
+  to: string;
+  subscriberName?: string;
+  creatorName: string;
+  creatorUsername: string;
+  topProducts: { title: string; price: number; type: string }[];
+}) {
+  const resend = getResend();
+  if (!resend) return;
+  const storefrontUrl = `https://linktohub.vercel.app/${creatorUsername}`;
+  const productList = topProducts.slice(0, 3).map((p) =>
+    `<li style="margin:6px 0"><a href="${storefrontUrl}" style="color:#7c3aed">${p.title}</a> — $${p.price}</li>`
+  ).join("");
+
+  await resend.emails.send({
+    from: `${creatorName} <updates@linktohub.com>`,
+    to,
+    subject: `Welcome to ${creatorName}'s inner circle!`,
+    html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#111">
+      <h2 style="color:#7c3aed">You're in! 🎉</h2>
+      <p>Hey${subscriberName ? ` ${subscriberName}` : ""}! Thanks for joining <strong>${creatorName}</strong>'s community.</p>
+      ${productList.length ? `<p><strong>Check out what's in the store:</strong></p><ul>${productList}</ul>` : ""}
+      <p><a href="${storefrontUrl}" style="color:#7c3aed;font-weight:bold">Visit the store →</a></p>
+      <hr style="margin:24px 0;border:none;border-top:1px solid #eee">
+      <p style="color:#888;font-size:12px">You subscribed at ${creatorName}'s Linktohub storefront. <a href="${storefrontUrl}/unsubscribe?email=${encodeURIComponent(to)}" style="color:#888">Unsubscribe</a></p>
+    </div>`,
+  });
+}

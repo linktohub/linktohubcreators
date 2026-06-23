@@ -1,10 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Mail, Users, Send } from "lucide-react";
+import { ArrowLeft, Mail, Users } from "lucide-react";
 import Link from "next/link";
 import EmailBroadcastClient from "./broadcast-client";
 
 export default async function EmailPage() {
+  const emailConfigured = Boolean(
+    process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== "your_resend_api_key"
+  );
+
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect("/auth/login");
@@ -26,6 +30,18 @@ export default async function EmailPage() {
 
   return (
     <div className="p-5 pb-28 md:pb-8 max-w-4xl mx-auto">
+      {!emailConfigured && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl px-5 py-4 mb-6 flex items-start gap-3">
+          <span className="text-red-400 text-lg shrink-0">⚠️</span>
+          <div>
+            <p className="font-bold text-red-300 text-sm">Email not configured</p>
+            <p className="text-red-400/70 text-xs mt-0.5">
+              Add your <code className="bg-red-500/10 px-1 rounded">RESEND_API_KEY</code> to Vercel environment variables to enable email delivery. Until then, order confirmations, welcome emails, and broadcasts are silently skipped.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-3 mb-8">
         <Link href="/dashboard" className="w-8 h-8 rounded-lg border border-white/[0.08] flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.05] transition-colors">
           <ArrowLeft className="w-4 h-4" />

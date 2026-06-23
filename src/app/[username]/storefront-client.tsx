@@ -861,8 +861,7 @@ export default function StorefrontClient({
 
               {hasActiveSub === false && (
                 <div className="h-80 flex flex-col items-center justify-center px-8 text-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
-                    style={{ backgroundColor: brandColor + "22" }}>🔒</div>
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl bg-violet-500/10 border border-violet-500/20">🔒</div>
                   <div>
                     <p className="font-bold text-white">Members only</p>
                     <p className="text-white/45 text-sm mt-1">Subscribe to chat with {creator.display_name}&apos;s AI</p>
@@ -1006,7 +1005,7 @@ export default function StorefrontClient({
                 )}
 
                 {/* Title */}
-                <h2 className="text-2xl font-black text-white leading-tight">
+                <h2 className="text-2xl font-black text-white leading-tight pr-10">
                   {"title" in selectedProduct ? selectedProduct.title : ("name" in selectedProduct ? selectedProduct.name : "")}
                 </h2>
 
@@ -1334,7 +1333,7 @@ function ProductCard({ product, brandColor, onAdd, onView }: { product: Product;
         <div className="flex items-center justify-between mt-2">
           <span className="font-black text-base">${product.price}</span>
           <button onClick={(e) => { e.stopPropagation(); onAdd(); }}
-            className="text-white text-xs font-bold px-3 h-9 rounded-xl flex items-center justify-center active:scale-95 transition-transform"
+            className="text-white text-xs font-bold px-3 h-10 rounded-xl flex items-center justify-center active:scale-95 transition-transform"
             style={{ backgroundColor: brandColor }}>
             Add
           </button>

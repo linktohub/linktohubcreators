@@ -5,7 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { Sparkles, Pencil, Trash2 } from "lucide-react";
+import { Sparkles, Pencil, Trash2, MoreVertical } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -158,6 +158,7 @@ export default function ProductsClient({
   const [items, setItems] = useState<UnifiedItem[]>(() => normalize(products, events, tiers));
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [openKebabId, setOpenKebabId] = useState<string | null>(null);
 
   const filtered = activeTab === "all" ? items : items.filter((i) => i.category === activeTab);
 
@@ -270,7 +271,7 @@ export default function ProductsClient({
 
               {/* Info — must have min-w-0 to allow truncation */}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-white text-sm truncate leading-tight">{item.title}</p>
+                <p className="font-semibold text-white text-sm truncate leading-tight max-w-[120px] sm:max-w-none">{item.title}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   {item.badge && (
                     <span className="text-[9px] font-bold text-white/35 bg-white/[0.05] px-1.5 py-0.5 rounded uppercase tracking-wide">
@@ -289,10 +290,10 @@ export default function ProductsClient({
               {/* Price — fixed width */}
               <p className="font-bold text-white text-sm shrink-0 w-14 text-right">{item.price}</p>
 
-              {/* Edit — only for products table items */}
+              {/* Edit — desktop only, products only */}
               {item.source === "products" && (
                 <Link href={`/dashboard/products/${item.id}`}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl text-white/25 hover:text-violet-400 hover:bg-violet-500/10 transition-colors shrink-0">
+                  className="hidden sm:flex w-10 h-10 items-center justify-center rounded-xl text-white/25 hover:text-violet-400 hover:bg-violet-500/10 transition-colors shrink-0">
                   <Pencil className="w-3.5 h-3.5" />
                 </Link>
               )}
@@ -312,14 +313,42 @@ export default function ProductsClient({
                 )} />
               </button>
 
-              {/* Delete */}
+              {/* Delete — desktop only */}
               <button
                 onClick={() => deleteItem(item)}
                 disabled={deletingId === item.id}
-                className="text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 w-10 h-10 flex items-center justify-center rounded-xl shrink-0"
+                className="hidden sm:flex text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 w-10 h-10 items-center justify-center rounded-xl shrink-0"
               >
                 <Trash2 className={cn("w-3.5 h-3.5", deletingId === item.id && "animate-pulse")} />
               </button>
+
+              {/* Mobile kebab — edit + delete collapsed */}
+              <div className="relative sm:hidden shrink-0">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setOpenKebabId(openKebabId === item.id ? null : item.id); }}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl text-white/25 hover:text-white/60 hover:bg-white/[0.05] transition-colors"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+                {openKebabId === item.id && (
+                  <div className="absolute right-0 top-full mt-1 bg-[#1a1a2e] border border-white/[0.08] rounded-xl overflow-hidden z-10 min-w-[120px] shadow-xl">
+                    {item.source === "products" && (
+                      <Link href={`/dashboard/products/${item.id}`}
+                        onClick={() => setOpenKebabId(null)}
+                        className="flex items-center gap-2 px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/[0.05] transition-colors">
+                        <Pencil className="w-3.5 h-3.5" /> Edit
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => { setOpenKebabId(null); deleteItem(item); }}
+                      disabled={deletingId === item.id}
+                      className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-white/70 hover:text-red-400 hover:bg-red-500/[0.06] transition-colors disabled:opacity-40"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>

@@ -18,6 +18,12 @@ export default async function DashboardPage() {
 
   if (!creator) redirect("/onboarding");
 
+  const { count: failedEmailCount } = await supabase
+    .from("orders")
+    .select("id", { count: "exact" })
+    .eq("creator_id", creator.id)
+    .eq("email_failed", true);
+
   const firstName = creator.display_name?.split(" ")[0] || "Creator";
   const needsPayouts = !creator.stripe_account_enabled;
 
@@ -37,6 +43,18 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-5 md:p-8 pb-24 md:pb-8 max-w-5xl mx-auto">
+      {/* Failed email delivery warning */}
+      {failedEmailCount != null && failedEmailCount > 0 && (
+        <Link href="/dashboard/email"
+          className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-2xl px-5 py-4 mb-4 group hover:bg-red-500/15 transition-colors">
+          <span className="text-red-400 text-lg shrink-0">⚠️</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-red-300 text-sm">{failedEmailCount} order{failedEmailCount !== 1 ? "s" : ""} had delivery email failures</p>
+            <p className="text-red-400/60 text-xs mt-0.5">Check email settings to prevent future failures →</p>
+          </div>
+        </Link>
+      )}
+
       {/* Stripe Connect banner — shown until bank account is connected */}
       {needsPayouts && (
         <Link href="/dashboard/payouts"
