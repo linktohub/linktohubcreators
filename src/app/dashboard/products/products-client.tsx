@@ -262,7 +262,7 @@ export default function ProductsClient({
           {filtered.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-3 group hover:border-white/10 transition-all overflow-hidden"
+              className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-3 group hover:border-white/10 transition-all"
             >
               {/* Emoji icon */}
               <div className="w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.06] flex items-center justify-center text-lg shrink-0">
@@ -271,10 +271,10 @@ export default function ProductsClient({
 
               {/* Info — must have min-w-0 to allow truncation */}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-white text-sm truncate leading-tight max-w-[120px] sm:max-w-none">{item.title}</p>
+                <p className="font-semibold text-white text-sm truncate leading-tight">{item.title}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   {item.badge && (
-                    <span className="text-[9px] font-bold text-white/35 bg-white/[0.05] px-1.5 py-0.5 rounded uppercase tracking-wide">
+                    <span className="text-[10px] font-bold text-white/40 bg-white/[0.05] px-1.5 py-0.5 rounded uppercase tracking-wide">
                       {item.badge}
                     </span>
                   )}

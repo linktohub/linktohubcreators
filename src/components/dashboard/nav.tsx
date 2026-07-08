@@ -79,8 +79,11 @@ export default function DashboardNav({ creator }: { creator: Creator }) {
         {/* Creator */}
         <div className="px-4 py-4 border-b border-white/[0.05]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-sm font-black shrink-0">
-              {creator.display_name?.[0]?.toUpperCase() || "C"}
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-sm font-black shrink-0 overflow-hidden">
+              {creator.avatar_url
+                ? <img src={creator.avatar_url} alt={creator.display_name} className="w-full h-full object-cover" />
+                : creator.display_name?.[0]?.toUpperCase() || "C"
+              }
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate text-white/90">{creator.display_name}</p>

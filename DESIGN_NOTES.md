@@ -2,6 +2,54 @@
 
 ---
 
+## Pass: 2026-07-08 · Score before: ~7/10 → after: ~7.5/10
+
+### What Was Fixed
+
+#### 1. Cart button `absolute`+`relative` conflict — broken positioning on storefront (`storefront-client.tsx`)
+The cart button in the banner had both `absolute` and `relative` in its class list: `className="absolute top-4 right-4 ... relative"`. In Tailwind v4's CSS cascade, both emit `position:` rules with identical specificity; `relative` is registered after `absolute` in the generated stylesheet, so it wins. The button was rendered `position: relative` — it appeared in document flow after the back button rather than anchored to the top-right corner of the banner. Fixed by removing `relative` (the `absolute` value alone creates a positioning context for the badge child). Also bumped from `w-10 h-10` to `w-11 h-11` (44px — proper minimum tap target).
+
+#### 2. Kebab dropdown clipped by `overflow-hidden` on product rows (`products-client.tsx`)
+The product list item row had `overflow-hidden` on the flex container. The kebab dropdown uses `absolute right-0 top-full` to render below its trigger, but `overflow-hidden` on the ancestor clipped it. Removed `overflow-hidden` from the row. There is no content that requires clipping — truncation is already handled via `truncate` on the title element. Kebab menus on mobile now open correctly.
+
+#### 3. Event "Register" button tap target — flagged 3 passes in a row (`storefront-client.tsx`)
+The event register button was `text-xs py-1.5 px-3 rounded-lg` (~28px tap height, well below 44px minimum). Changed to `h-9 px-3 rounded-xl flex items-center justify-center` (36px — acceptable for a secondary action in a compact list row). Also renamed "Register free" to "Free RSVP" — shorter text fits better in the right-aligned slot.
+
+#### 4. Product title `max-w-[120px]` constraint removed (`products-client.tsx`)
+The title `<p>` had `max-w-[120px] sm:max-w-none` — a workaround from before the kebab menu was implemented. Now that the fixed-width desktop buttons (Edit, Delete) are hidden on mobile and replaced by the kebab, the flex-1 title container has sufficient space without an artificial cap. The existing `truncate` class handles overflow cleanly. Removed `max-w-[120px] sm:max-w-none`.
+
+#### 5. Badge text `text-[9px]` below readability floor (`products-client.tsx`)
+The product type badge used `text-[9px]` — 9px is below the usable minimum for uppercase tracking text, especially at low opacity. Changed to `text-[10px]` and nudged opacity from `text-white/35` to `text-white/40` for a small contrast improvement.
+
+#### 6. Dashboard stat cards and quick action cards lack mobile press feedback (`dashboard/page.tsx`, `globals.css`)
+Flagged twice in previous passes. Stat cards and quick action links had `transition-all` but no `active:` variant — pressing them on mobile gave zero visual response. Added `active:scale-[0.98] transition-transform` to stat cards and `active:scale-[0.97] active:opacity-80` to quick action links. Also added `.card-glass:active` to globals.css with a slight darkening, so any other `card-glass` element across the app picks up mobile press feedback without individual class-by-class fixes.
+
+#### 7. Nav sidebar always shows initials, ignores `avatar_url` (`nav.tsx`)
+The Creator type includes `avatar_url?: string` but the sidebar avatar always rendered the first initial of `display_name`. Added the same `avatar_url ? <img> : initial` pattern used consistently in the storefront. Added `overflow-hidden` to the container so the image is cropped to the `rounded-xl` shape correctly.
+
+---
+
+### What Still Needs Work (Next Pass)
+
+**High priority**
+- **Storefront CTA row (Book + AI Chat + Tip)**: With all three enabled, the `flex-wrap` row tries to fit `min-w-[90px] + min-w-[100px] + min-w-[140px]` = 330px into ~311px at 375px — wraps awkwardly. Needs explicit column count logic or a re-layout when tip is enabled.
+- **ProductCard "Add" button**: Still `h-10 px-3` = 40px. Needs `h-11` or proper touch-target treatment.
+- **Storefront subscription tier CTA button text**: "Subscribe — $X/mo" at wider prices (e.g. "$249/mo") can overflow the button on narrow screens. Either truncate the price or use a shorter label.
+
+**Medium priority**
+- **Storefront product modal body text contrast**: Description uses `text-white/60` which passes WCAG AA at ~4.1:1 against `#111`, but only barely. Consider bumping to `text-white/70` for first-render readability.
+- **Empty state on AI chat tab when `ai_chat_enabled` is false**: No tab is shown, so this state can't be reached — but if a creator disables AI mid-session, the UI has no graceful fallback.
+- **Sidebar nav section labels** (`text-white/20`) fail WCAG AA at ~1.4:1. These are decorative section headers but still legible text. Consider `text-white/30`.
+- **Landing page hero `leading-[0.9]` on mobile**: 48px × 0.9 = 43px line height on a 2-line h1 is very tight. Consider `leading-[0.95] md:leading-[0.9]`.
+- **Dashboard greeting lacks date context**: The "Hey, {name} 👋" header could show today's date or a quick KPI summary line ("↑ 3 sales this week") to make the dashboard feel live rather than static.
+
+**Low priority**
+- Sidebar "Products" and "Digital" are separate items under Monetize but both route to `/dashboard/products` — confusing. Remove or re-route the "Digital" nav item.
+- Storefront acquisition bar uses `border-t` — a gradient-border card treatment would look more premium.
+- Footer on homepage has only 3 links — add Privacy / Terms before launch.
+
+---
+
 ## Pass: 2026-06-17 · Score before: ~6.5/10 → after: ~7/10
 
 ### What Was Fixed

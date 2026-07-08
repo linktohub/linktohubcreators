@@ -572,7 +572,7 @@ export default function StorefrontClient({
         {/* Cart in banner */}
         {cartCount > 0 && (
           <button onClick={() => setCartOpen(true)}
-            className="absolute top-4 right-4 w-10 h-10 rounded-2xl flex items-center justify-center relative"
+            className="absolute top-4 right-4 w-11 h-11 rounded-2xl flex items-center justify-center"
             style={{ backgroundColor: brandColor }}>
             <ShoppingCart className="w-4 h-4 text-white" />
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-black text-xs font-black rounded-full flex items-center justify-center">{cartCount}</span>
@@ -827,11 +827,11 @@ export default function StorefrontClient({
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="font-black">{event.price === 0 ? "Free" : `$${event.price}`}</p>
-                  <button className="mt-1 text-white text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-60"
+                  <button className="mt-1.5 text-white text-xs font-bold px-3 h-9 rounded-xl disabled:opacity-60 flex items-center justify-center"
                     style={{ backgroundColor: brandColor }}
                     disabled={processingId === event.id}
                     onClick={() => handleEventRegister(event.id)}>
-                    {processingId === event.id ? "..." : event.price === 0 ? "Register free" : "Register"}
+                    {processingId === event.id ? "..." : event.price === 0 ? "Free RSVP" : "Register"}
                   </button>
                 </div>
               </div>

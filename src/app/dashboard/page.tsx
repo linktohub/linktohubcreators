@@ -76,7 +76,7 @@ export default async function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         {stats.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="card-glass rounded-2xl p-5">
+          <div key={label} className="card-glass rounded-2xl p-5 active:scale-[0.98] transition-transform cursor-default">
             <div className="flex items-center justify-between mb-3">
               <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", bg)}>
                 <Icon className={cn("w-4 h-4", color)} />
@@ -126,7 +126,7 @@ export default async function DashboardPage() {
             <Link
               key={href}
               href={href}
-              className="card-glass rounded-xl p-4 flex items-center justify-between group transition-all"
+              className="card-glass rounded-xl p-4 flex items-center justify-between group transition-all active:scale-[0.97] active:opacity-80"
             >
               <div className="flex items-center gap-2.5">
                 {emoji ? (
