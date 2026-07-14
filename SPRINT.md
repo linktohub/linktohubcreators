@@ -40,7 +40,7 @@ All five 2026-06-22 sprint tasks are **done**:
 | **Creator plan billing route** | ✅ Done — `/api/stripe/creator-billing` creates Checkout or portal session; webhook upserts `creator_subscriptions` and updates `creators.plan_tier`; billing page shows upgrade success banner |
 | **Bookings storefront flow** | ❌ Missing — button shows toast "coming soon"; no booking request UX |
 | **UTM revenue attribution** | ❌ Missing — storefront captures HTTP referrer but not `utm_source`; no revenue-by-source in analytics |
-| **Mobile CTA row at 375px** | ❌ Design bug — Book+AI+Tip triple row wraps awkwardly; noted high-priority in 7/8 audit |
+| **Mobile CTA row at 375px** | ✅ Done — 2-col grid when all three enabled (tip spans full width); Add button 44px; subscribe text uses · separator; duplicate Digital nav removed |
 | Printify | ❌ Not integrated — Gelato only (~250 products) |
 | Email drip sequences (D3/D7) | ❌ Not built — prerequisite (welcome email) now live; ready to build |
 | Course completion certificates | ❌ Not built |
@@ -260,7 +260,7 @@ Pass to `AnalyticsCharts` component as a new `utmSources` prop and render as a t
 
 ---
 
-## Task 4 — Mobile Storefront Conversion Fixes HIGH
+## Task 4 — Mobile Storefront Conversion Fixes HIGH ✅ DONE
 
 **Why:** DESIGN_NOTES 7/8 audit flagged three high-priority mobile bugs as "still needs work." Mobile traffic is 60%+ of all storefront visits (analytics_events `device_type = "mobile"` consistently higher). Each bug is small to fix individually but together they create a broken purchase experience on the most common device.
 

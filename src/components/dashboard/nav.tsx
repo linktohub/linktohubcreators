@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard, ShoppingBag, FileText, Bot, Calendar,
+  LayoutDashboard, ShoppingBag, Bot, Calendar,
   Ticket, Star, BarChart3, Settings, ExternalLink, DollarSign,
   MessageSquarePlus, Users, CreditCard, Mail, MessageCircle,
 } from "lucide-react";
@@ -20,7 +20,6 @@ const NAV_GROUPS = [
     label: "Monetize",
     items: [
       { href: "/dashboard/products", label: "Products", icon: ShoppingBag },
-      { href: "/dashboard/digital", label: "Digital", icon: FileText },
       { href: "/dashboard/subscriptions", label: "Subscriptions", icon: Star },
       { href: "/dashboard/payouts", label: "Earnings", icon: DollarSign },
     ],

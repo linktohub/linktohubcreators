@@ -643,33 +643,38 @@ export default function StorefrontClient({
         )}
 
         {/* CTA row */}
-        <div className="flex gap-2 mb-7 flex-wrap">
-          {creator.calendar_enabled && (
-            <button className="flex-1 min-w-[90px] h-12 rounded-xl font-bold text-sm text-white border border-white/20 hover:bg-white/[0.06] active:opacity-75 transition-all"
-              onClick={() => toast.info("Bookings opening soon — stay tuned!")}>
-              📅 Book
-            </button>
-          )}
-          {creator.ai_chat_enabled && (
-            <button className="flex-1 min-w-[100px] h-12 rounded-xl font-bold text-sm text-white active:opacity-75 transition-opacity"
-              style={{ backgroundColor: brandColor }}
-              onClick={() => setActiveTab("ai")}>
-              🤖 Chat with AI
-            </button>
-          )}
-          {creator.tips_enabled && (
-            <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-xl px-3 h-12 min-w-[140px]">
-              <span className="text-white/40 text-sm font-medium">$</span>
-              <input type="number" value={tipAmount} onChange={(e) => setTipAmount(e.target.value)}
-                placeholder="Tip amount" className="flex-1 min-w-0 bg-transparent text-white text-sm outline-none placeholder:text-white/25" />
-              <button className="text-white font-bold text-sm px-3 h-8 rounded-lg disabled:opacity-50 shrink-0 active:opacity-75 transition-opacity" style={{ backgroundColor: brandColor }}
-                disabled={processingId === "tip"}
-                onClick={handleTip}>
-                {processingId === "tip" ? "..." : "Send"}
-              </button>
+        {(() => {
+          const allThree = creator.calendar_enabled && creator.ai_chat_enabled && creator.tips_enabled;
+          return (
+            <div className={allThree ? "grid grid-cols-2 gap-2 mb-7" : "flex gap-2 mb-7 flex-wrap"}>
+              {creator.calendar_enabled && (
+                <button className="h-12 rounded-xl font-bold text-sm text-white border border-white/20 hover:bg-white/[0.06] active:opacity-75 transition-all"
+                  onClick={() => toast.info("Bookings opening soon — stay tuned!")}>
+                  📅 Book
+                </button>
+              )}
+              {creator.ai_chat_enabled && (
+                <button className="h-12 rounded-xl font-bold text-sm text-white active:opacity-75 transition-opacity"
+                  style={{ backgroundColor: brandColor }}
+                  onClick={() => setActiveTab("ai")}>
+                  🤖 Chat with AI
+                </button>
+              )}
+              {creator.tips_enabled && (
+                <div className={`flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-xl px-3 h-12 ${allThree ? "col-span-2" : "flex-1 min-w-[140px]"}`}>
+                  <span className="text-white/40 text-sm font-medium">$</span>
+                  <input type="number" value={tipAmount} onChange={(e) => setTipAmount(e.target.value)}
+                    placeholder="Tip amount" className="flex-1 min-w-0 bg-transparent text-white text-sm outline-none placeholder:text-white/25" />
+                  <button className="text-white font-bold text-sm px-3 h-8 rounded-lg disabled:opacity-50 shrink-0 active:opacity-75 transition-opacity" style={{ backgroundColor: brandColor }}
+                    disabled={processingId === "tip"}
+                    onClick={handleTip}>
+                    {processingId === "tip" ? "..." : "Send"}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          );
+        })()}
 
         {/* Email capture */}
         {!emailSubmitted ? (
@@ -1112,7 +1117,7 @@ export default function StorefrontClient({
                       style={{ backgroundColor: brandColor }}
                       disabled={processingId === selectedProduct.id}
                       onClick={() => { setSelectedProduct(null); handleSubscribe(selectedProduct.id); }}>
-                      {processingId === selectedProduct.id ? "Loading..." : fanUser === null ? "Sign in to subscribe" : `Subscribe — $${selectedProduct.price_monthly}/mo`}
+                      {processingId === selectedProduct.id ? "Loading..." : fanUser === null ? "Sign in to subscribe" : `Subscribe · $${selectedProduct.price_monthly}/mo`}
                     </button>
                   ) : (
                     <button className="w-full h-14 rounded-2xl font-black text-white text-base"
@@ -1333,7 +1338,7 @@ function ProductCard({ product, brandColor, onAdd, onView }: { product: Product;
         <div className="flex items-center justify-between mt-2">
           <span className="font-black text-base">${product.price}</span>
           <button onClick={(e) => { e.stopPropagation(); onAdd(); }}
-            className="text-white text-xs font-bold px-3 h-10 rounded-xl flex items-center justify-center active:scale-95 transition-transform"
+            className="text-white text-xs font-bold px-3 h-11 rounded-xl flex items-center justify-center active:scale-95 transition-transform"
             style={{ backgroundColor: brandColor }}>
             Add
           </button>
