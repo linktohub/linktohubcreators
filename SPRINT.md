@@ -37,7 +37,7 @@ All five 2026-06-22 sprint tasks are **done**:
 | Onboarding | ✅ Done — 6-step AI brand generation |
 | Design | ✅ ~7.5/10 after 7/8 audit pass |
 | AutoDM | ✅ Code done — pending Meta review |
-| **Creator plan billing route** | ❌ BROKEN — `/api/stripe/creator-billing` 404s; no creator can upgrade from trial |
+| **Creator plan billing route** | ✅ Done — `/api/stripe/creator-billing` creates Checkout or portal session; webhook upserts `creator_subscriptions` and updates `creators.plan_tier`; billing page shows upgrade success banner |
 | **Bookings storefront flow** | ❌ Missing — button shows toast "coming soon"; no booking request UX |
 | **UTM revenue attribution** | ❌ Missing — storefront captures HTTP referrer but not `utm_source`; no revenue-by-source in analytics |
 | **Mobile CTA row at 375px** | ❌ Design bug — Book+AI+Tip triple row wraps awkwardly; noted high-priority in 7/8 audit |
@@ -48,7 +48,7 @@ All five 2026-06-22 sprint tasks are **done**:
 
 ---
 
-## Task 1 — Creator Plan Billing Route CRITICAL
+## Task 1 — Creator Plan Billing Route CRITICAL ✅ DONE
 
 **Why:** The billing page `src/app/dashboard/billing/page.tsx` renders "Upgrade" buttons for Starter ($29), Pro ($49), and Business ($99) tiers. Every button submits a `<form action="/api/stripe/creator-billing" method="POST">`. That route does not exist — `ls src/app/api/stripe/` shows no `creator-billing` directory. Every trial creator who clicks "Upgrade" gets a 404. Linktohub earns $0 from platform subscriptions until this is fixed. The `creator_subscriptions` table and the `update_creator_fee` trigger (auto-updates `transaction_fee_pct` when `plan_tier` changes) are already in the database — only the route is missing.
 

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Check, Zap, Crown } from "lucide-react";
+import { ArrowLeft, Check, Zap, Crown, PartyPopper } from "lucide-react";
 import Link from "next/link";
 
 const PLANS = [
@@ -16,7 +16,14 @@ const TIER_FEATURES: Record<string, string[]> = {
   business: ["Everything + 3% fee", "Agency mode", "Dedicated success manager", "Instant payouts"],
 };
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ upgraded?: string }>;
+}) {
+  const params = await searchParams;
+  const upgraded = params.upgraded === "1";
+
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect("/auth/login");
@@ -45,6 +52,16 @@ export default async function BillingPage() {
           <p className="text-white/40 mt-1 text-sm">Manage your Linktohub subscription</p>
         </div>
       </div>
+
+      {upgraded && (
+        <div className="flex items-center gap-3 rounded-2xl p-4 mb-6 bg-emerald-500/10 border border-emerald-500/30">
+          <PartyPopper className="w-5 h-5 text-emerald-400 shrink-0" />
+          <div>
+            <p className="font-bold text-emerald-300 text-sm">You&apos;re on the {tier.charAt(0).toUpperCase() + tier.slice(1)} plan!</p>
+            <p className="text-white/50 text-xs mt-0.5">Your transaction fee has been updated. Welcome to the team.</p>
+          </div>
+        </div>
+      )}
 
       {/* Current plan status */}
       <div className={`rounded-2xl p-6 mb-6 border ${isTrialing ? "bg-amber-500/10 border-amber-500/30" : "bg-emerald-500/[0.06] border-emerald-500/20"}`}>

@@ -25,6 +25,31 @@ export async function POST(req: NextRequest) {
     const sess = event.data.object as Stripe.Checkout.Session;
     const meta = sess.metadata || {};
 
+    // Creator platform subscription (no `type` field, but has `plan_tier`)
+    if (meta.plan_tier && meta.creator_id && !meta.type) {
+      const subId = sess.subscription as string;
+      const customerId = sess.customer as string;
+      const feeRates: Record<string, number> = { starter: 0.06, pro: 0.045, business: 0.03 };
+      const amounts: Record<string, number> = { starter: 29, pro: 49, business: 99 };
+
+      await admin.from("creator_subscriptions").upsert({
+        creator_id: meta.creator_id,
+        plan_tier: meta.plan_tier,
+        stripe_subscription_id: subId,
+        stripe_customer_id: customerId,
+        status: "active",
+        amount_monthly: amounts[meta.plan_tier] || 29,
+      }, { onConflict: "stripe_subscription_id" });
+
+      await admin.from("creators").update({
+        plan_tier: meta.plan_tier,
+        plan_stripe_subscription_id: subId,
+        transaction_fee_pct: feeRates[meta.plan_tier] ?? 0.06,
+      }).eq("id", meta.creator_id);
+
+      return NextResponse.json({ received: true });
+    }
+
     if (meta.type === "subscription" && meta.tier_id && meta.creator_id) {
       const subId = sess.subscription as string | null;
       let periodStart: string | null = null;
@@ -80,7 +105,25 @@ export async function POST(req: NextRequest) {
   // Subscription cancelled
   if (event.type === "customer.subscription.deleted") {
     const sub = event.data.object as Stripe.Subscription;
-    await admin.from("fan_subscriptions").update({ status: "cancelled" }).eq("stripe_subscription_id", sub.id);
+
+    // Check if this is a creator platform subscription
+    const { data: creatorSub } = await admin
+      .from("creator_subscriptions")
+      .select("creator_id")
+      .eq("stripe_subscription_id", sub.id)
+      .single();
+
+    if (creatorSub) {
+      await admin.from("creator_subscriptions").update({ status: "cancelled" }).eq("stripe_subscription_id", sub.id);
+      await admin.from("creators").update({
+        plan_tier: "trial",
+        plan_stripe_subscription_id: null,
+        transaction_fee_pct: 0.10,
+      }).eq("id", creatorSub.creator_id);
+    } else {
+      await admin.from("fan_subscriptions").update({ status: "cancelled" }).eq("stripe_subscription_id", sub.id);
+    }
+
     return NextResponse.json({ received: true });
   }
 
