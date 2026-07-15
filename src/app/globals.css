@@ -149,14 +149,16 @@
 
 .btn-gradient {
   background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, transform 0.1s;
 }
 .btn-gradient:hover { opacity: 0.88; }
+.btn-gradient:active { opacity: 0.75; transform: scale(0.985); }
 
 .card-glass {
   background: rgba(255,255,255,0.025);
   border: 1px solid rgba(255,255,255,0.07);
   backdrop-filter: blur(12px);
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .card-glass:hover {
@@ -167,6 +169,10 @@
 .card-glass:active {
   background: rgba(255,255,255,0.035);
   border-color: rgba(255,255,255,0.09);
+}
+
+.mobile-nav-item {
+  transition: color 0.12s, background 0.12s;
 }
 
 .nav-active {
@@ -181,6 +187,10 @@
 
 .safe-area-bottom {
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+}
+
+.floating-action {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
 }
 
 .scrollbar-none {

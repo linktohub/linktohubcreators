@@ -2,6 +2,56 @@
 
 ---
 
+## Pass: 2026-07-15 · Score before: ~7.5/10 → after: ~8/10
+
+### What Was Fixed
+
+#### 1. Nav active state only matched exact paths — sub-pages showed no active item (`nav.tsx`)
+`pathname === href` made the entire left sidebar and mobile bottom nav go dark when visiting sub-pages like `/dashboard/products/create` or `/dashboard/products/123`. Changed both desktop and mobile checks to `href === "/dashboard" ? pathname === href : pathname.startsWith(href)`. Dashboard gets exact-match to prevent it being active on all sub-routes; everything else gets prefix-match. Also bumped mobile active pill from `bg-violet-500/[0.12]` to `bg-violet-500/[0.15]` — the previous value was too faint on OLED screens.
+
+#### 2. Storefront "Book" button had zero background — invisible and untappable (`storefront-client.tsx`)
+The Book CTA was `border border-white/20` with no background fill. On `#050508` that's ~1.5:1 contrast — the button was essentially a faint outline on black. Added `bg-white/[0.07]` base and `hover:bg-white/[0.12]` for hover. Also changed from `font-bold` → `font-black` (matches design rule: primary actions use font-black).
+
+#### 3. All storefront CTA buttons used `font-bold` instead of `font-black` (`storefront-client.tsx`)
+Design rule: "Large bold fonts (font-black) for headlines" and primary actions. "Chat with AI", "Send" (tip), "Join" (email), "Subscribe", event "Register" buttons were all `font-bold`. Changed to `font-black`. Also bumped the event register button from `h-9` (36px) → `h-10` (40px) for a slightly better touch target.
+
+#### 4. Floating cart button needed safe-area clearance for iOS home indicator (`storefront-client.tsx`, `globals.css`)
+The cart button was `fixed bottom-6 right-6` — on iPhones with home indicator, `24px` bottom offset puts it directly behind the gesture bar. Added a `.floating-action` class in globals.css using `bottom: calc(env(safe-area-inset-bottom, 0px) + 24px)` and applied it to the cart button. Fallback is 24px on non-iOS. Also changed `font-bold` → `font-black` and added a `shadow-black/40` to the drop shadow for depth.
+
+#### 5. Kebab dropdown background was `#1a1a2e` — blue-tinted, off-palette (`products-client.tsx`)
+The mobile kebab menu rendered with a blue-purple tinted background from an earlier copy-paste. Changed to `bg-[#111]` (matches the cart drawer and auth modal backgrounds) with `border-white/[0.12]` and `shadow-2xl shadow-black/60` for better layering depth. Also bumped minimum width from 120px to 140px so "Delete" text doesn't wrap.
+
+#### 6. Create page back button used `rounded-lg` — inconsistent with `rounded-xl` design rule (`create/page.tsx`)
+Both back button variants (Link and button) were `w-8 h-8 rounded-lg`. Design rule says `rounded-xl` for buttons. Changed to `w-9 h-9 rounded-xl` (also bumped size for a slightly more generous touch area). Changed text opacity from `text-white/30` → `text-white/40` for better visibility. Type picker cards now use `active:scale-[0.97] active:opacity-80` instead of the very subtle `active:scale-[0.99]`.
+
+#### 7. `btn-gradient` and `card-glass` lacked active-state transitions (`globals.css`)
+`btn-gradient:active` had no definition — pressing primary CTA buttons gave no haptic-aligned visual feedback. Added `transform: scale(0.985)` and `opacity: 0.75` on active. Added `transition: background 0.15s, border-color 0.15s` to `.card-glass` so hover state animates in instead of snapping. Also added `.mobile-nav-item` utility class with transition for future use.
+
+#### 8. Landing page hero line-height too tight on mobile (`page.tsx`)
+`leading-[0.9]` at `text-5xl` (48px) gives 43px line height — extremely tight for 2 wrapped lines. Changed to `leading-[0.93]` on mobile, preserving `sm:leading-[0.9]` for larger screens where the heading is single-line. Feature cards gained `border border-violet-500/20` on icon containers and a `group-hover:bg-violet-500/20` fill for subtle hover depth. Secondary CTA ("View pricing") got `active:opacity-70` and `transition-all`.
+
+---
+
+### What Still Needs Work (Next Pass)
+
+**High priority**
+- **ProductCard "Add" button**: `h-11` (44px) is the correct size, but the button is on the bottom-right of a 2-col grid card — it's easy to tap accidentally when scrolling. Consider adding a brief `scale` animation as confirmation before dispatching the add action.
+- **Storefront CTA row with all three enabled**: Book + AI Chat + Tip spans a `grid-cols-2` + `col-span-2` layout. If the brand color is very light (near white), the Book button at `bg-white/[0.07]` may not be distinguishable. Add a `border-white/30` on Book when brand color is light.
+- **Auth modal feels too generic**: The sign-in/sign-up bottom sheet has no branding — it's a plain dark modal. Should show the creator avatar and name above the form so fans know who they're subscribing to.
+
+**Medium priority**
+- **Sidebar nav labels** (`text-white/20`) are decorative but still ~1.4:1 contrast. Nudge to `text-white/30`.
+- **Storefront acquisition footer** still uses `border-t` divider — a gradient-border card with soft violet glow would feel more premium.
+- **Dashboard greeting has no date or revenue context** — "Hey, Name 👋" with four zero-state stats on first login feels like a blank form. Consider a first-time onboarding nudge card.
+- **Product detail modal `pr-10` on title**: Long product names with close button overlapping — add `pr-10` to the title `<h2>` in the product modal.
+
+**Low priority**
+- Subscription tier cards lack visual differentiation — a "Most popular" badge on the middle tier would drive more conversions.
+- Footer on homepage has only 3 links — add Privacy / Terms before launch.
+- ProductCard emoji placeholder (👕, 📦) when no image — should be a branded gradient placeholder using `brandColor`.
+
+---
+
 ## Pass: 2026-07-08 · Score before: ~7/10 → after: ~7.5/10
 
 ### What Was Fixed

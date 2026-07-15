@@ -331,7 +331,7 @@ export default function ProductsClient({
                   <MoreVertical className="w-4 h-4" />
                 </button>
                 {openKebabId === item.id && (
-                  <div className="absolute right-0 top-full mt-1 bg-[#1a1a2e] border border-white/[0.08] rounded-xl overflow-hidden z-10 min-w-[120px] shadow-xl">
+                  <div className="absolute right-0 top-full mt-1 bg-[#111] border border-white/[0.12] rounded-xl overflow-hidden z-10 min-w-[140px] shadow-2xl shadow-black/60">
                     {item.source === "products" && (
                       <Link href={`/dashboard/products/${item.id}`}
                         onClick={() => setOpenKebabId(null)}

@@ -648,13 +648,13 @@ export default function StorefrontClient({
           return (
             <div className={allThree ? "grid grid-cols-2 gap-2 mb-7" : "flex gap-2 mb-7 flex-wrap"}>
               {creator.calendar_enabled && (
-                <button className="h-12 rounded-xl font-bold text-sm text-white border border-white/20 hover:bg-white/[0.06] active:opacity-75 transition-all"
+                <button className="h-12 rounded-xl font-black text-sm text-white bg-white/[0.07] border border-white/20 hover:bg-white/[0.12] active:opacity-75 transition-all"
                   onClick={() => toast.info("Bookings opening soon — stay tuned!")}>
                   📅 Book
                 </button>
               )}
               {creator.ai_chat_enabled && (
-                <button className="h-12 rounded-xl font-bold text-sm text-white active:opacity-75 transition-opacity"
+                <button className="h-12 rounded-xl font-black text-sm text-white active:opacity-75 transition-opacity"
                   style={{ backgroundColor: brandColor }}
                   onClick={() => setActiveTab("ai")}>
                   🤖 Chat with AI
@@ -665,7 +665,7 @@ export default function StorefrontClient({
                   <span className="text-white/40 text-sm font-medium">$</span>
                   <input type="number" value={tipAmount} onChange={(e) => setTipAmount(e.target.value)}
                     placeholder="Tip amount" className="flex-1 min-w-0 bg-transparent text-white text-sm outline-none placeholder:text-white/25" />
-                  <button className="text-white font-bold text-sm px-3 h-8 rounded-lg disabled:opacity-50 shrink-0 active:opacity-75 transition-opacity" style={{ backgroundColor: brandColor }}
+                  <button className="text-white font-black text-sm px-3 h-8 rounded-lg disabled:opacity-50 shrink-0 active:opacity-75 transition-opacity" style={{ backgroundColor: brandColor }}
                     disabled={processingId === "tip"}
                     onClick={handleTip}>
                     {processingId === "tip" ? "..." : "Send"}
@@ -688,7 +688,7 @@ export default function StorefrontClient({
               <input type="email" placeholder="your@email.com" value={email}
                 onChange={(e) => setEmail(e.target.value)} required
                 className="flex-1 h-11 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
-              <button type="submit" className="h-11 px-5 rounded-xl font-bold text-sm text-white shrink-0"
+              <button type="submit" className="h-11 px-5 rounded-xl font-black text-sm text-white shrink-0 active:opacity-75 transition-opacity"
                 style={{ backgroundColor: brandColor }}>
                 Join
               </button>
@@ -805,7 +805,7 @@ export default function StorefrontClient({
                       ))}
                     </ul>
                   )}
-                  <button className="w-full h-12 rounded-xl font-bold text-white text-sm disabled:opacity-60 active:opacity-75 transition-opacity"
+                  <button className="w-full h-12 rounded-xl font-black text-white text-sm disabled:opacity-60 active:opacity-75 transition-opacity"
                     style={{ backgroundColor: brandColor }}
                     disabled={processingId === tier.id}
                     onClick={() => handleSubscribe(tier.id)}>
@@ -832,7 +832,7 @@ export default function StorefrontClient({
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="font-black">{event.price === 0 ? "Free" : `$${event.price}`}</p>
-                  <button className="mt-1.5 text-white text-xs font-bold px-3 h-9 rounded-xl disabled:opacity-60 flex items-center justify-center"
+                  <button className="mt-1.5 text-white text-xs font-black px-3 h-10 rounded-xl disabled:opacity-60 flex items-center justify-center active:opacity-75 transition-opacity"
                     style={{ backgroundColor: brandColor }}
                     disabled={processingId === event.id}
                     onClick={() => handleEventRegister(event.id)}>
@@ -1141,7 +1141,7 @@ export default function StorefrontClient({
       {/* Floating cart button */}
       {cartCount > 0 && !cartOpen && (
         <button onClick={() => setCartOpen(true)}
-          className="fixed bottom-6 right-6 h-14 px-5 rounded-2xl flex items-center gap-2.5 text-white font-bold shadow-xl z-50"
+          className="fixed floating-action right-5 h-14 px-5 rounded-2xl flex items-center gap-2.5 text-white font-black shadow-xl shadow-black/40 z-50"
           style={{ backgroundColor: brandColor }}>
           <ShoppingCart className="w-5 h-5" />
           <span>{cartCount} item{cartCount !== 1 ? "s" : ""}</span>
@@ -1338,7 +1338,7 @@ function ProductCard({ product, brandColor, onAdd, onView }: { product: Product;
         <div className="flex items-center justify-between mt-2">
           <span className="font-black text-base">${product.price}</span>
           <button onClick={(e) => { e.stopPropagation(); onAdd(); }}
-            className="text-white text-xs font-bold px-3 h-11 rounded-xl flex items-center justify-center active:scale-95 transition-transform"
+            className="text-white text-xs font-black px-3 h-11 rounded-xl flex items-center justify-center active:scale-95 transition-transform"
             style={{ backgroundColor: brandColor }}>
             Add
           </button>

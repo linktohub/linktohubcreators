@@ -67,7 +67,7 @@ export default function HomePage() {
             <TrendingUp className="w-3.5 h-3.5" />
             207M creators. Only 4% earn $50K+. We fix that.
           </div>
-          <h1 className="text-5xl sm:text-6xl lg:text-[76px] font-black tracking-tight leading-[0.9] mb-7">
+          <h1 className="text-5xl sm:text-6xl lg:text-[76px] font-black tracking-tight leading-[0.93] sm:leading-[0.9] mb-7">
             Your entire creator<br /><span className="gradient-text">business, running itself.</span>
           </h1>
           <p className="text-lg sm:text-xl text-white/45 max-w-2xl mx-auto leading-relaxed mb-10">
@@ -77,7 +77,7 @@ export default function HomePage() {
             <Link href="/auth/signup" className="btn-gradient h-14 px-9 rounded-2xl text-white font-bold text-base shadow-lg shadow-violet-500/20 flex items-center justify-center gap-2 active:opacity-80 transition-opacity">
               Create free storefront <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link href="/pricing" className="h-14 px-9 rounded-2xl border border-white/10 text-white/60 hover:text-white hover:bg-white/[0.04] text-base font-medium transition-colors flex items-center justify-center">
+            <Link href="/pricing" className="h-14 px-9 rounded-2xl border border-white/10 text-white/60 hover:text-white hover:bg-white/[0.04] active:opacity-70 text-base font-medium transition-all flex items-center justify-center">
               View pricing
             </Link>
           </div>
@@ -138,12 +138,12 @@ export default function HomePage() {
           <p className="text-white/25 text-sm font-medium uppercase tracking-widest mb-8 text-center">Every revenue stream in one place</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {FEATURES.map(({ icon: Icon, label, desc }) => (
-              <div key={label} className="card-glass rounded-2xl p-5">
-                <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center mb-4">
+              <div key={label} className="card-glass rounded-2xl p-5 group">
+                <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4 group-hover:bg-violet-500/20 transition-colors">
                   <Icon className="w-4 h-4 text-violet-400" />
                 </div>
                 <p className="font-semibold text-sm text-white/90">{label}</p>
-                <p className="text-xs text-white/30 mt-1 leading-relaxed">{desc}</p>
+                <p className="text-xs text-white/35 mt-1 leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>

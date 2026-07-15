@@ -106,7 +106,7 @@ export default function DashboardNav({ creator }: { creator: Creator }) {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-white/20 px-3 mb-1.5">{label}</p>
               <div className="space-y-0.5">
                 {items.map(({ href, label: itemLabel, icon: Icon }) => {
-                  const isActive = pathname === href;
+                  const isActive = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
                   return (
                     <Link
                       key={href}
@@ -132,14 +132,14 @@ export default function DashboardNav({ creator }: { creator: Creator }) {
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#09090e]/95 backdrop-blur-xl border-t border-white/[0.06] z-40 flex items-center justify-around px-2 safe-area-bottom">
         {MOBILE_NAV.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href;
+          const isActive = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-2.5 rounded-xl text-[11px] font-semibold transition-all min-h-[52px] justify-center",
-                isActive ? "text-violet-400 bg-violet-500/[0.12] rounded-xl" : "text-white/35 hover:text-white/60"
+                isActive ? "text-violet-400 bg-violet-500/[0.15]" : "text-white/35 hover:text-white/60"
               )}
             >
               <Icon className="w-5 h-5 mb-0.5" />

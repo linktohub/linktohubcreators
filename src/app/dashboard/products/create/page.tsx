@@ -209,13 +209,13 @@ export default function CreateProductPage() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         {step === "pick" ? (
-          <Link href="/dashboard/products" className="w-8 h-8 rounded-lg border border-white/[0.08] flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.05] transition-colors shrink-0">
+          <Link href="/dashboard/products" className="w-9 h-9 rounded-xl border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.06] transition-colors shrink-0">
             <ArrowLeft className="w-4 h-4" />
           </Link>
         ) : (
           <button
             onClick={() => { setStep("pick"); setProductType(null); setAiData(null); }}
-            className="w-8 h-8 rounded-lg border border-white/[0.08] flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.05] transition-colors shrink-0"
+            className="w-9 h-9 rounded-xl border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.06] transition-colors shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -241,7 +241,7 @@ export default function CreateProductPage() {
                 "relative p-5 rounded-2xl border border-white/[0.06] text-left transition-all group",
                 "bg-gradient-to-br",
                 t.gradient,
-                "hover:border-white/20 hover:scale-[1.02] active:scale-[0.99]"
+                "hover:border-white/20 hover:scale-[1.02] active:scale-[0.97] active:opacity-80"
               )}
             >
               <span className="text-3xl mb-3 block">{t.emoji}</span>
