@@ -13,12 +13,13 @@ type ShippingAddress = {
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-  const { items, creatorId, customerEmail, shipping, fanId } = await req.json() as {
+  const { items, creatorId, customerEmail, shipping, fanId, utmSource } = await req.json() as {
     items: { id: string; name: string; price: number; quantity: number }[];
     creatorId: string;
     customerEmail?: string;
     shipping?: ShippingAddress;
     fanId?: string;
+    utmSource?: string;
   };
 
   if (!items?.length) return NextResponse.json({ error: "No items" }, { status: 400 });
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
         items.map((i) => ({ id: i.id, quantity: i.quantity }))
       ),
       ...(fanId ? { fan_id: fanId } : {}),
+      ...(utmSource ? { utm_source: utmSource } : {}),
     },
     receipt_email: customerEmail || undefined,
     automatic_payment_methods: { enabled: true },

@@ -25,6 +25,9 @@ export async function POST(req: NextRequest) {
     device_type: isMobile ? "mobile" : "desktop",
     browser: ua.slice(0, 200),
     referrer: referrer.slice(0, 500),
+    utm_source: metadata?.utm_source || null,
+    utm_medium: metadata?.utm_medium || null,
+    utm_campaign: metadata?.utm_campaign || null,
   });
 
   return NextResponse.json({ ok: true });

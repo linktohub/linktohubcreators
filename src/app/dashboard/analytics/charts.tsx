@@ -16,6 +16,7 @@ type DayData = { date: string; views: number; revenue: number };
 type Country = { country: string; count: number };
 type Device = { device: string; count: number };
 type Referrer = { source: string; count: number };
+type UtmRow = { source: string; visits: number; sales: number; revenue: number };
 
 export default function AnalyticsCharts({
   stats,
@@ -23,12 +24,14 @@ export default function AnalyticsCharts({
   topCountries,
   devices,
   referrers,
+  utmSources,
 }: {
   stats: Stats;
   chartData: DayData[];
   topCountries: Country[];
   devices: Device[];
   referrers: Referrer[];
+  utmSources: UtmRow[];
 }) {
   const STAT_CARDS = [
     { label: "Total Revenue", value: `$${stats.totalRevenue.toFixed(2)}`, icon: DollarSign, sub: "All time" },
@@ -96,6 +99,38 @@ export default function AnalyticsCharts({
             <Bar dataKey="revenue" fill="rgba(255,255,255,0.8)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* UTM Revenue Attribution */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+        <h3 className="font-bold mb-1">Campaign Attribution</h3>
+        <p className="text-white/40 text-xs mb-4">Traffic from UTM-tagged links in last 30 days</p>
+        {utmSources.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-white/30 text-xs uppercase tracking-wider">
+                  <th className="text-left pb-3 font-semibold">Source</th>
+                  <th className="text-right pb-3 font-semibold">Visits</th>
+                  <th className="text-right pb-3 font-semibold">Sales</th>
+                  <th className="text-right pb-3 font-semibold">Revenue</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.05]">
+                {utmSources.map((row) => (
+                  <tr key={row.source}>
+                    <td className="py-2.5 font-medium text-white/80 max-w-[160px] truncate pr-4">{row.source}</td>
+                    <td className="py-2.5 text-right text-white/60">{row.visits}</td>
+                    <td className="py-2.5 text-right text-white/60">{row.sales}</td>
+                    <td className="py-2.5 text-right font-bold">${row.revenue.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-white/30 text-sm">No UTM-tagged visits yet. Add <code className="text-white/50">?utm_source=instagram</code> to your storefront link.</p>
+        )}
       </div>
 
       {/* Bottom row */}

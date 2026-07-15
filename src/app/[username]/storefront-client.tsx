@@ -126,6 +126,16 @@ export default function StorefrontClient({
     cart: CartItem[];
     downloads: { title: string; url: string }[];
   } | null>(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingStep, setBookingStep] = useState<1 | 2>(1);
+  const [selectedBookingProduct, setSelectedBookingProduct] = useState<Product | null>(null);
+  const [bookingName, setBookingName] = useState("");
+  const [bookingEmail, setBookingEmail] = useState("");
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingTime, setBookingTime] = useState("");
+  const [bookingMessage, setBookingMessage] = useState("");
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
 
   const paymentRequestRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -137,12 +147,27 @@ export default function StorefrontClient({
 
   const merch = products.filter((p) => p.type === "merch" || p.type === "physical");
   const digital = products.filter((p) => p.type === "digital");
+  const bookingProducts = products.filter((p) => p.type === "booking");
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
   const hasPhysical = cart.some((i) => i.type !== "digital");
 
   useEffect(() => {
-    track(creator.id, "page_view", { username: creator.username });
+    const params = new URLSearchParams(window.location.search);
+    const utmSource = params.get("utm_source");
+    const utmMedium = params.get("utm_medium");
+    const utmCampaign = params.get("utm_campaign");
+    if (utmSource) {
+      sessionStorage.setItem("lh_utm_source", utmSource);
+      sessionStorage.setItem("lh_utm_medium", utmMedium || "");
+      sessionStorage.setItem("lh_utm_campaign", utmCampaign || "");
+    }
+    track(creator.id, "page_view", {
+      username: creator.username,
+      utm_source: utmSource || sessionStorage.getItem("lh_utm_source") || undefined,
+      utm_medium: utmMedium || sessionStorage.getItem("lh_utm_medium") || undefined,
+      utm_campaign: utmCampaign || sessionStorage.getItem("lh_utm_campaign") || undefined,
+    });
   }, [creator.id, creator.username]);
 
   // Check fan auth status
@@ -235,6 +260,7 @@ export default function StorefrontClient({
                 items: cart.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
                 shipping,
                 fanId: fanUser?.id,
+                utmSource: sessionStorage.getItem("lh_utm_source") || undefined,
               }),
             });
             const { clientSecret } = await res.json();
@@ -251,6 +277,11 @@ export default function StorefrontClient({
               const piId = clientSecret.split("_secret")[0];
               const successCart = [...cart];
               const hasDigital = successCart.some(i => i.type === "digital");
+              track(creator.id, "purchase", {
+                utm_source: sessionStorage.getItem("lh_utm_source") || undefined,
+                utm_medium: sessionStorage.getItem("lh_utm_medium") || undefined,
+                amount: cartTotal,
+              });
               setCart([]);
               setCheckoutSuccess({ cart: successCart, downloads: [] });
               if (hasDigital) {
@@ -338,6 +369,7 @@ export default function StorefrontClient({
           items: cart.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
           shipping,
           fanId: fanUser?.id,
+          utmSource: sessionStorage.getItem("lh_utm_source") || undefined,
         }),
       });
       const { clientSecret } = await res.json();
@@ -353,6 +385,11 @@ export default function StorefrontClient({
         const piId = clientSecret.split("_secret")[0];
         const successCart = [...cart];
         const hasDigital = successCart.some(i => i.type === "digital");
+        track(creator.id, "purchase", {
+          utm_source: sessionStorage.getItem("lh_utm_source") || undefined,
+          utm_medium: sessionStorage.getItem("lh_utm_medium") || undefined,
+          amount: cartTotal,
+        });
         setCart([]);
         setCheckoutSuccess({ cart: successCart, downloads: [] });
         if (hasDigital) {
@@ -542,6 +579,35 @@ export default function StorefrontClient({
     setProcessingId(null);
   }
 
+  async function handleBookingSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedBookingProduct) return;
+    setBookingSubmitting(true);
+    try {
+      const res = await fetch("/api/bookings/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          creatorId: creator.id,
+          productId: selectedBookingProduct.id,
+          fanName: bookingName,
+          fanEmail: bookingEmail,
+          preferredDate: bookingDate,
+          preferredTime: bookingTime,
+          message: bookingMessage || undefined,
+        }),
+      });
+      if (res.ok) {
+        setBookingSuccess(true);
+      } else {
+        toast.error("Something went wrong — please try again");
+      }
+    } catch {
+      toast.error("Something went wrong — please try again");
+    }
+    setBookingSubmitting(false);
+  }
+
   const tabs: { id: Tab; label: string; emoji: string }[] = [
     ...(creator.merch_enabled || merch.length > 0 ? [{ id: "store" as Tab, label: "Merch", emoji: "👕" }] : []),
     ...(creator.digital_enabled || digital.length > 0 ? [{ id: "digital" as Tab, label: "Digital", emoji: "📚" }] : []),
@@ -649,7 +715,7 @@ export default function StorefrontClient({
             <div className={allThree ? "grid grid-cols-2 gap-2 mb-7" : "flex gap-2 mb-7 flex-wrap"}>
               {creator.calendar_enabled && (
                 <button className="h-12 rounded-xl font-black text-sm text-white bg-white/[0.07] border border-white/20 hover:bg-white/[0.12] active:opacity-75 transition-all"
-                  onClick={() => toast.info("Bookings opening soon — stay tuned!")}>
+                  onClick={() => { setShowBookingModal(true); setBookingStep(1); setBookingSuccess(false); setSelectedBookingProduct(null); }}>
                   📅 Book
                 </button>
               )}
@@ -925,6 +991,116 @@ export default function StorefrontClient({
           </div>
         )}
       </div>
+
+      {/* Booking Modal */}
+      {showBookingModal && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { setShowBookingModal(false); setBookingSuccess(false); }} />
+          <div className="relative w-full max-w-md bg-[#111] rounded-t-3xl border-t border-white/[0.08] flex flex-col max-h-[90vh]">
+            <div className="flex justify-center pt-3 pb-1 shrink-0">
+              <div className="w-10 h-1 rounded-full bg-white/20" />
+            </div>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.07] shrink-0">
+              <h2 className="font-black text-xl">
+                {bookingSuccess ? "Request Sent!" : bookingStep === 1 ? "Book a Session" : "Your Details"}
+              </h2>
+              <button onClick={() => { setShowBookingModal(false); setBookingSuccess(false); }}
+                className="w-8 h-8 rounded-xl bg-white/[0.06] flex items-center justify-center">
+                <X className="w-4 h-4 text-white/60" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 pb-10 pt-4">
+              {bookingSuccess ? (
+                <div className="flex flex-col items-center text-center gap-4 py-8">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center text-3xl">✓</div>
+                  <div>
+                    <p className="font-black text-xl text-white">Request sent!</p>
+                    <p className="text-white/50 text-sm mt-2 leading-relaxed">
+                      {creator.display_name} will confirm within 24 hours. Check your email for a confirmation.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => { setShowBookingModal(false); setBookingSuccess(false); }}
+                    className="h-12 px-8 rounded-xl font-bold text-white text-sm mt-2"
+                    style={{ backgroundColor: brandColor }}
+                  >
+                    Done
+                  </button>
+                </div>
+              ) : bookingStep === 1 ? (
+                <div className="space-y-3">
+                  {bookingProducts.length === 0 ? (
+                    <div className="flex flex-col items-center text-center gap-3 py-10">
+                      <span className="text-4xl">📅</span>
+                      <p className="text-white/60 text-sm">This creator hasn&apos;t set up booking sessions yet.</p>
+                    </div>
+                  ) : (
+                    bookingProducts.map((p) => {
+                      const name = p.name || p.title || "Session";
+                      const duration = p.metadata?.duration_minutes;
+                      return (
+                        <button key={p.id}
+                          onClick={() => { setSelectedBookingProduct(p); setBookingStep(2); }}
+                          className="w-full flex items-center gap-4 bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4 text-left hover:border-white/20 transition-colors active:opacity-75">
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
+                            style={{ backgroundColor: brandColor + "33" }}>
+                            📅
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm">{name}</p>
+                            {duration && <p className="text-white/40 text-xs mt-0.5">{duration} min · 1-on-1</p>}
+                          </div>
+                          <div className="shrink-0">
+                            <p className="font-black text-base">{p.price === 0 ? "Free" : `$${p.price}`}</p>
+                            <p className="text-white/30 text-xs text-right mt-0.5">Select →</p>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              ) : (
+                <form onSubmit={handleBookingSubmit} className="space-y-3">
+                  {selectedBookingProduct && (
+                    <div className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.07] rounded-xl p-3 mb-5">
+                      <span className="text-xl">📅</span>
+                      <div>
+                        <p className="font-bold text-sm">{selectedBookingProduct.name || selectedBookingProduct.title}</p>
+                        {selectedBookingProduct.metadata?.duration_minutes && (
+                          <p className="text-white/40 text-xs">{selectedBookingProduct.metadata.duration_minutes} min</p>
+                        )}
+                      </div>
+                      <button type="button" onClick={() => setBookingStep(1)}
+                        className="ml-auto text-white/30 hover:text-white text-xs">
+                        Change
+                      </button>
+                    </div>
+                  )}
+                  <input type="text" placeholder="Your name" value={bookingName} onChange={(e) => setBookingName(e.target.value)} required
+                    className="w-full h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                  <input type="email" placeholder="Your email" value={bookingEmail} onChange={(e) => setBookingEmail(e.target.value)} required
+                    className="w-full h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20" />
+                  <div className="flex gap-2">
+                    <input type="date" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} required
+                      min={new Date().toISOString().split("T")[0]}
+                      className="flex-1 h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm outline-none focus:border-white/20 [color-scheme:dark]" />
+                    <input type="time" value={bookingTime} onChange={(e) => setBookingTime(e.target.value)} required
+                      className="w-32 h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm outline-none focus:border-white/20 [color-scheme:dark]" />
+                  </div>
+                  <textarea placeholder="Message (optional)" value={bookingMessage} onChange={(e) => setBookingMessage(e.target.value)} rows={3}
+                    className="w-full bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/20 resize-none" />
+                  <button type="submit" disabled={bookingSubmitting}
+                    className="w-full h-12 rounded-xl font-bold text-white text-sm disabled:opacity-50 mt-2"
+                    style={{ backgroundColor: brandColor }}>
+                    {bookingSubmitting ? "Sending..." : "Send Request"}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Fan Auth Modal */}
       {showAuthModal && (

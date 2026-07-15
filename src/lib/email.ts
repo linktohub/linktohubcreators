@@ -78,6 +78,67 @@ export async function sendNewSubscriberNotification({
   });
 }
 
+export async function sendBookingRequest({
+  creatorEmail, creatorName, fanName, fanEmail,
+  productTitle, durationMinutes, preferredDate, preferredTime, message, dashboardUrl,
+}: {
+  creatorEmail: string;
+  creatorName: string;
+  fanName: string;
+  fanEmail: string;
+  productTitle: string;
+  durationMinutes: number;
+  preferredDate: string;
+  preferredTime: string;
+  message?: string;
+  dashboardUrl: string;
+}) {
+  const resend = getResend();
+  if (!resend) return;
+
+  await resend.emails.send({
+    from: FROM,
+    to: creatorEmail,
+    subject: `New booking request from ${fanName} — ${productTitle}`,
+    html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#111">
+      <h2 style="color:#7c3aed">New booking request 📅</h2>
+      <p><strong>${fanName}</strong> (<a href="mailto:${fanEmail}">${fanEmail}</a>) wants to book a <strong>${productTitle}</strong> session (${durationMinutes} min).</p>
+      <p><strong>Preferred date:</strong> ${preferredDate} at ${preferredTime}</p>
+      ${message ? `<p><strong>Message:</strong> ${message}</p>` : ""}
+      <p><a href="${dashboardUrl}" style="color:#7c3aed;font-weight:bold">Review in dashboard →</a></p>
+      <hr style="margin:24px 0;border:none;border-top:1px solid #eee">
+      <p style="color:#888;font-size:12px">Reply to this email or confirm in your Linktohub dashboard.</p>
+    </div>`,
+  });
+}
+
+export async function sendBookingConfirmationToFan({
+  to, creatorName, productTitle, preferredDate, preferredTime,
+}: {
+  to: string;
+  creatorName: string;
+  productTitle: string;
+  preferredDate: string;
+  preferredTime: string;
+}) {
+  const resend = getResend();
+  if (!resend) return;
+
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `Your booking request was sent to ${creatorName}`,
+    html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#111">
+      <h2 style="color:#7c3aed">Request sent! 📅</h2>
+      <p>Your booking request for <strong>${productTitle}</strong> was sent to <strong>${creatorName}</strong>.</p>
+      <p><strong>Requested time:</strong> ${preferredDate} at ${preferredTime}</p>
+      <p>They'll confirm within 24 hours. You'll hear back at this email address.</p>
+      <hr style="margin:24px 0;border:none;border-top:1px solid #eee">
+      <p style="color:#888;font-size:12px">Questions? Reply to this email.</p>
+    </div>`,
+  });
+}
+
 export async function sendSubscriberWelcome({
   to, subscriberName, creatorName, creatorUsername, topProducts,
 }: {

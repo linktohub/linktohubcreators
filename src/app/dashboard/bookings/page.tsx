@@ -22,11 +22,10 @@ export default async function BookingsPage() {
   const { data: creator } = await supabase.from("creators").select("id, calendar_enabled").eq("user_id", user.id).single();
   if (!creator) redirect("/onboarding");
 
-  const { data: bookings } = await supabase
-    .from("bookings")
-    .select("*, profiles(full_name, email, avatar_url)")
-    .eq("creator_id", creator.id)
-    .order("scheduled_at");
+  const [{ data: bookings }, { data: bookingProducts }] = await Promise.all([
+    supabase.from("bookings").select("*, profiles(full_name, email, avatar_url)").eq("creator_id", creator.id).order("scheduled_at"),
+    supabase.from("products").select("id").eq("creator_id", creator.id).eq("type", "booking").eq("active", true),
+  ]);
 
   const upcoming = (bookings || []).filter((b) => b.status !== "completed" && b.status !== "cancelled");
   const past = (bookings || []).filter((b) => b.status === "completed" || b.status === "cancelled");
@@ -50,6 +49,20 @@ export default async function BookingsPage() {
         )}
       </div>
 
+      {creator.calendar_enabled && (!bookingProducts || bookingProducts.length === 0) && (
+        <div className="mb-6 flex items-center gap-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4">
+          <span className="text-yellow-400 text-xl shrink-0">📅</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-sm text-yellow-400">No booking products yet</p>
+            <p className="text-white/40 text-xs mt-0.5">Add a 1-on-1 session product so fans can request bookings from your storefront.</p>
+          </div>
+          <Link href="/dashboard/products/create"
+            className="shrink-0 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
+            Add product
+          </Link>
+        </div>
+      )}
+
       {bookings && bookings.length > 0 ? (
         <div className="space-y-8">
           {upcoming.length > 0 && (
@@ -69,9 +82,12 @@ export default async function BookingsPage() {
                       <p className="text-white/40 text-sm">
                         {format(new Date(booking.scheduled_at), "h:mm a")} · {booking.duration_minutes} min
                       </p>
-                      {booking.profiles && (
+                      {(booking.profiles || booking.fan_name) && (
                         <p className="text-white/30 text-xs mt-0.5">
-                          {booking.profiles.full_name || booking.profiles.email}
+                          {booking.profiles?.full_name || booking.profiles?.email || booking.fan_name}
+                          {booking.fan_email && !booking.profiles && (
+                            <span className="ml-1">· {booking.fan_email}</span>
+                          )}
                         </p>
                       )}
                     </div>
@@ -110,14 +126,16 @@ export default async function BookingsPage() {
           <Calendar className="w-12 h-12 text-white/20 mx-auto mb-4" />
           <p className="text-white/40 text-lg font-semibold mb-2">No bookings yet</p>
           <p className="text-white/30 text-sm mb-6">
-            Enable the calendar feature in Settings, then fans can book 1-on-1 sessions with you
+            Fans can request sessions directly from your storefront once you have a booking product set up.
           </p>
-          <Button
-            disabled
-            className="bg-white/10 text-white/40 cursor-not-allowed"
-          >
-            Cal.com integration coming soon
-          </Button>
+          {(!bookingProducts || bookingProducts.length === 0) && (
+            <Link
+              href="/dashboard/products/create"
+              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-colors"
+            >
+              Add a 1-on-1 session product
+            </Link>
+          )}
         </div>
       )}
     </div>

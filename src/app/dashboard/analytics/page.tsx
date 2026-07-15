@@ -25,17 +25,17 @@ export default async function AnalyticsPage() {
     { data: recentOrders },
     { data: subscribers },
     { data: emailSubs },
-    { data: topEvents },
+    { data: purchaseEvents },
   ] = await Promise.all([
-    supabase.from("analytics_events").select("created_at, event_type, country, device_type, referrer")
+    supabase.from("analytics_events").select("created_at, event_type, country, device_type, referrer, utm_source, utm_medium")
       .eq("creator_id", creator.id).gte("created_at", thirtyDaysAgo),
     supabase.from("orders").select("created_at, total, status")
       .eq("creator_id", creator.id).gte("created_at", thirtyDaysAgo).eq("status", "paid"),
     supabase.from("fan_subscriptions").select("created_at, price_monthly")
       .eq("creator_id", creator.id).eq("status", "active"),
     supabase.from("email_subscribers").select("created_at").eq("creator_id", creator.id),
-    supabase.from("analytics_events").select("event_type")
-      .eq("creator_id", creator.id).gte("created_at", thirtyDaysAgo),
+    supabase.from("analytics_events").select("utm_source, metadata")
+      .eq("creator_id", creator.id).eq("event_type", "purchase").gte("created_at", thirtyDaysAgo),
   ]);
 
   // Build daily chart data for last 30 days
@@ -84,6 +84,23 @@ export default async function AnalyticsPage() {
   });
   const referrers = Object.entries(refMap).sort(([, a], [, b]) => b - a).slice(0, 5).map(([source, count]) => ({ source, count }));
 
+  // UTM source attribution
+  type UtmRow = { source: string; visits: number; sales: number; revenue: number };
+  const utmMap: Record<string, UtmRow> = {};
+  (pageViews || []).filter((e) => e.event_type === "page_view" && e.utm_source).forEach((e) => {
+    const src = e.utm_source!;
+    if (!utmMap[src]) utmMap[src] = { source: src, visits: 0, sales: 0, revenue: 0 };
+    utmMap[src].visits += 1;
+  });
+  (purchaseEvents || []).filter((e) => e.utm_source).forEach((e) => {
+    const src = e.utm_source!;
+    if (!utmMap[src]) utmMap[src] = { source: src, visits: 0, sales: 0, revenue: 0 };
+    utmMap[src].sales += 1;
+    const meta = e.metadata as { amount?: number } | null;
+    utmMap[src].revenue += meta?.amount || 0;
+  });
+  const utmSources = Object.values(utmMap).sort((a, b) => b.visits - a.visits).slice(0, 10);
+
   const mrr = (subscribers || []).reduce((sum, s) => sum + (s.price_monthly || 0), 0);
 
   const stats = {
@@ -113,6 +130,7 @@ export default async function AnalyticsPage() {
         topCountries={topCountries}
         devices={devices}
         referrers={referrers}
+        utmSources={utmSources}
       />
     </div>
   );
