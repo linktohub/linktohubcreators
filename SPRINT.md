@@ -38,8 +38,8 @@ All five 2026-06-22 sprint tasks are **done**:
 | Design | ✅ ~7.5/10 after 7/8 audit pass |
 | AutoDM | ✅ Code done — pending Meta review |
 | **Creator plan billing route** | ✅ Done — `/api/stripe/creator-billing` creates Checkout or portal session; webhook upserts `creator_subscriptions` and updates `creators.plan_tier`; billing page shows upgrade success banner |
-| **Bookings storefront flow** | ❌ Missing — button shows toast "coming soon"; no booking request UX |
-| **UTM revenue attribution** | ❌ Missing — storefront captures HTTP referrer but not `utm_source`; no revenue-by-source in analytics |
+| **Bookings storefront flow** | ✅ Done — booking modal with product selection + request form; /api/bookings/request inserts pending row + emails creator/fan |
+| **UTM revenue attribution** | ✅ Done — UTM captured from URL on storefront mount, stored in analytics_events columns, purchase events tracked; Campaign Attribution table in analytics dashboard |
 | **Mobile CTA row at 375px** | ✅ Done — 2-col grid when all three enabled (tip spans full width); Add button 44px; subscribe text uses · separator; duplicate Digital nav removed |
 | Printify | ❌ Not integrated — Gelato only (~250 products) |
 | Email drip sequences (D3/D7) | ❌ Not built — prerequisite (welcome email) now live; ready to build |
@@ -155,7 +155,7 @@ Show success banner in `src/app/dashboard/billing/page.tsx` when `searchParams.u
 
 ---
 
-## Task 2 — Bookings MVP (native request form, no Cal.com) HIGH
+## Task 2 — Bookings MVP (native request form, no Cal.com) HIGH ✅ DONE
 
 **Why:** `creator.calendar_enabled` drives a "📅 Book" button on every storefront. That button currently shows `toast.info("Bookings opening soon — stay tuned!")` — it has been "coming soon" since launch. The `bookings` table and `/dashboard/bookings` page are fully built; the booking creation flow doesn't exist. Creators with bookings enabled are showing a broken button to every visitor. This blocks a direct revenue category for coaches, consultants, and tutors.
 
@@ -198,7 +198,7 @@ Creator setup: creators with `calendar_enabled` need at least one booking produc
 
 ---
 
-## Task 3 — UTM Source → Revenue Attribution HIGH
+## Task 3 — UTM Source → Revenue Attribution HIGH ✅ DONE
 
 **Why:** RESEARCH ranks traffic attribution as the #1 retention feature that makes creators unable to leave a platform. Currently: a creator shares `linktohub.vercel.app/username?utm_source=instagram_reel` in their bio → visitor lands → `utm_source` is silently discarded. `/api/analytics/track` only reads the `referer` HTTP header (which is the page before, not the campaign link the creator shared). Analytics shows "Instagram" referrals correctly only when someone clicks from instagram.com — but direct traffic from a link-in-bio app or a copied URL has no referrer and shows as "Direct." Creators cannot answer "does my Instagram or my TikTok bio drive more sales?" — they will stay forever with a platform that can.
 
