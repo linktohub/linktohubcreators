@@ -67,6 +67,7 @@ export default function CreateProductPage() {
   const [feedback, setFeedback] = useState("");
   const [refining, setRefining] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [podProvider, setPodProvider] = useState<"gelato" | "printify">("gelato");
 
   // Event: creator must be able to set these before publishing
   const [eventDate, setEventDate] = useState("");
@@ -168,6 +169,7 @@ export default function CreateProductPage() {
         : productType === "booking"
         ? { duration_minutes: aiData.duration_minutes }
         : null;
+      const selectedPodProvider = productType === "merch" ? podProvider : null;
       const result = await supabase.from("products").insert({
         creator_id: creator.id,
         type: productType === "merch" ? "merch" : productType === "booking" ? "booking" : "digital",
@@ -175,16 +177,17 @@ export default function CreateProductPage() {
         description: aiData.description || null,
         price: aiData.price || 0,
         file_type: isDigital ? productType : null,
-        pod_provider: productType === "merch" ? "gelato" : null,
+        pod_provider: selectedPodProvider,
         active: true,
         images: aiData.image ? [aiData.image] : [],
         ...(metadata ? { metadata } : {}),
       }).select("id").single();
       error = result.error;
 
-      // Auto-assign Gelato product IDs for merch silently in background
+      // Auto-assign POD product IDs for merch silently in background
       if (!error && result.data?.id && productType === "merch" && aiData.item_type) {
-        fetch("/api/gelato/auto-assign", {
+        const autoAssignRoute = podProvider === "printify" ? "/api/printify/auto-assign" : "/api/gelato/auto-assign";
+        fetch(autoAssignRoute, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId: result.data.id, itemType: aiData.item_type }),
@@ -340,6 +343,37 @@ export default function CreateProductPage() {
                 </div>
               )}
 
+              {/* POD provider selector for merch */}
+              {productType === "merch" && (
+                <div className="mt-5 pt-5 border-t border-white/[0.06]">
+                  <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-3">Fulfillment provider</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setPodProvider("gelato")}
+                      className={cn(
+                        "h-10 rounded-xl border text-sm font-medium transition-colors",
+                        podProvider === "gelato"
+                          ? "border-violet-500/60 bg-violet-500/15 text-violet-300"
+                          : "border-white/[0.08] text-white/40 hover:text-white hover:bg-white/[0.04]"
+                      )}
+                    >
+                      Gelato · 250+ products
+                    </button>
+                    <button
+                      onClick={() => setPodProvider("printify")}
+                      className={cn(
+                        "h-10 rounded-xl border text-sm font-medium transition-colors",
+                        podProvider === "printify"
+                          ? "border-violet-500/60 bg-violet-500/15 text-violet-300"
+                          : "border-white/[0.08] text-white/40 hover:text-white hover:bg-white/[0.04]"
+                      )}
+                    >
+                      Printify · 1,300+ products
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Price / meta row */}
               <div className="flex items-center gap-4 mt-5 pt-5 border-t border-white/[0.06]">
                 <div>
@@ -356,9 +390,6 @@ export default function CreateProductPage() {
                 )}
                 {productType === "booking" && aiData.duration_minutes && (
                   <div className="text-white/40 text-sm">{aiData.duration_minutes} min session</div>
-                )}
-                {productType === "merch" && aiData.pod_provider && (
-                  <div className="text-white/40 text-sm capitalize">via {aiData.pod_provider}</div>
                 )}
               </div>
             </div>

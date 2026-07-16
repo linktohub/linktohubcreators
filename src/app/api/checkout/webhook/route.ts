@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { createClient as createAdmin } from "@supabase/supabase-js";
 import { createGelatoOrder } from "@/lib/gelato";
+import { createPrintifyOrder } from "@/lib/printify";
 import { sendOrderConfirmation } from "@/lib/email";
 import { generateAndStorePdf } from "@/lib/pdf-generator";
 
@@ -230,32 +231,56 @@ export async function POST(req: NextRequest) {
 
     if (product.type === "merch" && shippingAddress && product.pod_product_id && product.pod_variant_id) {
       try {
-        const gelatoOrder = await createGelatoOrder({
-          orderReferenceId: order.id,
-          customerReferenceId: customerEmail,
-          currency: "USD",
-          items: [{
-            itemReferenceId: item.id,
-            productUid: product.pod_product_id,
-            variantUid: product.pod_variant_id,
-            quantity: item.quantity,
-            files: product.images?.[0]
-              ? [{ type: "default", url: product.images[0] }]
-              : [],
-          }],
-          shippingAddress: {
-            firstName: shippingAddress.firstName || shippingName.split(" ")[0] || "",
-            lastName: shippingAddress.lastName || shippingName.split(" ").slice(1).join(" ") || "",
-            addressLine1: shippingAddress.addressLine1,
-            city: shippingAddress.city,
-            postCode: shippingAddress.postCode,
-            country: shippingAddress.country,
-            email: customerEmail,
-          },
-        });
-        await admin.from("orders").update({ pod_order_id: gelatoOrder.id, status: "fulfilled" }).eq("id", order.id);
+        if (product.pod_provider === "printify") {
+          const [providerIdStr, variantIdStr] = product.pod_variant_id.split("|");
+          const printifyOrder = await createPrintifyOrder({
+            line_items: [{
+              blueprint_id: Number(product.pod_product_id),
+              print_provider_id: Number(providerIdStr),
+              variant_id: Number(variantIdStr),
+              print_areas: product.images?.[0] ? { front: { src: product.images[0] } } : {},
+              quantity: item.quantity,
+            }],
+            shipping_method: 1,
+            address_to: {
+              first_name: shippingAddress.firstName || shippingName.split(" ")[0] || "",
+              last_name: shippingAddress.lastName || shippingName.split(" ").slice(1).join(" ") || "",
+              email: customerEmail,
+              address1: shippingAddress.addressLine1,
+              city: shippingAddress.city,
+              zip: shippingAddress.postCode,
+              country: shippingAddress.country,
+            },
+          });
+          await admin.from("orders").update({ printify_order_id: printifyOrder.id, status: "fulfilled" }).eq("id", order.id);
+        } else {
+          const gelatoOrder = await createGelatoOrder({
+            orderReferenceId: order.id,
+            customerReferenceId: customerEmail,
+            currency: "USD",
+            items: [{
+              itemReferenceId: item.id,
+              productUid: product.pod_product_id,
+              variantUid: product.pod_variant_id,
+              quantity: item.quantity,
+              files: product.images?.[0]
+                ? [{ type: "default", url: product.images[0] }]
+                : [],
+            }],
+            shippingAddress: {
+              firstName: shippingAddress.firstName || shippingName.split(" ")[0] || "",
+              lastName: shippingAddress.lastName || shippingName.split(" ").slice(1).join(" ") || "",
+              addressLine1: shippingAddress.addressLine1,
+              city: shippingAddress.city,
+              postCode: shippingAddress.postCode,
+              country: shippingAddress.country,
+              email: customerEmail,
+            },
+          });
+          await admin.from("orders").update({ pod_order_id: gelatoOrder.id, status: "fulfilled" }).eq("id", order.id);
+        }
       } catch (err) {
-        console.error("Gelato order failed:", err);
+        console.error("POD order failed:", err);
       }
     }
 

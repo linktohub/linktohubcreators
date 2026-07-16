@@ -41,7 +41,7 @@ All five 2026-06-22 sprint tasks are **done**:
 | **Bookings storefront flow** | ✅ Done — booking modal with product selection + request form; /api/bookings/request inserts pending row + emails creator/fan |
 | **UTM revenue attribution** | ✅ Done — UTM captured from URL on storefront mount, stored in analytics_events columns, purchase events tracked; Campaign Attribution table in analytics dashboard |
 | **Mobile CTA row at 375px** | ✅ Done — 2-col grid when all three enabled (tip spans full width); Add button 44px; subscribe text uses · separator; duplicate Digital nav removed |
-| Printify | ❌ Not integrated — Gelato only (~250 products) |
+| Printify | ✅ Done — `src/lib/printify.ts`; Gelato/Printify toggle in merch create; Printify branch in checkout webhook |
 | Email drip sequences (D3/D7) | ❌ Not built — prerequisite (welcome email) now live; ready to build |
 | Course completion certificates | ❌ Not built |
 | Cal.com integration | ❌ Not integrated |
@@ -305,7 +305,7 @@ Also add `text-sm` if not already set.
 
 ---
 
-## Task 5 — Printify POD Integration MEDIUM
+## Task 5 — Printify POD Integration MEDIUM ✅ DONE
 
 **Why:** Gelato is live and real orders are submitting. But Gelato offers ~250 products, mostly apparel and wall art with strong EU fulfillment. Printify offers 1,300+ products including candles, puzzles, pet accessories, premium wall art, and phone cases — strong North American fulfillment. Creators in niches like pets, home decor, and gaming cannot offer relevant merch from Gelato alone. RESEARCH ranked Printify as the highest-impact product expansion after AutoDM ships. AutoDM code is done — Printify is next.
 
