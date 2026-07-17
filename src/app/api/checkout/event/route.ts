@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
   const { data: event } = await admin
     .from("events")
-    .select("*, creators(stripe_account_id, stripe_account_enabled, display_name)")
+    .select("*, creators(stripe_account_id, stripe_account_enabled, display_name, transaction_fee_pct)")
     .eq("id", eventId)
     .single();
   if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     profile = np;
   }
 
-  const creator = event.creators as { stripe_account_id?: string; stripe_account_enabled?: boolean };
+  const creator = event.creators as { stripe_account_id?: string; stripe_account_enabled?: boolean; transaction_fee_pct?: number };
 
   // Free events — register directly without payment
   if (!event.price || event.price === 0) {
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
   if (creator?.stripe_account_id && creator?.stripe_account_enabled) {
     checkoutParams.payment_intent_data = {
-      application_fee_amount: Math.round(event.price * 100 * 0.10),
+      application_fee_amount: Math.round(event.price * 100 * (creator?.transaction_fee_pct ?? 0.06)),
       transfer_data: { destination: creator.stripe_account_id },
     };
   }

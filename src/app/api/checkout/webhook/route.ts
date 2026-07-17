@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
       await admin.from("creators").update({
         plan_tier: "trial",
         plan_stripe_subscription_id: null,
-        transaction_fee_pct: 0.10,
+        transaction_fee_pct: 0.06,
       }).eq("id", creatorSub.creator_id);
     } else {
       await admin.from("fan_subscriptions").update({ status: "cancelled" }).eq("stripe_subscription_id", sub.id);

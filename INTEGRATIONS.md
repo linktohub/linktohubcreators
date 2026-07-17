@@ -219,6 +219,27 @@ const shippingAddress = pi.metadata.shipping_address
 
 ---
 
+## 16. Platform fee — tips, events, subscriptions, and cancellation fix (sprint week 2026-07-17)
+
+**Status:** Implemented  
+**Bugs fixed:**
+- `checkout/tip/route.ts` hardcoded `0.10` (10%) for `application_fee_amount` on all tip payments, overcharging Pro (4.5%) and Business (3%) creators.
+- `checkout/event/route.ts` hardcoded `0.10` for event ticket payments — same overcharge.
+- `checkout/subscribe/route.ts` hardcoded `application_fee_percent = 10` for fan subscription payments — same overcharge.
+- `checkout/webhook/route.ts` reset `transaction_fee_pct` to `0.10` on `customer.subscription.deleted` instead of the correct trial default `0.06`.
+
+**Impact:** Pro and Business creators were losing an extra 5.5% and 7% respectively on every tip, event ticket, and fan subscription to the platform (vs. product purchases, which already used `transaction_fee_pct`). The cancellation bug would bump cancelled creators to 10% instead of the documented 6% default.
+
+**Changes:**
+- Tip route: added `transaction_fee_pct` to creator select; fee now `amountCents * (creator.transaction_fee_pct ?? 0.06)`.
+- Event route: added `transaction_fee_pct` to creator join select; fee now `event.price * 100 * (creator.transaction_fee_pct ?? 0.06)`.
+- Subscribe route: added `transaction_fee_pct` to creator join select; `application_fee_percent` now `Math.round((creator.transaction_fee_pct ?? 0.06) * 100)`.
+- Webhook subscription cancellation: `transaction_fee_pct` reset to `0.06` (not `0.10`).
+
+**Files:** `src/app/api/checkout/tip/route.ts`, `src/app/api/checkout/event/route.ts`, `src/app/api/checkout/subscribe/route.ts`, `src/app/api/checkout/webhook/route.ts`
+
+---
+
 ## Supabase admin client
 
 `src/lib/supabase/admin.ts` — service role client for webhook routes that run without user auth. Used in all webhook handlers and checkout intent route.

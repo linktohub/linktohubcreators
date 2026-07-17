@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   if (!creatorId || !amount || amount < 1) return NextResponse.json({ error: "Invalid tip" }, { status: 400 });
 
   const admin = createAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-  const { data: creator } = await admin.from("creators").select("display_name, stripe_account_id, stripe_account_enabled").eq("id", creatorId).single();
+  const { data: creator } = await admin.from("creators").select("display_name, stripe_account_id, stripe_account_enabled, transaction_fee_pct").eq("id", creatorId).single();
 
   const amountCents = Math.round(parseFloat(amount) * 100);
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   if (creator?.stripe_account_id && creator?.stripe_account_enabled) {
     checkoutParams.payment_intent_data = {
-      application_fee_amount: Math.round(amountCents * 0.10),
+      application_fee_amount: Math.round(amountCents * ((creator?.transaction_fee_pct as number) ?? 0.06)),
       transfer_data: { destination: creator.stripe_account_id },
     };
   }

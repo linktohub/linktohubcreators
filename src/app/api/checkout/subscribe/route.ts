@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Get tier
-  const { data: tier } = await admin.from("subscription_tiers").select("*, creators(stripe_account_id, stripe_account_enabled, display_name)").eq("id", tierId).single();
+  const { data: tier } = await admin.from("subscription_tiers").select("*, creators(stripe_account_id, stripe_account_enabled, display_name, transaction_fee_pct)").eq("id", tierId).single();
   if (!tier) return NextResponse.json({ error: "Tier not found" }, { status: 404 });
 
   // Ensure Stripe Price exists for this tier
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     if (profile?.id) await admin.from("profiles").update({ stripe_customer_id: stripeCustomerId }).eq("id", profile.id);
   }
 
-  const creator = tier.creators as { stripe_account_id?: string; stripe_account_enabled?: boolean };
+  const creator = tier.creators as { stripe_account_id?: string; stripe_account_enabled?: boolean; transaction_fee_pct?: number };
 
   const checkoutParams: Parameters<typeof stripe.checkout.sessions.create>[0] = {
     mode: "subscription",
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
   };
 
   if (creator?.stripe_account_id && creator?.stripe_account_enabled) {
-    checkoutParams.subscription_data!.application_fee_percent = 10;
+    checkoutParams.subscription_data!.application_fee_percent = Math.round((creator?.transaction_fee_pct ?? 0.06) * 100);
     checkoutParams.subscription_data!.transfer_data = { destination: creator.stripe_account_id };
   }
 
