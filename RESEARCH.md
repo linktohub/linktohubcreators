@@ -1,3 +1,183 @@
+# Research Report — 2026-07-18
+
+## Top 3 Opportunities (act on these this week)
+
+1. **Ship email drip sequences (D3/D7) this sprint — the gap is now overdue and the prerequisite is live.** Welcome email shipped last sprint. Email drips are listed as ❌ Not built in the current sprint. Meanwhile, Stan still locks email automation at $99/month, Beacons limits free tier to 50 sends/month, and Gumroad has zero email automation. 91.9% of creators now use AI tools, and email + automation is universally identified as the #1 feature gap below $99/month. Linktohub having working drip sequences makes us the only platform with: 0% fees + email automation + native merch + bookings — a genuinely unoccupied position. Build the D3 ("here's what you can sell") and D7 ("your first sale guide") automations on top of the working welcome email this week.
+
+2. **Gumroad just shipped daily payouts — update `/compare/gumroad` immediately.** Gumroad's June 4, 2026 feature drop included daily payouts for eligible US accounts. Our existing comparison page and marketing likely still cite "Gumroad's 7-day payout cycle" as a pain point. That argument is now obsolete. The real differentiator is still strong — the *fee math*: Gumroad takes 13–23% effective on every sale (10% platform + Stripe + $0.50/sale + 30% on Discover). Linktohub's flat $29/month with 0% fees beats Gumroad at any revenue level above ~$250/month. Rewrite the comparison page to lead with fee math, not payout speed. Also flag: Gumroad launched built-in community chat per product (Discord-replacement), installment plans, verified video reviews, and churn analytics in the same June drop. Gumroad is a more serious competitor than it was six weeks ago.
+
+3. **Beacons' domain ownership trap is a hot creator pain point — build a landing page around it.** Creators who purchase a custom domain through Beacons do not own it. Beacons holds the registrar access, and leaving costs a $70 "transfer processing fee." This is now appearing in multiple 2026 reviews as a dealbreaker. Separately, Linktree's July 5, 2026 ToS update begins sharing creator profile pictures, bios, and engagement metrics with OpenAI without explicit creator consent. Both create a "data/asset ownership" story Linktohub can own: "Your domain is yours. Your data stays yours." A single comparison page targeting Beacons and Linktree switchers on this exact angle is a 1-day marketing build with high organic search value. No competitor has built this yet.
+
+---
+
+## Competitor Intelligence
+
+### Stan.store
+- **Pricing**: Unchanged — $29/mo (Creator), $99/mo (Creator Pro). 0% transaction fees on both. No free plan, 14-day trial.
+- **New in last 4 weeks**: Order bump revamp (June 2026) — significantly more customization options. Most recent blog post July 2: creator case study, no product announcements.
+- **AutoDM**: Confirmed active and maintained as of April 7, 2026. Instagram comment-to-DM automation on both plans. Supports multi-step sequences, lead capture, purchase attribution analytics. Still Instagram-only.
+- **Ongoing weaknesses**: Email marketing locked at $99/month (single most-cited complaint in every 2026 comparison article). No native webinar/live event hosting — requires Zapier → Zoom chain. All stores look identical (font, color, header image only). No course certificates, quizzes, or completion tracking. No custom domain for storefront.
+- **Conversion hook**: "Zero transaction fees" + "AutoDM included free on both plans."
+- **Signal**: Stan's own blog now publishes "Stan Store Alternatives" — they're chasing their own churn keywords. Defensive positioning from a market leader.
+
+### Beacons.ai
+- **Pricing**: Free ($0, 9% fee) | Creator $10/mo (9% fee) | Creator Plus $30/mo (0% fees, email automations, custom domain) | Creator Max $90/mo (unlimited AI, 0% fees).
+- **New in last 4 weeks**: No confirmed product launches June–July 2026. Last confirmed update: April 2026 Beam for Brands performance update.
+- **Hidden traps now surfacing in creator communities**:
+  - Domain trap: Domains purchased through Beacons are held by Beacons. Leaving costs $70 "transfer processing fee." Creators feel locked in and are writing about it publicly.
+  - TikTok link blocking: TikTok has intermittently blocked beacons.ai links since mid-2024. Creators must use beacons.page workaround URLs, breaking brand identity.
+  - Support: 1.8/5 on Trustpilot. 41% of negative reviews cite unresolved billing disputes and bot-like support. For a platform handling revenue, this is serious.
+- **AI (Beam)**: Content-generation AI — captions, emails, bio text, media kit. NOT a chatbot in the creator's voice. Linktohub's AI assistant is in a different category.
+- **Fee math**: On the free plan, $1,000/month in sales = $90 to Beacons + Stripe. Creator is paying $90/month in fees vs. Linktohub's flat $29.
+- **Conversion hook**: "Free plan + AI tools + media kit for brand deals." The TikTok link blocking issue directly undermines the core value prop.
+
+### Gumroad
+- **Pricing**: No monthly fee. 10% + $0.50 per sale (direct). Discover marketplace: 30%. Effective total rate: 13–23% depending on transaction size.
+- **Major feature drop June 4, 2026** — this changes the competitive picture significantly:
+  - **Communities**: Built-in group chat per product. Explicitly positioned as a Discord replacement. Buyers get a join prompt after purchase. This is a genuine new moat.
+  - **Installment plans**: Customers can pay for high-ticket products in multiple payments.
+  - **Verified video reviews**: Buyers can leave verified reviews and video testimonials on product pages.
+  - **Automatic discount codes**: Codes apply without buyer entry — for promotions and affiliate links.
+  - **Churn analytics**: New dashboard tab showing churn rate, lost revenue, and churned users for membership products.
+  - **Daily payouts**: Now available for eligible US accounts. **This eliminates the "Gumroad's 7-day cycle" talking point.**
+  - **Local currency estimates**: Buyers see estimated local price at checkout.
+- **Still unaddressed**: No link-in-bio, no bookings, no email marketing, no native storefront beyond product pages. Fee structure unchanged (13–23% effective rate). No-refund-on-fees policy unchanged (sell $100, refund $100, still owe $10.50).
+- **Verdict**: Gumroad is no longer a static target. Their June 2026 drop added real features. The fee math still makes them lose above $250/month in revenue, but the "feature-poor" story is weakening.
+
+### Linktree
+- **Pricing**: Free (12% seller fee) | Starter $8/mo (9% fee) | Pro $15/mo — up 67% from $9 (9% fee) | Premium $35/mo — up 46% from $24 (0% fee).
+- **New in last 4 weeks**:
+  - **Sticker Bio Boards** (mid-June 2026): Cosmetic feature. Pre-designed stickers creators can layer on their page. Launch partner was Olivia Rodrigo. Free for all tiers; three matching header layouts are Pro-only. No commerce or functionality value — pure visual customization.
+  - **July 5 Privacy Notice update**: Section 14 "Generative AI" — creator profile pictures, summarized bios, and engagement metrics can now be shared with OpenAI in response to ChatGPT queries. User inputs/outputs from Linktree's AI features shared with AI providers for model improvement. No explicit opt-in required.
+- **Core structural weakness unchanged**: Traffic routing layer with no email capture on free/Starter, no CRM, no AutoDM, no native commerce. A follower clicks through Linktree and disappears — Linktree retains nothing.
+- **Data/privacy exposure**: The OpenAI data-sharing ToS is a trust issue for brand-conscious creators. Linktohub can position against this.
+- **Conversion hook**: Name recognition only. Sticker boards show the product is in cosmetic-feature territory, not commerce-feature territory.
+
+---
+
+## Creator Pain Points
+
+1. **Email automation below $99/month is the most persistent unmet need in the market.** Stan's lock at $99 appears in every 2026 alternative article. Beacons limits free tier to 50 sends/month. No platform serves the "$29/month creator who wants email sequences" without extracting a high percentage fee (Beacons 9%) or a premium subscription (Stan $99). This is the most cited switching reason across Reddit, Trustpilot, and comparison blogs.
+
+2. **"I don't own my audience on any of these platforms."** Instagram's average engagement rate dropped 24% to a historic 0.48% low in 2026. Creators are publicly migrating strategy to owned infrastructure: email lists, communities, paid memberships. 88% of creators now cite paid memberships as their primary revenue model (up from 51% in 2022). Platforms that don't help creators own their audience feel rented, not owned.
+
+3. **Gumroad's refund policy is still actively burning creators.** Sell $100, refund it, still owe Gumroad $10.50. Despite Gumroad's June feature drop, this policy is unchanged and generating active Reddit/YouTube content in July 2026. The effective rate of 13–23% compounds on every refund.
+
+4. **Beacons' domain trap is emerging as a hot issue.** Multiple 2026 reviews now flag that domains purchased through Beacons remain Beacons' property. Leaving requires a $70 "transfer processing fee." Creators who discover this after building brand identity on the domain feel trapped. "Your domain, forever" is a differentiation line Linktohub can use.
+
+5. **DM automation converts 30–50% of engagers vs. 2–5% for link-in-bio.** Creators who have tried AutoDM flows (via ManyChat or platform-native tools) report dramatic differences vs. static bio link pages. AutoDM is now considered the baseline for serious creator monetization — not a premium feature. Every platform without it is losing mid-tier creator evaluations.
+
+6. **Linktree's OpenAI data sharing (July 5 ToS) is raising creator concerns.** Creator profile pictures, bios, and engagement metrics can now be fed to OpenAI without opt-in. Brand-conscious creators — especially those in fashion, beauty, and health — are uncomfortable with their visual identity and audience data being used for AI model training. Still early-stage concern but worth monitoring as acquisition signal.
+
+7. **Generic storefronts still killing brand identity.** Stan allows color, font, and header only. Gumroad's product pages are identical across all sellers. Creators with strong visual brands (fashion, beauty, fitness, music) immediately notice their storefront looks like everyone else's. "My fans can tell it's a template" appears consistently in Stan and Gumroad reviews.
+
+8. **Pre-revenue creators are priced out on flat-fee platforms.** Stan charges $29/month from day 15 of trial before a creator earns their first sale. Beacons' free plan (with 9% fee) captures this segment, converting them to paid after they start generating revenue. Any flat-fee platform without a free/freemium entry point loses all pre-revenue creators by default.
+
+---
+
+## Feature Ideas (ranked by impact)
+
+1. **Email drip sequences (D3 + D7)** — Welcome email is live. Build D3 ("here's how to set up your first product") and D7 ("your store is ready — here's how to drive traffic") sequences. On a platform where Stan charges $99/month for email automation, Linktohub having working sequences at the base price is a literal talking point in every comparison article. This is the highest-impact unbuilt feature currently on the board. Ready to ship this sprint.
+
+2. **Rewrite Gumroad comparison page with fee-math focus** — `/compare/gumroad` is live but was built when Gumroad's 7-day payout cycle was the lead argument. That argument is now obsolete (daily payouts launched June 2026). Rebuild the page around: (a) fee math — $1,000/month in sales costs creator $130–230 on Gumroad vs. $29 flat on Linktohub; (b) refund trap — Gumroad keeps its fee when you refund; (c) Discover 30% rate; (d) no email automation. Add an interactive calculator. Update messaging site-wide that references "Gumroad's 7-day payouts."
+
+3. **Course completion certificates** — Auto-generated PDF certificate with creator branding when a student completes a course. Unbuilt (❌ in sprint). Course certificates are the #1 cited missing feature in sub-$50 course tools. Blocks churn to Kajabi ($119+/month) for creators running $97–$497 educational programs. Instagram engagement at all-time lows is pushing creators toward owned-audience products — courses and certifications convert well into that strategy. Build certificate generation on top of existing course infrastructure.
+
+4. **"Own your domain, own your data" landing page** — Target Beacons ($70 domain transfer trap) and Linktree (OpenAI data sharing ToS) switchers. One page: "When you use Beacons, they own your domain. When you use Linktree, they share your bio with OpenAI. At Linktohub, your domain is yours and your data stays yours." Organic SEO value, direct appeal to switching creators. 1-day build.
+
+5. **TikTok Shop API integration** — TikTok Shop API expanded significantly in 2025–2026. Connects creator product listings to TikTok's native shopping experience. No current Linktohub competitor (Stan, Beacons, Linktree) has a confirmed TikTok Shop integration. For creators with large TikTok followings, native shop integration is more valuable than another link-in-bio tool. Q3 scope item.
+
+6. **Membership-first homepage messaging** — 88% of creators say paid memberships are their primary revenue model. Linktohub has memberships built, but the homepage positioning doesn't emphasize this. Reframe the value prop: "Sell memberships, courses, merch, and bookings — all from one link." The membership angle is where the creator economy is moving; make sure Linktohub's marketing reflects it.
+
+7. **AI agent "voice-of-creator" showcase** — Linktohub's AI assistant trained on creator voice is a genuine category-of-one feature. Beacons' Beam generates generic content. Stan has no AI. The 2026 trend of "creators selling access to AI agents trained on their knowledge" is a direct match for what Linktohub already has. Build a homepage section or demo video showing the AI answering fan questions in the creator's exact tone. "Your AI, your voice, your store" — not generic chatbot, but creator-identity AI.
+
+8. **Beacons/Linktree migration importer** — Low-friction import tool: "Coming from Beacons or Linktree? Import your links and products in 30 seconds." The Beacons domain trap and Linktree ToS concerns are active switching triggers right now. A migration importer converts the switching intent into actual conversions. Medium engineering effort, high acquisition value during the current switching window.
+
+---
+
+## Pricing Intelligence
+
+| Platform | Free Tier | Base Paid | Pro Paid | Effective Fee | Email | AutoDM | Merch/POD | Community |
+|---|---|---|---|---|---|---|---|---|
+| **Stan.store** | None (14-day trial) | $29/mo | $99/mo | 0% | $99 only | Yes (all tiers) | No | No |
+| **Beacons.ai** | Yes (9% fee) | $10/mo (9% fee) | $30/mo (0% fees) | 0–9% | Limited free, full at $30 | Yes (all tiers) | No | No |
+| **Gumroad** | Yes (no monthly) | — | — | 13–23% effective | No | No | No | **Yes (new June 2026)** |
+| **Linktree** | Yes (12% fee) | $8/mo (9% fee) | $15–$35/mo | 0–12% | Integration only | No | No | No |
+| **Linktohub target** | — | ~$29–39/mo | — | 0% | **Ship drips this sprint** | Pending Meta review | Yes (Gelato + Printify) | Via memberships |
+
+**The unclaimed position is still open**: Flat subscription + 0% fees + email automation + native merch + bookings + AI in creator's voice. Stan has 0% fees but no email under $99. Beacons has email at $30 but no merch, domain trap, and TikTok link issues. Gumroad has no monthly fee but 13–23% effective rate and no email. No competitor sits at the intersection Linktohub is building toward.
+
+**Fee math that should be on the homepage**: On $1,000/month in sales — Gumroad takes $130–230. Linktree free takes $120 + Stripe. Beacons free takes $90 + Stripe. Stan $29 flat but no email. Linktohub at $29/month with 0% fees + email sequences beats every competitor above ~$250/month in revenue.
+
+---
+
+## Tech Opportunities
+
+**Gumroad's daily payouts change the competitive framing:**
+- Gumroad launched daily payouts for eligible US accounts (June 2026). The "get paid faster than Gumroad's 7-day cycle" positioning is obsolete.
+- Linktohub's Stripe Instant Payouts toggle is still better (real-time, not daily), but the messaging should shift from "faster than Gumroad" to "you keep more money than Gumroad" (fee math).
+
+**Instagram Messaging API — rate limit cut to 200 DM/hr (since October 2024):**
+- Critical constraint the team needs to know: Instagram reduced the automated DM rate limit from 5,000/hour to 200/hour per account in October 2024. This is now the production ceiling.
+- At 200 DM/hr, a creator with a viral post can generate more comments than the automation can handle in real-time. Queue management and user communication ("Your DM will arrive within X minutes") are required.
+- AutoDM code is done and pending Meta review. Before launching, ensure the queue/rate architecture handles this constraint — it wasn't a known constraint when the code was written.
+
+**TikTok DM API: Still blocked as of July 2026.** No change. No timeline. Do not roadmap TikTok AutoDM.
+
+**TikTok Creator Search Insights API: Now production-available (new in 2026):**
+- Returns creator-level data (follower ranges, content category, avg engagement rate, audience growth, age demographics, top geo markets) without per-creator OAuth.
+- Integration opportunity: Surface trending search terms in creator dashboard. "Your fans are searching for [X] — build a product around it." First mover in this space.
+
+**Stripe marketplace wallets (preview at Sessions 2026):**
+- Marketplace sellers can hold earnings in a balance, spend on-platform, and receive prepaid debit cards.
+- Future product concept: Creator earnings flow directly into a Linktohub wallet, usable for Gelato/Printify merch orders without a separate withdrawal. Join preview waitlist now.
+
+**Beacons' TikTok link blocking issue:**
+- TikTok has intermittently blocked beacons.ai links since mid-2024. Creators must use beacons.page workarounds, undermining brand identity.
+- Linktohub's links are not known to be blocked by any platform. This is a reliability differentiator worth testing and documenting publicly.
+
+**AI creator monetization trend — selling expertise access, not content access:**
+- The 2026 emerging model: creators sell access to AI agents trained on their specific knowledge (coaching AI, recipe AI, workout AI). This is "expertise access" replacing "content access."
+- Linktohub's AI assistant trained on creator voice is already built for this. The product exists — it needs marketing as a monetization tool ("Your AI works 24/7, answering fan questions and converting them while you sleep").
+
+**New POD providers worth noting:**
+- **MerchOne**: Manufacturing specialist in non-apparel (wall art, home décor, gifts, pet products). Facilities in Poland, Germany, Latvia, Ohio. Gaining traction as Gelato supplement for non-apparel niches.
+- **Teemill**: Sustainable/eco-focused POD with API. Growing segment among sustainability-conscious creators.
+- **Gooten**: Launched first loyalty program in POD industry (dedicated partner managers, BI insights). High-volume seller retention play.
+- Printify integration (shipped last sprint) already covers the breadth gap. Gelato + Printify is the right two-provider stack.
+
+---
+
+## Message for Sprint Planner
+
+**This week: Ship email drip sequences. Update Gumroad comparison page. Flag the Instagram DM rate limit.**
+
+**Email drips (D3/D7) — highest-impact unbuilt feature, build it this sprint.** Welcome email is live (shipped last sprint). D3 and D7 drips are ready to build with no additional prerequisites. Stan charges $99/month for email automation. Beacons limits free tier to 50 sends/month. Linktohub shipping working drip sequences at the base price makes us the answer to the most-searched creator complaint in 2026. Assign one engineer + template copy this week. Build D3: "Your store is set up — here's how to create your first product" with a link to onboarding. Build D7: "Your first week on Linktohub — how to drive your first sale" with a UTM link to share their storefront. These are 2-day builds max.
+
+**Update Gumroad comparison page — the competitor changed.** Gumroad shipped daily payouts June 4, 2026. Our `/compare/gumroad` page was built when "7-day payout cycle" was the lead argument. That argument is now stale. Rebuild the page around: (1) fee math calculator — show how much Gumroad takes vs. Linktohub's flat fee at $250/$500/$1,000/$2,500/month revenue; (2) the refund trap — Gumroad keeps its fee when you refund; (3) Discover's 30% cut; (4) no email automation on Gumroad at any price. Update any site copy that references Gumroad's payout speed. This is 1-day marketing work, not engineering.
+
+**Flag to engineering: Instagram DM rate limit is 200/hr, not 5,000/hr.** The rate limit was cut in October 2024 from 5,000 to 200 DM/hour per account. AutoDM code was written without this constraint in mind. Before AutoDM launches post-Meta-review, the queue architecture must handle burst scenarios (viral post → 10,000 comments in 1 hour → 50 hours to deliver DMs at 200/hr). Creators need a clear "Your DM will arrive within X minutes" message and queue management. This is not a sprint task — it's a pre-launch audit item that must happen before the Meta review clears.
+
+**Hold this sprint (carry to next):**
+- Course completion certificates — right feature, needs course progress/module tracking built first
+- TikTok Shop API integration — Q3
+- Beacons/Linktree migration importer — high value but not urgent
+- "Own your domain, own your data" landing page — 1-day build, do it alongside email drips if bandwidth allows
+- Cal.com integration — evaluate after native bookings have been live 2 weeks
+
+**Evidence summary:**
+- Email drip: ❌ in sprint, prerequisite (welcome email) live since last sprint. Email automation cited as #1 pain point in 7+ independent 2026 comparison articles.
+- Gumroad daily payouts: confirmed June 4, 2026 announcement (Gumroad's own blog + ReleaseBot tracking).
+- Instagram 200 DM/hr cap: confirmed by UnifyPort developer documentation, effective October 2024.
+- Beacons domain trap: confirmed across multiple July 2026 reviews (autoposting.ai, brandid.app, fritz.ai).
+- Linktree OpenAI ToS: confirmed July 5, 2026 effective date (Linkero blog, Linktree's own ToS update).
+
+---
+
+*Prior report (2026-06-20) archived below.*
+
+---
+
 # Research Report — 2026-06-20
 
 ## Top 3 Opportunities (act on these this week)
