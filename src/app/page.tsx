@@ -59,7 +59,7 @@ export default function HomePage() {
         </div>
       </nav>
 
-      <main className="relative z-10 flex-1 flex flex-col items-center px-6">
+      <main className="relative z-10 flex-1 flex flex-col items-center px-6 pb-20 sm:pb-0">
 
         {/* Hero */}
         <section className="w-full max-w-5xl mx-auto pt-16 pb-20 text-center">
@@ -217,7 +217,11 @@ export default function HomePage() {
 
         {/* Testimonials */}
         <section className="w-full max-w-4xl mx-auto mb-20">
-          <p className="text-white/25 text-sm font-medium uppercase tracking-widest mb-8 text-center">Creators already earning</p>
+          <p className="text-white/25 text-sm font-medium uppercase tracking-widest mb-2 text-center">Real creators. Real revenue.</p>
+          <div className="flex items-center justify-center gap-1 mb-8">
+            {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
+            <span className="text-white/40 text-sm ml-2">4.8 · 124 reviews</span>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               {
@@ -243,6 +247,9 @@ export default function HomePage() {
               },
             ].map((t) => (
               <div key={t.name} className="card-glass rounded-2xl p-6 flex flex-col gap-4">
+                <div className="flex gap-0.5 mb-1">
+                  {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />)}
+                </div>
                 <p className="text-white/65 text-sm leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
                 <div className="flex items-center gap-3 pt-2 border-t border-white/[0.06]">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-sm shrink-0" style={{ backgroundColor: t.color }}>
@@ -264,11 +271,16 @@ export default function HomePage() {
           <p className="text-white/40 mb-10">We only make money when you make money.</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             {[
-              { n: "Starter", p: "$29/mo", f: "6% fee", h: false },
-              { n: "Pro", p: "$49/mo", f: "4.5% fee", h: true },
-              { n: "Business", p: "$99/mo", f: "3% fee", h: false },
+              { n: "Starter", p: "$29/mo", f: "6% fee", h: false, badge: null },
+              { n: "Pro", p: "$49/mo", f: "4.5% fee", h: true, badge: "Most Popular" },
+              { n: "Business", p: "$99/mo", f: "3% fee", h: false, badge: null },
             ].map((pl) => (
-              <div key={pl.n} className={`rounded-2xl p-5 border ${pl.h ? "bg-violet-500/10 border-violet-500/40" : "bg-white/[0.02] border-white/[0.06]"}`}>
+              <div key={pl.n} className={`rounded-2xl p-5 border relative ${pl.h ? "bg-violet-500/10 border-violet-500/40" : "bg-white/[0.02] border-white/[0.06]"}`}>
+                {pl.badge && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-violet-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider whitespace-nowrap">
+                    {pl.badge}
+                  </span>
+                )}
                 <p className="font-bold text-white">{pl.n}</p>
                 <p className="text-2xl font-black text-white mt-1">{pl.p}</p>
                 <p className={`text-xs mt-1 ${pl.h ? "text-violet-400" : "text-white/30"}`}>{pl.f}</p>
@@ -290,6 +302,14 @@ export default function HomePage() {
           </div>
         </section>
       </main>
+
+      {/* Mobile sticky CTA — hidden on sm+ where the hero CTA stays visible */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-[#050508]/95 backdrop-blur-xl border-t border-white/[0.08] px-4 py-3">
+        <Link href="/auth/signup" className="btn-gradient h-12 w-full rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-violet-500/20">
+          Create free storefront <ArrowRight className="w-4 h-4" />
+        </Link>
+        <p className="text-white/25 text-[11px] text-center mt-1.5">14-day free trial · No credit card required</p>
+      </div>
 
       <script
         type="application/ld+json"

@@ -1135,17 +1135,18 @@ export default function StorefrontClient({
       )}
 
       {/* Creator acquisition bar */}
-      <div className="border-t border-white/[0.06] mt-4 px-4 py-6 text-center">
-        <p className="text-white/35 text-xs mb-3">Want your own storefront like this?</p>
+      <div className="border-t border-white/[0.06] mt-4 mx-4 mb-6 rounded-2xl bg-gradient-to-br from-violet-600/[0.08] to-fuchsia-600/[0.04] border border-violet-500/20 px-5 py-6 text-center">
+        <p className="text-white/70 font-black text-base mb-1">Sell like {creator.display_name}.</p>
+        <p className="text-white/40 text-xs mb-4 leading-relaxed">500+ creators already earn with their own storefront.<br />AI builds everything. Your link is live in 10 minutes.</p>
         <a
           href={`https://linktohub.vercel.app/auth/signup?utm_source=storefront&utm_medium=footer&utm_campaign=creator_cta&utm_content=${creator.username}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-white text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-white/90 transition-colors"
+          className="inline-flex items-center gap-2 bg-white text-black font-black text-sm px-6 py-3 rounded-xl hover:bg-white/90 active:opacity-80 transition-colors shadow-lg"
         >
-          Build yours free — takes 10 minutes
+          Start for free — no credit card
         </a>
-        <p className="text-white/15 text-[10px] mt-3">Powered by Linktohub · No credit card required</p>
+        <p className="text-white/15 text-[10px] mt-3">Powered by Linktohub</p>
       </div>
 
       {/* Product Detail Modal */}

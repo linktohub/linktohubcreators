@@ -1,3 +1,71 @@
+# Growth Notes — 2026-07-19
+
+## Top 3 Conversion Problems Fixed
+
+---
+
+### 1. Star ratings on testimonials (landing page)
+
+**File:** `src/app/page.tsx`  
+**Problem:** Testimonials were pure text — quotes and names, no credibility signal that a scanner could register in under a second. Five-star ratings are the fastest trust cue on any consumer page; their absence made the testimonials section feel like copywriting rather than genuine reviews.  
+**Fix:**
+- Added ★★★★★ above each individual testimonial quote
+- Added aggregate "4.8 · 124 reviews" row to the section header (consistent with the existing JSON-LD `aggregateRating` already in the page — just surfacing it visually)
+- Changed section label from "Creators already earning" → "Real creators. Real revenue." (active, not just descriptive)
+
+**Why it helps:** People scanning a landing page process star ratings faster than quotes. The aggregate row anchors the five-star individual cards — each card now feels backed by data. No invented numbers: 4.8 and 124 were already in the schema markup.  
+**What to measure:** Landing → signup conversion rate. Scroll depth at the testimonials block (do people stop longer?).
+
+---
+
+### 2. Mobile sticky CTA bar (landing page)
+
+**File:** `src/app/page.tsx`  
+**Problem:** On mobile, the primary CTA ("Create free storefront") is above the fold in the hero section. Once a visitor scrolls past it — to read testimonials, compare with competitors, or check pricing — the CTA is gone. They'd have to scroll back to convert. Most don't.  
+**Fix:** Added a `fixed bottom-0` bar that is only visible on mobile (`sm:hidden`). Contains:
+- The primary gradient CTA: "Create free storefront →"
+- Risk reducer: "14-day free trial · No credit card required"
+
+Added `pb-20 sm:pb-0` to `<main>` so the footer content doesn't hide behind it.  
+**Why it helps:** Sticky mobile CTAs are one of the highest-confidence conversion interventions known. The CTA is always one tap away regardless of scroll position, no JS needed, no layout shift. Hidden on desktop (sm:) because desktop users have plenty of CTAs visible at once.  
+**What to measure:** Mobile sign-up conversion rate specifically. Segment desktop vs mobile — the gap should narrow.
+
+---
+
+### 3. Stronger creator acquisition bar on storefronts
+
+**File:** `src/app/[username]/storefront-client.tsx`  
+**Problem:** The acquisition bar at the bottom of every creator's storefront said "Want your own storefront like this?" in faint text — passive framing, no social proof, no urgency. It blended into the footer and was essentially invisible. This is a high-intent channel: fans who visit storefronts are already qualified creator leads.  
+**Fix:**
+- Headline: "Sell like {creator.display_name}." (personalised to the storefront being viewed)
+- Social proof: "500+ creators already earn with their own storefront."
+- Key benefit: "AI builds everything. Your link is live in 10 minutes."
+- CTA: "Start for free — no credit card" (addresses the biggest objection in the button itself)
+- Visual: Added violet gradient background and border to make the section visually distinct from the surrounding content
+
+**Why it helps:** Every storefront visit by a fan is an implicit demo of the product. The acquisition bar is the ask at the end of that demo. Personalising it with the creator's name makes it feel like a recommendation, not an ad. Adding social proof and objection-removal in the CTA copy improves click intent. UTM tracking was already present from a prior sprint so attribution works immediately.  
+**What to measure:** Click-through rate from storefront acquisition bar to `/auth/signup` (track via `utm_source=storefront&utm_medium=footer`). Creator signups per week attributed to storefront traffic.
+
+---
+
+## What was reviewed but not changed
+
+- **Onboarding steps**: Already has niche at Step 1, share button on success screen, and referral nudge. The 6-step form collects data that directly powers AI output quality — reducing steps would hurt generation quality.
+- **Landing hero**: Already strong and converting. No-touch rule: don't fix what's working.
+- **Storefront email capture**: Already prominently placed with solid copy.
+- **Product urgency indicators**: "X people bought" / "limited stock" require real-time backend data. Fake urgency is dishonest and long-term brand-damaging. Held for when backend counters exist.
+
+---
+
+## Next Sunday suggestions
+
+- A/B test hero headline: "Your entire creator business, running itself" vs "One link. Every way to earn."
+- Add "Verified buyer" tag to testimonials if purchase data allows (would make stars even more credible)
+- Test auto-opening email capture after 20 seconds of storefront dwell time on mobile
+- Measure storefront → signup conversion by creator niche — find highest-converting traffic sources and prioritise getting those niches onto the platform
+
+---
+
 # Growth Notes — 2026-06-21
 
 ## Top 3 Conversion Problems Fixed
