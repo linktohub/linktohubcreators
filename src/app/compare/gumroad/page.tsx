@@ -5,10 +5,10 @@ import GumroadCalculator from "./calculator-client";
 
 export const metadata: Metadata = {
   title: "Gumroad Fee Calculator 2026 — See What You Actually Keep",
-  description: "Enter your monthly Gumroad sales to see the real effective fee rate and compare to alternatives.",
+  description: "On $1,000/month Gumroad takes $130–230 in fees. Linktohub is $29 flat. See the real numbers, the refund trap, and why email marketing matters.",
   openGraph: {
     title: "Gumroad Fee Calculator 2026 — See What You Actually Keep",
-    description: "On $1,000/mo Gumroad takes ~$130. Linktohub at 6% takes $60. See the real numbers.",
+    description: "On $1,000/month Gumroad takes $130–230 in fees. Linktohub is $29 flat. See the real numbers, the refund trap, and why email marketing matters.",
     url: "https://linktohub.vercel.app/compare/gumroad",
     siteName: "Linktohub",
     type: "website",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Gumroad Fee Calculator 2026 — See What You Actually Keep",
-    description: "On $1,000/mo Gumroad takes ~$130. Linktohub at 6% takes $60. See the real numbers.",
+    description: "On $1,000/month Gumroad takes $130–230 in fees. Linktohub is $29 flat. See the real numbers, the refund trap, and why email marketing matters.",
   },
 };
 
@@ -59,26 +59,60 @@ export default function GumroadComparePage() {
 
         <GumroadCalculator />
 
-        <div className="mt-12 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-3">
-          <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-4">Fee breakdown</p>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-            <div>
-              <p className="font-bold text-white/70 mb-2">Gumroad</p>
-              <p className="text-white/40">10% platform fee</p>
-              <p className="text-white/40">$0.50 per transaction</p>
-              <p className="text-white/40">2.9% + $0.30 Stripe</p>
-              <p className="text-red-400/60">Keeps fee on refunds</p>
-              <p className="text-red-400 font-semibold mt-2">~13–20% effective</p>
-            </div>
-            <div>
-              <p className="font-bold text-white/70 mb-2">Linktohub</p>
-              <p className="text-white/40">6% platform fee</p>
-              <p className="text-white/40">2.9% + $0.30 Stripe</p>
-              <p className="text-white/40">No per-tx surcharge</p>
-              <p className="text-white/40">No refund penalty</p>
-              <p className="text-violet-400 font-semibold mt-2">~9% effective</p>
+        {/* Why Linktohub wins — ordered by impact */}
+        <div className="mt-16 space-y-4">
+          <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-6">Why Linktohub wins</p>
+
+          {/* 1. Fee math */}
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-violet-400">01 — Fee math</p>
+            <p className="font-black text-xl leading-snug">On $1,000/month: Gumroad takes $130–230. Linktohub: $29 flat.</p>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm mt-4">
+              <div>
+                <p className="font-bold text-white/70 mb-2">Gumroad</p>
+                <p className="text-white/40">10% platform fee</p>
+                <p className="text-white/40">$0.50 per transaction</p>
+                <p className="text-white/40">2.9% + $0.30 Stripe</p>
+                <p className="text-red-400 font-semibold mt-2">~13–23% effective</p>
+              </div>
+              <div>
+                <p className="font-bold text-white/70 mb-2">Linktohub</p>
+                <p className="text-white/40">$29/mo flat plan</p>
+                <p className="text-white/40">2.9% + $0.30 Stripe</p>
+                <p className="text-white/40">No per-tx surcharge</p>
+                <p className="text-violet-400 font-semibold mt-2">$29 + Stripe only</p>
+              </div>
             </div>
           </div>
+
+          {/* 2. Refund trap */}
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-red-400 mb-3">02 — The refund trap</p>
+            <p className="font-black text-xl leading-snug">Gumroad keeps their fee when you refund.</p>
+            <p className="text-white/45 mt-3">Issue a $100 refund and you still owe Gumroad $10.50. You eat the loss; they don&apos;t. Linktohub has no refund penalty — if a buyer gets their money back, you owe nothing.</p>
+          </div>
+
+          {/* 3. Discover 30% */}
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-red-400 mb-3">03 — Discover: 30%, no exceptions</p>
+            <p className="font-black text-xl leading-snug">Put your product in Gumroad&apos;s marketplace and the fee jumps to 30%.</p>
+            <p className="text-white/45 mt-3">Gumroad Discover charges a flat 30% on every sale made through their discovery feed. There&apos;s no cap, no opt-out once you&apos;re in. Linktohub doesn&apos;t take a marketplace cut.</p>
+          </div>
+
+          {/* 4. Email marketing */}
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-violet-400 mb-3">04 — Email marketing included</p>
+            <p className="font-black text-xl leading-snug">Gumroad has no email marketing at any price point.</p>
+            <p className="text-white/45 mt-3">Linktohub includes automated email drip sequences (D3 + D7), broadcast emails, and subscriber analytics at the base plan. Stan charges $99/mo for comparable automation. Beacons caps free accounts at 50 sends/month. Linktohub at $29/mo: unlimited sends, automated drip, zero per-send fees.</p>
+          </div>
+        </div>
+
+        {/* What Gumroad improved in 2026 — intellectual honesty */}
+        <div className="mt-8 bg-white/[0.015] border border-white/[0.05] rounded-2xl p-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-3">What Gumroad improved in 2026</p>
+          <p className="text-white/50 text-sm leading-relaxed">
+            To be fair: Gumroad shipped meaningful improvements this year. In June 2026 they launched daily payouts for eligible US accounts (previously 7-day cycles), communities for paid memberships, and installment payment plans. These are real additions. The fee math, the refund trap, and the missing email marketing haven&apos;t changed — but if those three don&apos;t matter for your use case, Gumroad is a legitimate option.
+          </p>
         </div>
 
         <p className="text-center text-white/20 text-xs mt-8">

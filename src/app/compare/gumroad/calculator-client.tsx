@@ -135,6 +135,21 @@ export default function GumroadCalculator() {
         </div>
       </div>
 
+      {/* Crossover point: at what revenue does Linktohub's $29/mo plan cost equal Gumroad's % fees? */}
+      {(() => {
+        const gumroadRateAtPrice = 0.10 + 0.50 / Math.max(p, 1);
+        const crossoverRevenue = Math.ceil(29 / gumroadRateAtPrice);
+        return (
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
+            <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-2">Crossover point</p>
+            <p className="text-white font-bold">
+              You break even vs Gumroad at <span className="text-violet-300">${fmt(crossoverRevenue)}/month</span> in revenue — above that, Linktohub&apos;s $29/mo plan costs less forever.
+            </p>
+            <p className="text-white/30 text-xs mt-1">At your avg price of ${fmt(p)}, Gumroad&apos;s effective rate is {(gumroadRateAtPrice * 100).toFixed(1)}% per dollar of revenue.</p>
+          </div>
+        );
+      })()}
+
       {/* Annual savings callout */}
       {annualDiff > 0 && (
         <div className="bg-gradient-to-r from-violet-600/20 to-fuchsia-600/10 border border-violet-500/30 rounded-2xl p-6 text-center">
