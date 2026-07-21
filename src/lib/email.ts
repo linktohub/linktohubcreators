@@ -169,3 +169,62 @@ export async function sendSubscriberWelcome({
     </div>`,
   });
 }
+
+export async function sendDripD3({
+  to, subscriberName, creatorName, creatorUsername, topProducts,
+}: {
+  to: string;
+  subscriberName?: string;
+  creatorName: string;
+  creatorUsername: string;
+  topProducts: { title: string; price: number }[];
+}) {
+  const resend = getResend();
+  if (!resend) return;
+  const storeUrl = `https://linktohub.vercel.app/${creatorUsername}?utm_source=email&utm_medium=drip&utm_campaign=d3`;
+  const productList = topProducts.slice(0, 3).map((p) =>
+    `<li style="margin:6px 0"><strong>${p.title}</strong> — $${p.price}</li>`
+  ).join("");
+
+  await resend.emails.send({
+    from: `${creatorName} <updates@linktohub.com>`,
+    to,
+    subject: `3 days in — here's what ${creatorName} has for you`,
+    html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#111">
+      <h2 style="color:#7c3aed">You joined 3 days ago 👋</h2>
+      <p>Hey${subscriberName ? ` ${subscriberName}` : ""}! You joined <strong>${creatorName}</strong>'s list 3 days ago. Here's what's available in the store:</p>
+      ${productList.length ? `<ul style="padding-left:20px">${productList}</ul>` : ""}
+      <p style="margin:24px 0"><a href="${storeUrl}" style="background:#7c3aed;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Visit the store →</a></p>
+      <hr style="margin:24px 0;border:none;border-top:1px solid #eee">
+      <p style="color:#888;font-size:12px">You subscribed at ${creatorName}'s Linktohub storefront. <a href="https://linktohub.vercel.app/${creatorUsername}/unsubscribe?email=${encodeURIComponent(to)}" style="color:#888">Unsubscribe</a></p>
+    </div>`,
+  });
+}
+
+export async function sendDripD7({
+  to, subscriberName, creatorName, creatorUsername,
+}: {
+  to: string;
+  subscriberName?: string;
+  creatorName: string;
+  creatorUsername: string;
+}) {
+  const resend = getResend();
+  if (!resend) return;
+  const storeUrl = `https://linktohub.vercel.app/${creatorUsername}?utm_source=email&utm_medium=drip&utm_campaign=d7`;
+
+  await resend.emails.send({
+    from: `${creatorName} <updates@linktohub.com>`,
+    to,
+    subject: `Your first week with ${creatorName} — share this`,
+    html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#111">
+      <h2 style="color:#7c3aed">One week in 🙌</h2>
+      <p>Hey${subscriberName ? ` ${subscriberName}` : ""}! You've been part of <strong>${creatorName}</strong>'s community for a week. Know someone who'd love their content?</p>
+      <p>Share the store:</p>
+      <p style="background:#f5f3ff;padding:12px 16px;border-radius:8px;word-break:break-all"><a href="${storeUrl}" style="color:#7c3aed">${storeUrl}</a></p>
+      <p style="margin:24px 0"><a href="${storeUrl}" style="background:#7c3aed;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Visit the store →</a></p>
+      <hr style="margin:24px 0;border:none;border-top:1px solid #eee">
+      <p style="color:#888;font-size:12px">You subscribed at ${creatorName}'s Linktohub storefront. <a href="https://linktohub.vercel.app/${creatorUsername}/unsubscribe?email=${encodeURIComponent(to)}" style="color:#888">Unsubscribe</a></p>
+    </div>`,
+  });
+}
