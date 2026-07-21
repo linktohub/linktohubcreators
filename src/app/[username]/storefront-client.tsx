@@ -852,10 +852,16 @@ export default function StorefrontClient({
         {/* Subscribe tab */}
         {activeTab === "subscribe" && (
           <div className="space-y-4 mb-16">
-            {tiers.map((tier) => {
+            {tiers.map((tier, idx) => {
               const price = tier.price_monthly || tier.price || 0;
+              const isPopular = tiers.length > 1 && idx === Math.floor(tiers.length / 2);
               return (
-                <div key={tier.id} className="border border-white/[0.08] rounded-2xl p-6 bg-white/[0.02]">
+                <div key={tier.id} className={`rounded-2xl p-6 transition-all ${isPopular ? "border border-violet-500/40 bg-violet-500/[0.05] ring-1 ring-violet-500/20" : "border border-white/[0.08] bg-white/[0.02]"}`}>
+                  {isPopular && (
+                    <span className="inline-block text-[10px] font-black tracking-widest uppercase text-violet-300 bg-violet-500/20 px-3 py-1 rounded-full mb-3">
+                      Most popular
+                    </span>
+                  )}
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xl font-black">{tier.name}</h3>
                     <span className="text-2xl font-black">${price}<span className="text-sm font-normal text-white/40">/mo</span></span>
@@ -871,8 +877,9 @@ export default function StorefrontClient({
                       ))}
                     </ul>
                   )}
-                  <button className="w-full h-12 rounded-xl font-black text-white text-sm disabled:opacity-60 active:opacity-75 transition-opacity"
-                    style={{ backgroundColor: brandColor }}
+                  <button
+                    className={`w-full h-12 rounded-xl font-black text-white text-sm disabled:opacity-60 active:opacity-75 transition-opacity ${isPopular ? "btn-gradient" : ""}`}
+                    style={isPopular ? undefined : { backgroundColor: brandColor }}
                     disabled={processingId === tier.id}
                     onClick={() => handleSubscribe(tier.id)}>
                     {processingId === tier.id ? "Loading..." : fanUser === null ? `Sign in to subscribe` : `Subscribe — $${price}/mo`}
