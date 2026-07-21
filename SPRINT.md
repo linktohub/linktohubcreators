@@ -42,17 +42,17 @@ Additional work shipped between sprints (2026-07-15–19):
 | Mobile storefront UX | ✅ Done |
 | Printify POD | ✅ Done |
 | AutoDM | ✅ Code done — pending Meta review (no code action needed) |
-| **Email drip sequences (D3/D7)** | ❌ Not built — `email.ts` has no drip functions; no cron endpoint; `email_subscribers` has no `drip_sent` columns |
-| **Gumroad compare page messaging** | ❌ Stale — Gumroad daily payouts launched June 4, 2026; any "payout cycle" argument is now obsolete |
-| **"Own your domain, own your data" page** | ❌ Not built — Beacons domain trap + Linktree OpenAI ToS are live creator pain points with no Linktohub response |
-| **Auth modal creator branding** | ❌ Not built — DESIGN_NOTES HIGH: sign-in modal shows no creator avatar; fans lose context when asked to create an account |
-| **Subscription tier visual hierarchy** | ❌ Not built — DESIGN_NOTES MEDIUM: all tiers identical styling, no "Most popular" badge |
+| **Email drip sequences (D3/D7)** | ✅ Done — migration adds columns, `sendDripD3/D7` in `email.ts`, `/api/email/drip` cron route, `vercel.json` daily 10:00 UTC cron |
+| **Gumroad compare page messaging** | ✅ Done — metadata updated, crossover calculator added, fee math leads, refund trap + Discover 30% + email marketing sections, 2026 improvements callout |
+| **"Own your domain, own your data" page** | ✅ Done — `/compare/ownership` live, Beacons domain trap + Linktree OpenAI ToS sections, linked from homepage footer |
+| **Auth modal creator branding** | ✅ Done — creator avatar + display name above tabs in auth bottom sheet, gradient fallback for no avatar |
+| **Subscription tier visual hierarchy** | ✅ Done — violet "Most popular" badge on middle tier, btn-gradient for popular Subscribe button |
 | Course completion certificates | ❌ Not built — needs course progress/module tracking first; Q3 |
 | Cal.com integration | ❌ Not built — native bookings live; evaluate Cal.com after 2 weeks of data |
 
 ---
 
-## Task 1 — Email Drip Sequences (D3 + D7) CRITICAL
+## Task 1 — Email Drip Sequences (D3 + D7) CRITICAL ✅ DONE
 
 **Why:** The welcome email shipped in the 2026-06-22 sprint — the prerequisite is live. D3 and D7 drip sequences are now ready to build with zero new prerequisites. Stan charges $99/month for email automation; Beacons limits free tiers to 50 sends/month. Linktohub at base price with working drip sequences is the answer to the single most-cited creator complaint in 2026. Every creator who activates and gets D3/D7 sends is more likely to stay and drive sales from their storefront. RESEARCH confirms this is the highest-impact unbuilt feature on the board.
 
@@ -115,7 +115,7 @@ Add `CRON_SECRET` to Vercel env vars and check `Authorization: Bearer ${CRON_SEC
 
 ---
 
-## Task 2 — Gumroad Comparison Page Messaging Refresh HIGH
+## Task 2 — Gumroad Comparison Page Messaging Refresh HIGH ✅ DONE
 
 **Why:** Gumroad shipped daily payouts for eligible US accounts on June 4, 2026. The `/compare/gumroad` page was written when "Gumroad's 7-day payout cycle" was a lead argument. Any creator who researches Gumroad before landing on this page will already know about daily payouts — stale messaging signals to them that Linktohub isn't paying attention, which undermines the whole comparison. The refund trap (Gumroad keeps its fee when you refund) and the fee math (13%+ effective rate vs. flat $29/mo) are the arguments that survived — make those the headline.
 
@@ -140,7 +140,7 @@ Update metadata description to: "On $1,000/month Gumroad takes $130–230 in fee
 
 ---
 
-## Task 3 — "Own Your Domain, Own Your Data" Landing Page HIGH
+## Task 3 — "Own Your Domain, Own Your Data" Landing Page HIGH ✅ DONE
 
 **Why:** Two live, hot creator pain points with no competitive Linktohub response:
 1. Beacons holds domains registered through their platform. Leaving requires a $70 "transfer processing fee." Creators are writing about it publicly in July 2026 reviews.
@@ -179,7 +179,7 @@ Link from the compare index (`/compare/`) if one exists, or add a footer link on
 
 ---
 
-## Task 4 — Auth Modal Creator Branding on Storefronts HIGH
+## Task 4 — Auth Modal Creator Branding on Storefronts HIGH ✅ DONE
 
 **Why:** DESIGN_NOTES (2026-07-15 pass) flags this as high priority: "The sign-in/sign-up bottom sheet has no branding — it's a plain dark modal. Should show the creator avatar and name above the form so fans know who they're subscribing to." When a fan clicks "Subscribe" or "AI Chat" on a creator storefront, a modal appears asking them to sign in or create an account. Right now it shows generic tab labels with no visual connection to the creator they were just browsing. Adding the creator's avatar and name above the form reduces drop-off by reinforcing that they're joining a specific creator's community, not just creating a random account.
 
@@ -216,7 +216,7 @@ At 375px: the avatar is 64×64 (`w-16 h-16`) which fits comfortably; the display
 
 ---
 
-## Task 5 — Subscription Tier "Most Popular" Badge MEDIUM
+## Task 5 — Subscription Tier "Most Popular" Badge MEDIUM ✅ DONE
 
 **Why:** DESIGN_NOTES (2026-07-15 pass) flags this as medium priority: "Subscription tier cards lack visual differentiation — a 'Most popular' badge on the middle tier would drive more conversions." Currently all subscription tiers on storefronts render with identical dark cards and no visual hierarchy. When a creator has 2–3 tiers, buyers default to the cheapest or stall. A visual highlight on the middle tier reliably shifts buyers toward a higher-value plan — this is standard conversion practice on every SaaS pricing page and directly increases creator subscription revenue.
 
