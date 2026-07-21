@@ -1108,7 +1108,25 @@ export default function StorefrontClient({
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowAuthModal(false)} />
           <div className="relative w-full max-w-md bg-[#111] rounded-t-3xl border-t border-white/[0.08] p-6 pb-10">
             <div className="flex justify-center mb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
-            <div className="flex gap-1 bg-white/[0.05] rounded-xl p-1 mb-6 mt-4">
+            {/* Creator identity header */}
+            <div className="flex flex-col items-center gap-3 mb-6 mt-4">
+              <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-white/10">
+                {creator.avatar_url
+                  ? <img src={creator.avatar_url} alt={creator.display_name} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-2xl font-black"
+                         style={{ background: `linear-gradient(135deg, ${creator.brand_color || "#7c3aed"}, #c026d3)` }}>
+                      {creator.display_name?.[0]?.toUpperCase() || "?"}
+                    </div>
+                }
+              </div>
+              <div className="text-center">
+                <p className="font-black text-lg leading-tight truncate max-w-[220px]">{creator.display_name}</p>
+                <p className="text-white/40 text-sm mt-0.5">
+                  {authMode === "signin" ? "Sign in to access exclusive content" : "Join their community"}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-1 bg-white/[0.05] rounded-xl p-1 mb-6">
               {(["signin", "signup"] as const).map((m) => (
                 <button key={m} onClick={() => setAuthMode(m)}
                   className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${authMode === m ? "bg-white text-black" : "text-white/40 hover:text-white"}`}>
@@ -1116,9 +1134,6 @@ export default function StorefrontClient({
                 </button>
               ))}
             </div>
-            <p className="text-white/50 text-sm text-center mb-5">
-              {authMode === "signin" ? `Sign in to subscribe and support ${creator.display_name}` : `Create a free account to subscribe`}
-            </p>
             <form onSubmit={handleFanAuth} className="space-y-3">
               <input type="email" placeholder="Your email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required
                 className="w-full h-12 bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 text-white text-sm placeholder:text-white/25 outline-none focus:border-white/30" />
