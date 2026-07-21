@@ -329,10 +329,12 @@ export default function HomePage() {
       />
 
       <footer className="relative z-10 text-center py-8 border-t border-white/[0.06]">
-        <div className="flex items-center justify-center gap-6 text-white/40 text-sm">
-          <Link href="/pricing" className="hover:text-white/40 transition-colors">Pricing</Link>
-          <Link href="/auth/signup" className="hover:text-white/40 transition-colors">Sign up</Link>
-          <Link href="/auth/login" className="hover:text-white/40 transition-colors">Sign in</Link>
+        <div className="flex items-center justify-center gap-6 text-white/40 text-sm flex-wrap">
+          <Link href="/pricing" className="hover:text-white/60 transition-colors">Pricing</Link>
+          <Link href="/compare/gumroad" className="hover:text-white/60 transition-colors">vs Gumroad</Link>
+          <Link href="/compare/ownership" className="hover:text-white/60 transition-colors">Domain &amp; Data Ownership</Link>
+          <Link href="/auth/signup" className="hover:text-white/60 transition-colors">Sign up</Link>
+          <Link href="/auth/login" className="hover:text-white/60 transition-colors">Sign in</Link>
         </div>
         <p className="text-white/15 text-xs mt-4">© 2026 Linktohub · The creator monetization OS</p>
       </footer>
