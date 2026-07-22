@@ -2,6 +2,62 @@
 
 ---
 
+## Pass: 2026-07-22 · Score before: ~4/10 → estimated: ~5.5/10
+
+### What Was Fixed
+
+#### 1. Horizontal tab bars had no scroll affordance (`storefront-client.tsx`, `products-client.tsx`, `globals.css`)
+Both the storefront tab bar and the dashboard products tab bar are `overflow-x-auto` on mobile but gave zero visual cue that more tabs exist. Users at 375px would see 3-4 tabs and assume they'd seen them all.
+Fix: Added `.scroll-fade-right` CSS utility in `globals.css` — a `::after` pseudo-element that fades the right edge to `#050508`. Applied as a wrapper div to both tab bars.
+
+#### 2. ProductCard "Add" button — cramped layout and ambiguous label (`storefront-client.tsx`)
+The "Add" button was `px-3 h-11` positioned inline-right next to the price. On a ~156px card (2-column grid, 375px viewport), the total button area was ~48px wide — technically meeting the 44px minimum but feeling undersized and easy to miss. The label "Add" was also ambiguous (add what, where?).
+Fix: Button is now `w-full h-10` spanning the full card width with label "Add to cart". Price moved above it. Visually stronger and immediately understandable.
+
+#### 3. Acquisition bar — duplicate conflicting border classes (`storefront-client.tsx`)
+The storefront footer CTA had `border-t border-white/[0.06]` immediately followed by `border border-violet-500/20` in the same className string. In Tailwind, the second `border` class (all-sides) overrides the first border-color set by `border-t`, making the white/6 rule a dead declaration.
+Fix: Removed the redundant `border-t border-white/[0.06]` — only `border border-violet-500/20` remains.
+
+#### 4. Low-contrast text in critical user paths (`storefront-client.tsx`, `dashboard/page.tsx`)
+Multiple labels were at opacity levels where they fail to read on OLED panels and lower-brightness mobile screens:
+- `@username` slug: `text-white/40` → `text-white/50`
+- "Tap to view" hint: `text-white/30` → `text-white/45`
+- Dashboard stats card labels: `text-white/35` → `text-white/55`
+- Storefront card description: `text-white/35` → `text-white/50`
+
+#### 5. Dashboard storefront card — "Open" button orphaned on mobile (`dashboard/page.tsx`)
+The card used `flex items-center justify-between flex-wrap gap-4`. On mobile the URL `<code>` block is `hidden sm:block`, so the right div contained only the small "Open" button — which wrapped alone to its own row, appearing disconnected from the content above it.
+Fix: Changed to `flex flex-col sm:flex-row`. On mobile the button gets `w-full sm:w-auto` and fills the card width naturally. Also renamed to "Open storefront" for clarity.
+
+#### 6. No `focus-visible` styles — browser default clashes with dark design (`globals.css`)
+No custom focus-visible styles were defined. Browser default is a blue outline that looks accidental on a dark violet/fuchsia design system.
+Fix: Added `button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid rgba(139, 92, 246, 0.7); outline-offset: 2px; }` to `globals.css`.
+
+#### 7. Mobile bottom nav active state — background only, no position indicator (`nav.tsx`)
+The active mobile nav item had only a faint background (`bg-violet-500/[0.12]`). Small background fills on dark surfaces read weakly — users can miss the active state entirely.
+Fix: Added a short `w-8 h-0.5` violet-to-fuchsia gradient line absolutely positioned at `top-0` of the active item. iOS/Linear-style indicator that clearly communicates "current page."
+
+---
+
+### What Still Needs Work (Next Pass)
+
+**High priority**
+- **Create product form feels like a form** — The feedback input on `/dashboard/products/create` step 3 has an uppercase `tracking-wider` label ("Tell AI what to change") that reads bureaucratic. Should be inline conversational prompt text, not a section header.
+- **Storefront empty state for Merch tab** — "Store coming soon" with a shopping bag emoji is generic system-message energy. Should reference the creator's name, e.g. "Drop incoming from @username — join their list."
+- **Subscription tier `/mo` suffix contrast** — `$49/mo` price display: the `/mo` suffix is `text-sm font-normal text-white/40` which is nearly invisible at small sizes. Raise to `text-white/60`.
+
+**Medium priority**
+- Social link chips have no `active:` state — tap feedback is entirely suppressed by `-webkit-tap-highlight-color: transparent`. Add `active:bg-white/[0.12]`.
+- Storefront active tab uses flat `brandColor` background — consider `btn-gradient` fallback when brandColor is too close to white or black to read.
+- Dashboard quick action "Create tier" label — 11 chars — can feel tight in 2-col grid on 375px. Consider short labels or icon-only with tooltip.
+- Delete action is immediate with no undo — add `toast.success("Deleted", { action: { label: "Undo", onClick: () => {} } })`.
+
+**Low priority**
+- No skeleton loading on dashboard stats — shows `0` flash before server data. Add `animate-pulse` placeholder.
+- Booking form date/time inputs: `[color-scheme:dark]` helps but Android Chrome native pickers still white-flash on some versions.
+
+---
+
 ## Pass: 2026-07-15 · Score before: ~7.5/10 → after: ~8/10
 
 ### What Was Fixed
