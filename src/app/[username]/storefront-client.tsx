@@ -667,7 +667,7 @@ export default function StorefrontClient({
 
         {/* Name — full width, no overlap */}
         <h1 className="text-2xl font-black leading-tight mb-0.5">{creator.display_name}</h1>
-        <p className="text-white/40 text-sm mb-4">@{creator.username}</p>
+        <p className="text-white/50 text-sm mb-4">@{creator.username}</p>
 
         {/* Bio */}
         {creator.bio && (
@@ -772,21 +772,23 @@ export default function StorefrontClient({
 
         {/* Tabs */}
         {tabs.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-1 mb-6 scrollbar-none -mx-4 px-4">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap shrink-0 transition-all active:opacity-75"
-                  style={isActive
-                    ? { backgroundColor: brandColor, color: "#fff" }
-                    : { backgroundColor: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.45)" }
-                  }>
-                  <span>{tab.emoji}</span>
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
+          <div className="scroll-fade-right -mx-4 mb-6">
+            <div className="flex gap-2 overflow-x-auto pb-1 px-4 scrollbar-none">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap shrink-0 transition-all active:opacity-75"
+                    style={isActive
+                      ? { backgroundColor: brandColor, color: "#fff" }
+                      : { backgroundColor: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.45)" }
+                    }>
+                    <span>{tab.emoji}</span>
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -830,7 +832,7 @@ export default function StorefrontClient({
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="font-black text-lg">{product.price === 0 ? "Free" : `$${product.price}`}</p>
-                    <p className="text-white/30 text-xs mt-0.5">Tap to view</p>
+                    <p className="text-white/45 text-xs mt-0.5">Tap to view</p>
                   </div>
                 </button>
               );
@@ -1157,7 +1159,7 @@ export default function StorefrontClient({
       )}
 
       {/* Creator acquisition bar */}
-      <div className="border-t border-white/[0.06] mt-4 mx-4 mb-6 rounded-2xl bg-gradient-to-br from-violet-600/[0.08] to-fuchsia-600/[0.04] border border-violet-500/20 px-5 py-6 text-center">
+      <div className="mt-4 mx-4 mb-6 rounded-2xl bg-gradient-to-br from-violet-600/[0.08] to-fuchsia-600/[0.04] border border-violet-500/20 px-5 py-6 text-center">
         <p className="text-white/70 font-black text-base mb-1">Sell like {creator.display_name}.</p>
         <p className="text-white/40 text-xs mb-4 leading-relaxed">500+ creators already earn with their own storefront.<br />AI builds everything. Your link is live in 10 minutes.</p>
         <a
@@ -1533,15 +1535,12 @@ function ProductCard({ product, brandColor, onAdd, onView }: { product: Product;
       </div>
       <div className="p-3">
         <p className="font-bold text-sm truncate text-white">{name}</p>
-        {product.description && <p className="text-white/35 text-xs mt-0.5 line-clamp-1">{product.description}</p>}
-        <div className="flex items-center justify-between mt-2">
-          <span className="font-black text-base">${product.price}</span>
-          <button onClick={(e) => { e.stopPropagation(); onAdd(); }}
-            className="text-white text-xs font-black px-3 h-11 rounded-xl flex items-center justify-center active:scale-95 transition-transform"
-            style={{ backgroundColor: brandColor }}>
-            Add
-          </button>
-        </div>
+        <p className="font-black text-base mt-1">{product.price === 0 ? "Free" : `$${product.price}`}</p>
+        <button onClick={(e) => { e.stopPropagation(); onAdd(); }}
+          className="w-full h-10 text-white text-xs font-black rounded-xl flex items-center justify-center mt-2.5 active:scale-[0.97] transition-transform"
+          style={{ backgroundColor: brandColor }}>
+          Add to cart
+        </button>
       </div>
     </div>
   );

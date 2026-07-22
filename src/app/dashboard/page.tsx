@@ -83,7 +83,7 @@ export default async function DashboardPage() {
               </div>
             </div>
             <p className="text-2xl font-black text-white mb-0.5">{value}</p>
-            <p className="text-white/35 text-xs font-medium">{label}</p>
+            <p className="text-white/55 text-xs font-medium">{label}</p>
           </div>
         ))}
       </div>
@@ -91,14 +91,14 @@ export default async function DashboardPage() {
       {/* Storefront card */}
       <div className="card-glass rounded-2xl p-6 mb-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-violet-600/5 to-fuchsia-600/5 pointer-events-none" />
-        <div className="relative flex items-center justify-between flex-wrap gap-4">
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-emerald-400 text-xs font-semibold uppercase tracking-wider">Live</span>
             </div>
             <h3 className="font-bold text-white text-lg">Your storefront is live</h3>
-            <p className="text-white/35 text-sm mt-0.5">Share this link with your audience to start earning</p>
+            <p className="text-white/50 text-sm mt-0.5">Share this link with your audience to start earning</p>
           </div>
           <div className="flex items-center gap-3">
             <code className="bg-white/[0.06] border border-white/[0.08] px-4 py-2 rounded-xl text-sm text-white/70 font-mono max-w-[180px] truncate hidden sm:block">
@@ -107,9 +107,9 @@ export default async function DashboardPage() {
             <Link
               href={`/${creator.username}`}
               target="_blank"
-              className="flex items-center gap-1.5 btn-gradient text-white font-semibold px-4 py-2 rounded-xl text-sm"
+              className="flex items-center justify-center gap-1.5 btn-gradient text-white font-semibold px-4 py-2.5 rounded-xl text-sm w-full sm:w-auto"
             >
-              Open <ExternalLink className="w-3.5 h-3.5" />
+              Open storefront <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>

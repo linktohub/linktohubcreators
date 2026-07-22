@@ -138,10 +138,13 @@ export default function DashboardNav({ creator }: { creator: Creator }) {
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-2.5 rounded-xl text-[11px] font-semibold transition-all min-h-[52px] justify-center",
-                isActive ? "text-violet-400 bg-violet-500/[0.15]" : "text-white/35 hover:text-white/60"
+                "relative flex flex-col items-center gap-0.5 px-3 py-2.5 rounded-xl text-[11px] font-semibold transition-all min-h-[52px] justify-center",
+                isActive ? "text-violet-400 bg-violet-500/[0.12]" : "text-white/35 hover:text-white/60"
               )}
             >
+              {isActive && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
+              )}
               <Icon className="w-5 h-5 mb-0.5" />
               {label}
             </Link>

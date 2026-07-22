@@ -226,7 +226,8 @@ export default function ProductsClient({
   return (
     <>
       {/* Tab bar */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 mb-6 scrollbar-none -mx-5 px-5 md:mx-0 md:px-0">
+      <div className="scroll-fade-right -mx-5 md:mx-0 mb-6">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none px-5 md:px-0">
         {TABS.map((tab) => {
           const count = counts[tab.id];
           if (tab.id !== "all" && count === 0) return null;
@@ -254,6 +255,7 @@ export default function ProductsClient({
             </button>
           );
         })}
+        </div>
       </div>
 
       {/* Items */}
